@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -16,24 +17,29 @@ import javax.swing.JTextField;
 /**
  * ChatView - The View component of the MVC pattern.
  * Responsible for displaying the UI. Contains no business logic.
+ * Implements ChatModelListener to receive updates from the Model.
  */
-public class ChatView {
+public class ChatView implements ChatModelListener {
     private JFrame frame;
     private JList<String> messageList;
     private JTextField inputField;
     private JButton sendButton;
     private JButton loadButton;
     private JButton clearButton;
+    private DefaultListModel<String> displayModel;
 
     /**
-     * Creates and displays the UI with the given messages model.
+     * Creates and displays the UI.
      */
-    public void createAndShowUi(DefaultListModel<String> messagesModel) {
+    public void createAndShowUi() {
         frame = new JFrame("Chat Client");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        // Internal display model for Swing (View's own data)
+        displayModel = new DefaultListModel<>();
+
         // Chat message list
-        messageList = new JList<>(messagesModel);
+        messageList = new JList<>(displayModel);
         JScrollPane scrollPane = new JScrollPane(messageList);
         scrollPane.setPreferredSize(new Dimension(360, 240));
         scrollPane.setBorder(BorderFactory.createTitledBorder("Messages"));
@@ -61,6 +67,30 @@ public class ChatView {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
+
+    // --- ChatModelListener implementation (Observer pattern) ---
+
+    @Override
+    public void onMessageAdded(String message) {
+        displayModel.addElement(message);
+        // Auto-scroll to bottom
+        messageList.ensureIndexIsVisible(displayModel.size() - 1);
+    }
+
+    @Override
+    public void onMessagesCleared() {
+        displayModel.clear();
+    }
+
+    @Override
+    public void onMessagesLoaded(List<String> messages) {
+        displayModel.clear();
+        for (String message : messages) {
+            displayModel.addElement(message);
+        }
+    }
+
+    // --- Getters and listener registration ---
 
     /**
      * Returns the text from the input field.

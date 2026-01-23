@@ -21,9 +21,12 @@ public class ChatController {
      * Initializes the controller by setting up the view and attaching event listeners.
      */
     public void initialize() {
+        // Register the View as a listener to the Model (Observer pattern)
+        model.addListener(view);
+        
         // Create and show the UI on the Event Dispatch Thread
         EventQueue.invokeLater(() -> {
-            view.createAndShowUi(model.getMessagesModel());
+            view.createAndShowUi();
             attachEventListeners();
         });
     }

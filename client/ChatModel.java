@@ -2,24 +2,35 @@ package client;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.DefaultListModel;
 
 /**
  * ChatModel - The Model component of the MVC pattern.
  * Responsible for storing and managing chat message data.
+ * UI-agnostic: uses Observer pattern to notify listeners of changes.
  */
 public class ChatModel {
-    private final DefaultListModel<String> messagesModel;
+    private final List<String> messages;
+    private final List<ChatModelListener> listeners;
 
     public ChatModel() {
-        this.messagesModel = new DefaultListModel<>();
+        this.messages = new ArrayList<>();
+        this.listeners = new ArrayList<>();
     }
 
     /**
-     * Returns the underlying list model for binding to the view.
+     * Registers a listener to receive model change notifications.
      */
-    public DefaultListModel<String> getMessagesModel() {
-        return messagesModel;
+    public void addListener(ChatModelListener listener) {
+        if (listener != null && !listeners.contains(listener)) {
+            listeners.add(listener);
+        }
+    }
+
+    /**
+     * Removes a listener from receiving notifications.
+     */
+    public void removeListener(ChatModelListener listener) {
+        listeners.remove(listener);
     }
 
     /**
@@ -27,7 +38,9 @@ public class ChatModel {
      */
     public void addMessage(String message) {
         if (message != null && !message.trim().isEmpty()) {
-            messagesModel.addElement(message.trim());
+            String trimmed = message.trim();
+            messages.add(trimmed);
+            notifyMessageAdded(trimmed);
         }
     }
 
@@ -35,34 +48,52 @@ public class ChatModel {
      * Clears all messages from the model.
      */
     public void clearMessages() {
-        messagesModel.clear();
+        messages.clear();
+        notifyMessagesCleared();
     }
 
     /**
      * Loads a list of messages into the model, replacing any existing messages.
      */
-    public void loadMessages(List<String> messages) {
-        messagesModel.clear();
-        if (messages != null) {
-            messages.forEach(messagesModel::addElement);
+    public void loadMessages(List<String> newMessages) {
+        messages.clear();
+        if (newMessages != null) {
+            messages.addAll(newMessages);
         }
+        notifyMessagesLoaded(new ArrayList<>(messages));
     }
 
     /**
      * Returns the number of messages in the model.
      */
     public int getMessageCount() {
-        return messagesModel.size();
+        return messages.size();
     }
 
     /**
      * Returns a copy of all messages as a list.
      */
     public List<String> getAllMessages() {
-        List<String> messages = new ArrayList<>();
-        for (int i = 0; i < messagesModel.size(); i++) {
-            messages.add(messagesModel.get(i));
+        return new ArrayList<>(messages);
+    }
+
+    // --- Observer notification methods ---
+
+    private void notifyMessageAdded(String message) {
+        for (ChatModelListener listener : listeners) {
+            listener.onMessageAdded(message);
         }
-        return messages;
+    }
+
+    private void notifyMessagesCleared() {
+        for (ChatModelListener listener : listeners) {
+            listener.onMessagesCleared();
+        }
+    }
+
+    private void notifyMessagesLoaded(List<String> messages) {
+        for (ChatModelListener listener : listeners) {
+            listener.onMessagesLoaded(messages);
+        }
     }
 }
