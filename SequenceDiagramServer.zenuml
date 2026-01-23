@@ -1,0 +1,31 @@
+title Server
+@Actor Client
+Server
+ChatListEndpoint
+GetChatEndpoint
+SendMessageEndpoint
+AddConnectEndpoint
+
+Client->Server.FetchChats(User) {
+    Server->ChatListEndpoint.FetchChats(User) {
+        return ChatNames
+    }
+    return
+Client->Server.GetChat(ChatName) {
+    Server->GetChatEndpoint.GetChat(ChatName) {
+        return Chat
+    }
+    return
+}
+Client->Server.SendMessage(User, ChatName, String) {
+    Server->SendMessageEndpoint.SendMessage(User, ChatName, String) {
+        return Chat
+    }
+}
+Client->Server.AddConnect(User, ChatName) {
+    Server->AddConnectEndpoint.AddConnect(User, ChatName) {
+        return Chat
+    }
+    return
+}
+}
