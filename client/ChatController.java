@@ -1,0 +1,81 @@
+package client;
+
+import java.awt.EventQueue;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * ChatController - The Controller component of the MVC pattern.
+ * Bridges the Model and View, handling user interactions and updating the model.
+ */
+public class ChatController {
+    private final ChatModel model;
+    private final ChatView view;
+
+    public ChatController(ChatModel model, ChatView view) {
+        this.model = model;
+        this.view = view;
+    }
+
+    /**
+     * Initializes the controller by setting up the view and attaching event listeners.
+     */
+    public void initialize() {
+        // Create and show the UI on the Event Dispatch Thread
+        EventQueue.invokeLater(() -> {
+            view.createAndShowUi(model.getMessagesModel());
+            attachEventListeners();
+        });
+    }
+
+    /**
+     * Attaches event listeners to the view components.
+     */
+    private void attachEventListeners() {
+        view.addSendButtonListener(evt -> handleSendMessage());
+        view.addInputFieldListener(evt -> handleSendMessage());
+        view.addLoadButtonListener(evt -> handleLoadMockMessages());
+        view.addClearButtonListener(evt -> handleClearMessages());
+    }
+
+    /**
+     * Handles the send message action.
+     */
+    private void handleSendMessage() {
+        String text = view.getInputText();
+        if (text != null && !text.trim().isEmpty()) {
+            model.addMessage(text);
+            view.clearInputField();
+        }
+    }
+
+    /**
+     * Handles loading mock messages (simulating server data).
+     */
+    private void handleLoadMockMessages() {
+        // Pretend these arrived from the server
+        List<String> mockMessages = Arrays.asList(
+            "Hello there",
+            "This shows an array of strings",
+            "Use it as your chat history"
+        );
+        model.loadMessages(mockMessages);
+    }
+
+    /**
+     * Handles clearing all messages.
+     */
+    private void handleClearMessages() {
+        model.clearMessages();
+    }
+
+    /**
+     * Main entry point for the application.
+     */
+    public static void main(String[] args) {
+        ChatModel model = new ChatModel();
+        ChatView view = new ChatView();
+        ChatController controller = new ChatController(model, view);
+        controller.initialize();
+    }
+}
