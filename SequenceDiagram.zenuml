@@ -1,0 +1,44 @@
+title Client
+@Actor User
+
+Client
+Chatlist
+ActiveChat
+Server
+
+User->Client.ChooseUser(String) {
+    Client->Chatlist.PopulateChatlist(User) {
+        Chatlist->Server.FetchChats(User) {
+            return ChatsNames
+        }
+        return
+    }
+User->Client.ChooseChat() {
+    Client->Chatlist.ActivateChat(Chat) {
+        Chatlist->ActiveChat.PopulateChat(Chat) {
+            ActiveChat->Server.FetchMessages(Chat) {
+                return Messages
+            }
+            return
+        }
+        return
+    }
+}
+User->Client.ConnectChat(ChatName) {
+    Client->Chatlist.ConnectChat(ChatName, User) {
+        Chatlist->Server.AddConnect(ChatName, User) {
+            return ChatNames
+        }
+
+        return
+    } 
+}
+User->Client.WriteMessage(String) {
+    Client->ActiveChat.SendMessage(String, User) {
+        ActiveChat->Server.SendMessage(String, User) {
+            return
+        }
+        return
+    }
+}
+}
