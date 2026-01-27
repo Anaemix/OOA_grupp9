@@ -3,9 +3,9 @@ package client;
 import java.time.LocalDateTime;
 
 public class Message {
-    private String text;
-    private LocalDateTime time;
-    private User user;
+    private final String text;
+    private final LocalDateTime time;
+    private final User user;
 
     public Message(String text, LocalDateTime time, User user) {
         this.text = text;
