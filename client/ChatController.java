@@ -3,6 +3,7 @@ package client;
 import java.awt.EventQueue;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.JFileChooser;
 
 /**
  * ChatController - The Controller component of the MVC pattern.
@@ -39,6 +40,7 @@ public class ChatController {
         view.addInputFieldListener(evt -> handleSendMessage());
         view.addLoadButtonListener(evt -> handleLoadMockMessages());
         view.addClearButtonListener(evt -> handleClearMessages());
+        view.addSendImageButtonListener(evt -> handleSendImageMessage());
     }
 
     /**
@@ -50,6 +52,14 @@ public class ChatController {
             model.addMessage(text);
             view.clearInputField();
         }
+    }
+
+        /**
+     * Handles the send message action.
+     */
+    private void handleSendImageMessage() {
+        JFileChooser j = new JFileChooser(".");
+        j.showSaveDialog(null);
     }
 
     /**

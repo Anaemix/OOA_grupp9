@@ -24,6 +24,7 @@ public class ChatView implements ChatModelListener {
     private JList<String> messageList;
     private JTextField inputField;
     private JButton sendButton;
+    private JButton sendImageButton;
     private JButton loadButton;
     private JButton clearButton;
     private DefaultListModel<String> displayModel;
@@ -50,6 +51,7 @@ public class ChatView implements ChatModelListener {
 
         // Buttons
         sendButton = new JButton("Send");
+        sendImageButton = new JButton("Send Image");
         loadButton = new JButton("Load mock array");
         clearButton = new JButton("Clear");
 
@@ -57,6 +59,7 @@ public class ChatView implements ChatModelListener {
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
         controls.add(inputField);
         controls.add(sendButton);
+        controls.add(sendImageButton);
         controls.add(loadButton);
         controls.add(clearButton);
 
@@ -111,6 +114,13 @@ public class ChatView implements ChatModelListener {
      */
     public void addSendButtonListener(ActionListener listener) {
         sendButton.addActionListener(listener);
+    }
+
+        /**
+     * Adds an action listener to the send button.
+     */
+    public void addSendImageButtonListener(ActionListener listener) {
+        sendImageButton.addActionListener(listener);
     }
 
     /**
