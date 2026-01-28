@@ -3,12 +3,15 @@ package client;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.util.List;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -27,6 +30,10 @@ public class ChatView implements ChatModelListener {
     private JButton sendImageButton;
     private JButton loadButton;
     private JButton clearButton;
+    private JButton testButton;
+    private JButton testButton2;
+    private JButton addChatButton;
+    private JTextField addChatField;
     private DefaultListModel<String> displayModel;
 
     /**
@@ -54,6 +61,8 @@ public class ChatView implements ChatModelListener {
         sendImageButton = new JButton("Send Image");
         loadButton = new JButton("Load mock array");
         clearButton = new JButton("Clear");
+        testButton = new JButton("Chat1");
+        testButton2 = new JButton("Chat2");
 
         // Controls panel
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -63,9 +72,34 @@ public class ChatView implements ChatModelListener {
         controls.add(loadButton);
         controls.add(clearButton);
 
+        addChatField = new JTextField();
+        addChatField.setPreferredSize(new Dimension(100, 28));
+        addChatButton = new JButton("Add Chat");
+        JPanel addChat = new JPanel(new GridLayout(1,2));
+        addChat.add(addChatField);
+        addChat.add(addChatButton);
+
+        JPanel panel = new JPanel(new GridLayout(10, 2));
+        panel.setBorder(BorderFactory.createTitledBorder("Chats"));
+        panel.add(addChat);
+        panel.add(testButton);
+        panel.add(testButton2);
+
+        JPanel chatUsers = new JPanel();
+        chatUsers.setLayout(new BoxLayout(chatUsers, BoxLayout.Y_AXIS));
+        chatUsers.setBorder(BorderFactory.createTitledBorder("Users"));
+        chatUsers.setPreferredSize(new Dimension(100, 240));
+        JLabel label = new JLabel("Hugo");
+        JLabel label2 = new JLabel("Henning");
+        
+        chatUsers.add(label);
+        chatUsers.add(label2);
+
         // Assemble frame
         frame.add(scrollPane, BorderLayout.CENTER);
         frame.add(controls, BorderLayout.SOUTH);
+        frame.add(panel, BorderLayout.WEST);
+        frame.add(chatUsers, BorderLayout.EAST);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
