@@ -1,6 +1,8 @@
 # OOA_grupp9
 Projektrepo för Objektorienterade applikationer
 
+FRÅN FÖRELÄSNING: VIEW BARA UPPDATERA GRAFIKEN IFRÅN VILKEN UI SOM HELST! NO COUPLING.
+
 //ASCI art by Claude Opus 4.5
 ┌─────────────────────────────────────────────────────────┐
 │ User Interaction                                        │
