@@ -1,4 +1,6 @@
-package server;
+package com.chatapp.server;
+import com.chatapp.shared.Message;
+import com.chatapp.shared.User;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
