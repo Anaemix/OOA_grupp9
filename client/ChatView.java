@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -30,8 +31,6 @@ public class ChatView implements ChatModelListener {
     private JButton sendImageButton;
     private JButton loadButton;
     private JButton clearButton;
-    private JButton testButton;
-    private JButton testButton2;
     private JButton addChatButton;
     private JTextField addChatField;
     private DefaultListModel<String> displayModel;
@@ -61,8 +60,6 @@ public class ChatView implements ChatModelListener {
         sendImageButton = new JButton("Send Image");
         loadButton = new JButton("Load mock array");
         clearButton = new JButton("Clear");
-        testButton = new JButton("Chat1");
-        testButton2 = new JButton("Chat2");
 
         // Controls panel
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -79,11 +76,22 @@ public class ChatView implements ChatModelListener {
         addChat.add(addChatField);
         addChat.add(addChatButton);
 
-        JPanel panel = new JPanel(new GridLayout(10, 2));
+        JPanel panel = new JPanel(new GridLayout(2, 2));
         panel.setBorder(BorderFactory.createTitledBorder("Chats"));
+
         panel.add(addChat);
-        panel.add(testButton);
-        panel.add(testButton2);
+
+        Chat exchat = new Chat("chat1");
+        Chat exchat2 = new Chat("chat2");
+        Chat exchat3 = new Chat("chat3");
+        ArrayList<Chat> chats = new ArrayList<>();
+        chats.add(exchat);
+        chats.add(exchat2);
+        chats.add(exchat3);
+
+        ChatListGUI chatListGUI = new ChatListGUI(chats);
+
+        panel.add(chatListGUI.getChatListPanel());
 
         JPanel chatUsers = new JPanel();
         chatUsers.setLayout(new BoxLayout(chatUsers, BoxLayout.Y_AXIS));
