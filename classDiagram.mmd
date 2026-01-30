@@ -1,0 +1,66 @@
+classDiagram
+    class Controller {
+        triggerEvent()
+        
+    }
+    class ChatView {
+        +updateChat(Chat chat)
+        +updateChatlist(ArrayList< String > chatlist)
+    }
+    class Model {
+        -User
+        +getChats(User username): ListArray < String >
+        +getChat(String chatname): Chat
+    }
+    class Observable {
+        -ArrayList< Observer >
+        +addObserver(Observer observer)
+        +removeObserver()
+        +updateChat(Chat chat)
+        +updateChatlist(ArrayList< String > chatlist)
+    }
+    class Observer {
+        +updateChat(Chat chat)
+        +updateChatlist(ArrayList< String > chatlist)
+    }
+    class Message {
+        -Time time
+        -User user
+        -String text
+        -String imagepath
+        +getTime(): Time
+        +getUser(): User
+        +getText(): String
+        +getImagepath(): String
+    }
+    class Chat {
+        -String name
+        -ArrayList< User > users
+        -ArrayList< Message > messages
+        +getName(): String
+        +getUsers(): ArrayList < User >
+        +getMessages(): ArrayList < Message >
+    }
+    class User {
+        -String id
+        -String name
+        +getId(): String
+        +getName(): String
+    }
+    class ServerConnection {
+        +getChatlist(User user): ArrayList < String >
+        +getChat(User user, String chatname): Chat
+    }
+    ChatView ..|> Observer
+    Model ..|> Observable
+    Model o-- User
+    Model <.. Chat
+    Chat o-- User
+    Message o-- User
+    Chat o-- Message
+    Controller --> ChatView
+    Controller --> Model
+    ChatView ..> Model
+    Model o-- ServerConnection
+    User ..> ServerConnection
+    Chat ..> ServerConnection
