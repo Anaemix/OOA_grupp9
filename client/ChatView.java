@@ -76,22 +76,36 @@ public class ChatView implements ChatModelListener {
         addChat.add(addChatField);
         addChat.add(addChatButton);
 
-        JPanel panel = new JPanel(new GridLayout(2, 2));
+        JTextField loginField = new JTextField();
+        loginField.setPreferredSize(new Dimension(100, 28));
+        JButton loginButton = new JButton("Login");
+        JPanel login = new JPanel(new GridLayout(1, 2));
+        login.add(loginField);
+        login.add(loginButton);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Chats"));
 
-        panel.add(addChat);
+        panel.add(addChat, BorderLayout.NORTH);
+        panel.add(login, BorderLayout.SOUTH);
 
         Chat exchat = new Chat("chat1");
         Chat exchat2 = new Chat("chat2");
         Chat exchat3 = new Chat("chat3");
+        Chat exchat4 = new Chat("chat4");
         ArrayList<Chat> chats = new ArrayList<>();
         chats.add(exchat);
         chats.add(exchat2);
         chats.add(exchat3);
+        chats.add(exchat4);
 
         ChatListGUI chatListGUI = new ChatListGUI(chats);
 
-        panel.add(chatListGUI.getChatListPanel());
+        panel.add(chatListGUI.getChatListPanel(), BorderLayout.CENTER);
+
+        panel.setVisible(false);
+        
 
         JPanel chatUsers = new JPanel();
         chatUsers.setLayout(new BoxLayout(chatUsers, BoxLayout.Y_AXIS));
