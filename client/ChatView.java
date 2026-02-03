@@ -103,8 +103,6 @@ public class ChatView implements ChatModelListener {
         ChatListGUI chatListGUI = new ChatListGUI(chats);
 
         panel.add(chatListGUI.getChatListPanel(), BorderLayout.CENTER);
-
-        panel.setVisible(false);
         
 
         JPanel chatUsers = new JPanel();
