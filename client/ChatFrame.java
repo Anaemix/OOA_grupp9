@@ -1,15 +1,21 @@
 package client;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 /**
@@ -17,11 +23,10 @@ import javax.swing.JTextField;
  * Responsible for displaying the UI. Contains no business logic.
  * Implements ChatModelListener to receive updates from the Model.
  */
-public class ChatView implements ChatModelListener {
+public class ChatFrame implements ChatModelListener {
     private JFrame frame;
     private JList<String> messageList;
     private JTextField inputField;
-    private JTextField loginField;
     private JButton sendButton;
     private JButton sendImageButton;
     private JButton loadButton;
@@ -30,13 +35,11 @@ public class ChatView implements ChatModelListener {
     private JButton loginButton;
     private JTextField addChatField;
     private DefaultListModel<String> displayModel;
-    private Login login;
 
     /**
      * Creates and displays the UI.
      */
-    public void createAndShowUi() {
-        /**
+    public void createAndShowUi(ArrayList<Chat> chats) {
         frame = new JFrame("Chat Client");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -83,7 +86,6 @@ public class ChatView implements ChatModelListener {
         login.add(loginButton);
         */
 
-        /**
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Chats"));
@@ -91,29 +93,20 @@ public class ChatView implements ChatModelListener {
         panel.add(addChat, BorderLayout.NORTH);
         //panel.add(login, BorderLayout.SOUTH);
 
-        Chat exchat = new Chat("chat1");
-        Chat exchat2 = new Chat("chat2");
-        Chat exchat3 = new Chat("chat3");
-        Chat exchat4 = new Chat("chat4");
-        ArrayList<Chat> chats = new ArrayList<>();
-        chats.add(exchat);
-        chats.add(exchat2);
-        chats.add(exchat3);
-        chats.add(exchat4);
+        ChatListGUI chatListGUI = new ChatListGUI(chats);
 
-        //ChatListGUI chatListGUI = new ChatListGUI(chats);
-
-        //panel.add(chatListGUI.getChatListPanel(), BorderLayout.CENTER);
+        panel.add(chatListGUI.getChatListPanel(), BorderLayout.CENTER);
 
         JPanel chatUsers = new JPanel();
         chatUsers.setLayout(new BoxLayout(chatUsers, BoxLayout.Y_AXIS));
         chatUsers.setBorder(BorderFactory.createTitledBorder("Users"));
         chatUsers.setPreferredSize(new Dimension(100, 240));
-        JLabel label = new JLabel("Hugo");
-        JLabel label2 = new JLabel("Henning");
-        
-        chatUsers.add(label);
-        chatUsers.add(label2);
+        for (Chat c : chats) {
+            for (User u : c.getUsers()) {
+                JLabel label = new JLabel(u.getName());
+                chatUsers.add(label);
+            }
+        }
 
         // Assemble frame
         frame.add(scrollPane, BorderLayout.CENTER);
@@ -122,29 +115,8 @@ public class ChatView implements ChatModelListener {
         frame.add(chatUsers, BorderLayout.EAST);
         frame.pack();
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true); */
+        frame.setVisible(true);
     }
-
-
-    public void LoginUi() {
-        JFrame loginFrame = new JFrame("Login");
-        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        this.loginField = new JTextField();
-        loginField.setPreferredSize(new Dimension(200, 28));
-        loginButton = new JButton("Login");
-
-        JPanel panel = new JPanel(new FlowLayout());
-        panel.add(new JLabel("Username:"));
-        panel.add(loginField);
-        panel.add(loginButton);
-
-        loginFrame.add(panel);
-        loginFrame.pack();
-        loginFrame.setLocationRelativeTo(null);
-        loginFrame.setVisible(true);
-    }
-
 
     // --- ChatModelListener implementation (Observer pattern) ---
 
@@ -178,7 +150,7 @@ public class ChatView implements ChatModelListener {
     }
 
     public String getLoginText() {
-        return (loginField != null) ? loginField.getText() : "";
+        return inputField.getText();
     }
 
     /**
@@ -191,7 +163,7 @@ public class ChatView implements ChatModelListener {
     /**
      * Adds an action listener to the send button.
      */
-    /**Public void addSendButtonListener(ActionListener listener) {
+    public void addSendButtonListener(ActionListener listener) {
         sendButton.addActionListener(listener);
     }
 
@@ -219,16 +191,12 @@ public class ChatView implements ChatModelListener {
     /**
      * Adds an action listener to the input field (for Enter key).
      */
-    /**public void addInputFieldListener(ActionListener listener) {
+    public void addInputFieldListener(ActionListener listener) {
         inputField.addActionListener(listener);
-    }*/
+    }
 
     public void addLoginButtonListener(ActionListener listener) {
         loginButton.addActionListener(listener);
-    }
-
-    public void addLoginFieldListener(ActionListener listener) {
-        loginField.addActionListener(listener);
     }
 
     /**
@@ -238,3 +206,4 @@ public class ChatView implements ChatModelListener {
         return frame;
     }
 }
+

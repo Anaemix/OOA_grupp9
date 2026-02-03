@@ -1,6 +1,7 @@
 package client;
 
 import java.awt.EventQueue;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFileChooser;
@@ -27,7 +28,8 @@ public class ChatController {
         
         // Create and show the UI on the Event Dispatch Thread
         EventQueue.invokeLater(() -> {
-            view.createAndShowUi();
+            view.LoginUi();
+            //view.createAndShowUi();
             attachEventListeners();
         });
     }
@@ -36,11 +38,13 @@ public class ChatController {
      * Attaches event listeners to the view components.
      */
     private void attachEventListeners() {
-        view.addSendButtonListener(evt -> handleSendMessage());
-        view.addInputFieldListener(evt -> handleSendMessage());
-        view.addLoadButtonListener(evt -> handleLoadMockMessages());
-        view.addClearButtonListener(evt -> handleClearMessages());
-        view.addSendImageButtonListener(evt -> handleSendImageMessage());
+        //view.addSendButtonListener(evt -> handleSendMessage());
+        //view.addInputFieldListener(evt -> handleSendMessage());
+        //view.addLoadButtonListener(evt -> handleLoadMockMessages());
+        //view.addClearButtonListener(evt -> handleClearMessages());
+        //view.addSendImageButtonListener(evt -> handleSendImageMessage());
+        view.addLoginButtonListener(evt -> handleLogin());
+        view.addLoginFieldListener(evt -> handleLogin());
     }
 
     /**
@@ -52,6 +56,38 @@ public class ChatController {
             model.addMessage(text);
             view.clearInputField();
         }
+    }
+
+    private void handleLogin() {
+    System.out.println("Login handler called, login text = " + view.getLoginText());
+    String text = view.getLoginText();
+
+    Chat chat1 = new Chat("chat1");
+    Chat chat2 = new Chat("chat2");
+    Chat chat3 = new Chat("chat3");
+
+    ArrayList<Chat> chats = new ArrayList<>();
+    chats.add(chat1);
+    chats.add(chat2);
+    chats.add(chat3);
+
+    User user1 = new User("1", "user1");
+
+    chat1.addUser(user1);
+    chat3.addUser(user1);
+
+    ArrayList<Chat> viewChats = new ArrayList<>();
+    for (Chat chat : chats) {
+        for (User u : chat.getUsers()) {
+            if (u.getName().equals(text)) {
+                viewChats.add(chat);
+                break;
+            }
+        }
+    }
+
+    ChatFrame chatFrame = new ChatFrame();
+    chatFrame.createAndShowUi(viewChats);
     }
 
         /**
