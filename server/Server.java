@@ -1,5 +1,8 @@
 package server;
 
+import client.Message;
+import client.Chat;
+import client.User;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -7,7 +10,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import com.google.gson.Gson;
-import java.time.LocalDateTime;
+import com.google.gson.GsonBuilder;
+import java.lang.reflect.Array;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 
@@ -33,18 +39,13 @@ public class Server {
                 return;
             }
             try {
-            Gson gson = new Gson();
+            Gson gson =
+                new GsonBuilder()
+                .registerTypeAdapter( Instant.class , new Gson_InstantTypeAdapter() )
+                .create();
+
             String chat_name = httpexchange.getRequestURI().getPath().replace("/get_chat/", "");
-            
-            User u1 = new User("fb27a87b8a214", "HenningPenning");
-            Message m1 = new Message("Hej där", LocalDateTime.now().toString(), u1);
-            Message m2 = new Message("Är någon här?", LocalDateTime.now().toString(), u1);
-            ArrayList<Message> a1 = new ArrayList<Message>();
-            a1.add(m1);
-            a1.add(m2);
-            String messages = gson.toJson(a1);
-            String response = String.format("{\"chat\": \"%s\", \"messages\": %s}", chat_name, messages); 
-            System.out.println(response);
+            String response = gson.toJson(dummy_get_chat(chat_name));
             httpexchange.getResponseHeaders().add("Content-Type", "application/json");
             httpexchange.sendResponseHeaders(200, response.getBytes().length);
             
@@ -55,5 +56,28 @@ public class Server {
                 t.printStackTrace();
             }
         }
+    }
+
+    private static Chat dummy_get_chat(String chat_name) {
+        Chat dummy = new Chat(chat_name);
+        User dummy_u1 = new User("1", "Coola Henning");
+        User dummy_u2 = new User("2", "Najibis");
+        User dummy_u3 = new User("3", "Mega Hugo");
+        dummy.addUser(dummy_u1);
+        dummy.addUser(dummy_u2);
+        dummy.addUser(dummy_u3);
+        dummy.addMessage(new Message("Alltså kolla Hennings Linked in story, hur kan man ens ha på sig den där tröjan? 😂", Instant.now(), dummy_u2));
+        dummy.addMessage(new Message("Hahaha jag dör, han ser ut som en gammal morfar!", Instant.now().plus(8, ChronoUnit.SECONDS), dummy_u3));
+        dummy.addMessage(new Message("Jag ser vad ni skriver, vi är i samma gruppchatt...", Instant.now().plus(289, ChronoUnit.SECONDS), dummy_u1));
+        dummy.addMessage(new Message("OJ NEJ förlåt, trodde jag skrev i tråden med bara Najibbis!! 💀", Instant.now().plus(321, ChronoUnit.SECONDS), dummy_u2));
+        dummy.addMessage(new Message("Kul", Instant.now().plus(344, ChronoUnit.SECONDS), dummy_u1));
+        dummy.addMessage(new Message("Jepp, hehe", Instant.now().plus(834, ChronoUnit.SECONDS), dummy_u3));
+        return dummy;
+    }
+    private static ArrayList<String> dummy_get_chats(String name) {
+        ArrayList<String> dummy = new ArrayList<>();
+        dummy.add("Hennings Privata chat");
+        dummy.add("Johans och Claude's chat");
+        return dummy;
     }
 }
