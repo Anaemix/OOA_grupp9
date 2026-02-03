@@ -13,10 +13,13 @@ import javax.swing.JFileChooser;
 public class ChatController {
     private final ChatModel model;
     private final ChatView view;
+    private final ChatFrame frame;
 
-    public ChatController(ChatModel model, ChatView view) {
+    public ChatController(ChatModel model, ChatView view, ChatFrame frame) {
         this.model = model;
         this.view = view;
+        this.frame = frame;
+        
     }
 
     /**
@@ -25,10 +28,12 @@ public class ChatController {
     public void initialize() {
         // Register the View as a listener to the Model (Observer pattern)
         model.addListener(view);
+        model.addListener(frame);
         
         // Create and show the UI on the Event Dispatch Thread
         EventQueue.invokeLater(() -> {
             view.LoginUi();
+            frame.createAndShowUi(new ArrayList<>());
             //view.createAndShowUi();
             attachEventListeners();
         });
@@ -45,6 +50,7 @@ public class ChatController {
         //view.addSendImageButtonListener(evt -> handleSendImageMessage());
         view.addLoginButtonListener(evt -> handleLogin());
         view.addLoginFieldListener(evt -> handleLogin());
+        frame.addChatButtonListener(evt -> handleAddChat());
     }
 
     /**
@@ -90,6 +96,14 @@ public class ChatController {
     chatFrame.createAndShowUi(viewChats);
     }
 
+    private void handleAddChat() {
+        System.out.println("Add chat handler called, chat name = " + frame.getAddChatText());
+        String chatName = frame.getAddChatText();
+
+        frame.getChatListGUI().addChat(chatName);
+        //frame.addChat(chatName);
+    }
+
         /**
      * Handles the send message action.
      */
@@ -124,7 +138,9 @@ public class ChatController {
     public static void main(String[] args) {
         ChatModel model = new ChatModel();
         ChatView view = new ChatView();
-        ChatController controller = new ChatController(model, view);
+        ChatFrame frame = new ChatFrame();
+        
+        ChatController controller = new ChatController(model, view, frame);
         controller.initialize();
     }
 }

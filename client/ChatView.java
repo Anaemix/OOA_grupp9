@@ -231,6 +231,10 @@ public class ChatView implements ChatModelListener {
         loginField.addActionListener(listener);
     }
 
+    public void addAddChatButtonListener(ActionListener listener) {
+        addChatButton.addActionListener(listener);
+    }
+
     /**
      * Returns the main frame.
      */

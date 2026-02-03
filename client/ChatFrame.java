@@ -35,6 +35,7 @@ public class ChatFrame implements ChatModelListener {
     private JButton loginButton;
     private JTextField addChatField;
     private DefaultListModel<String> displayModel;
+    private ChatListGUI chatListGUI;
 
     /**
      * Creates and displays the UI.
@@ -77,15 +78,6 @@ public class ChatFrame implements ChatModelListener {
         addChat.add(addChatField);
         addChat.add(addChatButton);
 
-        /**
-        JTextField loginField = new JTextField();
-        loginField.setPreferredSize(new Dimension(100, 28));
-        loginButton = new JButton("Login");
-        JPanel login = new JPanel(new GridLayout(1, 2));
-        login.add(loginField);
-        login.add(loginButton);
-        */
-
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Chats"));
@@ -93,7 +85,7 @@ public class ChatFrame implements ChatModelListener {
         panel.add(addChat, BorderLayout.NORTH);
         //panel.add(login, BorderLayout.SOUTH);
 
-        ChatListGUI chatListGUI = new ChatListGUI(chats);
+        chatListGUI = new ChatListGUI(chats);
 
         panel.add(chatListGUI.getChatListPanel(), BorderLayout.CENTER);
 
@@ -140,6 +132,10 @@ public class ChatFrame implements ChatModelListener {
         }
     }
 
+    public ChatListGUI getChatListGUI() {
+        return chatListGUI;
+    }
+
     // --- Getters and listener registration ---
 
     /**
@@ -151,6 +147,10 @@ public class ChatFrame implements ChatModelListener {
 
     public String getLoginText() {
         return inputField.getText();
+    }
+
+    public String getAddChatText() {
+        return addChatField.getText();
     }
 
     /**
@@ -197,6 +197,11 @@ public class ChatFrame implements ChatModelListener {
 
     public void addLoginButtonListener(ActionListener listener) {
         loginButton.addActionListener(listener);
+    }
+
+    
+    public void addChatButtonListener(ActionListener listener) {
+        addChatButton.addActionListener(listener);
     }
 
     /**
