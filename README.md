@@ -18,6 +18,22 @@ FRÅN FÖRELÄSNING: VIEW BARA UPPDATERA GRAFIKEN IFRÅN VILKEN UI SOM HELST! NO
 │      (Observer pattern)   └─────────┘                   │
 └─────────────────────────────────────────────────────────┘
 
+frame (JFrame)
+└── leftPanel (JPanel med BorderLayout, "Chats"-border)
+    ├── NORTH: addChat (textfält + knapp)
+    ├── CENTER: chatListPanel (från ChatListGUI, innehåller chatt-knappar)
+    └── SOUTH: login (textfält + knapp)
+
+
+Server                          Client
+───────                         ──────
+1. GET /chat_names    →    ArrayList<String> chatNames
+   (bara namnen för listan)
+   
+2. GET /chat/{name}   →    Chat-objekt (med ArrayList<Message>)
+   (när användaren klickar)
+   
+
 ## CRC
 |Class|Responsibility|Collaborator|
 |-|-|-|

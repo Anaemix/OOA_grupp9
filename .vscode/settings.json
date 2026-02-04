@@ -4,6 +4,7 @@
     ],
     "java.project.outputPath": "bin",
     "java.project.referencedLibraries": [
+        "libs\\gson-2.13.2.jar",
         "libs\\sqlite-jdbc-3.51.1.0.jar"
     ]
 }

@@ -11,10 +11,37 @@ import java.util.List;
 public class ChatModel {
     private final List<String> messages;
     private final List<ChatModelListener> listeners;
+    private ArrayList<Chat> chats = new ArrayList<>();
+    private Chat currentChat;
 
     public ChatModel() {
         this.messages = new ArrayList<>();
         this.listeners = new ArrayList<>();
+    }
+
+    public void setChats(ArrayList<Chat> chats) {
+        this.chats = chats;
+        notifyChatsLoaded(chats);
+    }
+
+    public ArrayList<Chat> getChats() {
+        return chats;
+    }
+
+    public void setCurrentChat(Chat currentChat) {
+        this.currentChat = currentChat;
+        notifyChatSelected(currentChat);
+    }
+
+    public Chat getCurrentChat() {
+        return currentChat;
+    }
+
+    public void addChat(Chat chat) {
+        if (chat != null) {
+            chats.add(chat);
+            notifyChatsLoaded(chats);
+        }
     }
 
     /**
@@ -32,6 +59,8 @@ public class ChatModel {
     public void removeListener(ChatModelListener listener) {
         listeners.remove(listener);
     }
+
+
 
     /**
      * Adds a single message to the model.
@@ -77,7 +106,20 @@ public class ChatModel {
         return new ArrayList<>(messages);
     }
 
+
     // --- Observer notification methods ---
+
+    private void notifyChatsLoaded(ArrayList<Chat> chats) {
+        for (ChatModelListener listener : listeners) {
+            listener.onChatsLoaded(chats);
+        }
+    }
+
+    private void notifyChatSelected(Chat chat) {
+        for (ChatModelListener listener : listeners) {
+            listener.onChatSelected(chat);
+        }
+    }
 
     private void notifyMessageAdded(String message) {
         for (ChatModelListener listener : listeners) {

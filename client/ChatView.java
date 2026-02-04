@@ -21,7 +21,7 @@ import javax.swing.JTextField;
 /**
  * ChatView - The View component of the MVC pattern.
  * Responsible for displaying the UI. Contains no business logic.
- * Implements ChatModelListener to receive updates from the Model.
+ * Implements ChatModelListener(Observer) to receive updates from the Model.
  */
 public class ChatView implements ChatModelListener {
     private JFrame frame;
@@ -34,6 +34,9 @@ public class ChatView implements ChatModelListener {
     private JButton addChatButton;
     private JTextField addChatField;
     private DefaultListModel<String> displayModel;
+    private ChatListGUI chatListGUI;
+    private JPanel chatListPanel;
+    private JPanel leftPanel;
 
     /**
      * Creates and displays the UI.
@@ -82,28 +85,15 @@ public class ChatView implements ChatModelListener {
         JPanel login = new JPanel(new GridLayout(1, 2));
         login.add(loginField);
         login.add(loginButton);
+ 
+        leftPanel = new JPanel();
+        leftPanel.setLayout(new BorderLayout());
+        leftPanel.setBorder(BorderFactory.createTitledBorder("Chats"));
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Chats"));
+        leftPanel.add(addChat, BorderLayout.NORTH);
+        leftPanel.add(login, BorderLayout.SOUTH);
 
-        panel.add(addChat, BorderLayout.NORTH);
-        panel.add(login, BorderLayout.SOUTH);
-
-        Chat exchat = new Chat("chat1");
-        Chat exchat2 = new Chat("chat2");
-        Chat exchat3 = new Chat("chat3");
-        Chat exchat4 = new Chat("chat4");
-        ArrayList<Chat> chats = new ArrayList<>();
-        chats.add(exchat);
-        chats.add(exchat2);
-        chats.add(exchat3);
-        chats.add(exchat4);
-
-        ChatListGUI chatListGUI = new ChatListGUI(chats);
-
-        panel.add(chatListGUI.getChatListPanel(), BorderLayout.CENTER);
-        
+        // Flyttade testchattar till ChatController för MVC-struktur
 
         JPanel chatUsers = new JPanel();
         chatUsers.setLayout(new BoxLayout(chatUsers, BoxLayout.Y_AXIS));
@@ -118,7 +108,7 @@ public class ChatView implements ChatModelListener {
         // Assemble frame
         frame.add(scrollPane, BorderLayout.CENTER);
         frame.add(controls, BorderLayout.SOUTH);
-        frame.add(panel, BorderLayout.WEST);
+        frame.add(leftPanel, BorderLayout.WEST);
         frame.add(chatUsers, BorderLayout.EAST);
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -147,7 +137,37 @@ public class ChatView implements ChatModelListener {
         }
     }
 
+    @Override
+    public void onChatsLoaded(ArrayList<Chat> chats) {
+        // Ta bort gammal chattlista om den finns
+        if (chatListPanel != null) {
+            leftPanel.remove(chatListPanel);
+        }
+        
+        // Skapa ny chattlista
+        chatListGUI = new ChatListGUI(chats);
+        chatListPanel = chatListGUI.getChatListPanel();
+        leftPanel.add(chatListPanel, BorderLayout.CENTER);
+        
+        // Uppdatera UI
+        leftPanel.revalidate();
+        leftPanel.repaint();
+    }
+
+    @Override
+    public void onChatSelected(Chat chat) {
+
+    }
+
     // --- Getters and listener registration ---
+
+    public void clearAddChatField() { addChatField.setText("");}
+
+    public String getAddChatText() { return addChatField.getText();}
+
+    public void addAddChatButtonListener(ActionListener listener) {
+        addChatButton.addActionListener(listener);
+    }
 
     /**
      * Returns the text from the input field.
