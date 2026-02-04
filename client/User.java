@@ -44,11 +44,11 @@ public class User {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         User user = (User) obj;
-        return id.equals(user.id);
+        return id == user.id;
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Integer.hashCode(id);
     }
 }
