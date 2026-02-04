@@ -10,12 +10,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.GsonBuilder;
-import java.lang.reflect.Array;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 public class Server {
 
@@ -23,6 +25,10 @@ public class Server {
         int port = 2345;
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0); 
         server.createContext("/get_chat", new GetChatHandler());
+        server.createContext("/get_chats", new GetChatsHandler());
+        server.createContext("/connect", new ConnectHandler());
+        server.createContext("/disconnect", new DisconnectHandler());
+        server.createContext("/send_message", new Send_MessageHandler());
         server.setExecutor(null);
         server.start();
         System.out.println(String.format("Server up at port :%d", port));
@@ -31,6 +37,38 @@ public class Server {
     /**
      * 
      */
+    static class GetChatsHandler implements HttpHandler {
+        public void handle(HttpExchange httpexchange) throws IOException {
+            if (httpexchange.getRequestMethod().equals("GET")) {
+                Gson gson = new Gson();
+                String input = httpexchange.getRequestURI().getPath().replace("/get_chats/", "");
+                if(input.contains("/")) {
+                    User user = new User(input.split("/")[1], input.split("/")[0]);
+                    
+
+                    // ----REPLACE----
+                    String response = gson.toJson(dummy_get_chats(user));
+                    // ----REPLACE----
+
+                    httpexchange.getResponseHeaders().add("Content-Type", "application/json");
+                    httpexchange.sendResponseHeaders(200, response.getBytes().length);
+                    
+                    try (OutputStream os = httpexchange.getResponseBody()) {
+                        os.write(response.getBytes());
+                    }
+                } else {
+                    httpexchange.sendResponseHeaders(400, -1);
+                }
+
+            } else {
+                httpexchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+    /**
+     * Http handler for getting the contents of a chat. 
+     * Request with "curl http://localhost:2345/get_chat/{chatname}"
+     */
     static class GetChatHandler implements HttpHandler {
         
         public void handle(HttpExchange httpexchange) throws IOException {
@@ -38,26 +76,202 @@ public class Server {
                 httpexchange.sendResponseHeaders(451, -1);
                 return;
             }
-            try {
-            Gson gson =
-                new GsonBuilder()
-                .registerTypeAdapter( Instant.class , new Gson_InstantTypeAdapter() )
-                .create();
+
+            Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
 
             String chat_name = httpexchange.getRequestURI().getPath().replace("/get_chat/", "");
+
+            // ----REPLACE----
             String response = gson.toJson(dummy_get_chat(chat_name));
+            // ----REPLACE----
+
             httpexchange.getResponseHeaders().add("Content-Type", "application/json");
             httpexchange.sendResponseHeaders(200, response.getBytes().length);
             
             try (OutputStream os = httpexchange.getResponseBody()) {
                 os.write(response.getBytes());
             }
-            } catch (Throwable t) {
-                t.printStackTrace();
+        }
+    }
+    /**
+     * 
+     */
+    static class ConnectHandler implements HttpHandler {
+        public void handle(HttpExchange httpexchange) throws IOException {
+            if (httpexchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                String response = "0";
+
+                try {
+                    InputStream is = httpexchange.getRequestBody();
+                    String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+
+                    Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
+                    JsonObject jsonobject = gson.fromJson(body, JsonObject.class);
+                    Set keys = jsonobject.keySet();
+
+
+                    if (keys.contains("user") && keys.contains("chat")) {
+                        User user = gson.fromJson(jsonobject.getAsJsonObject("user"), User.class);
+                        String chat = jsonobject.get("chat").getAsString();
+                        // ----REPLACE----
+                        dummy_connect(user, chat);
+                        // ----REPLACE----
+                        response = "true";
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                httpexchange.getResponseHeaders().add("Content-Type", "application/json");
+                httpexchange.sendResponseHeaders(200, response.getBytes().length);
+                
+                try (OutputStream os = httpexchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+            } else {
+                httpexchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+        /**
+     * 
+     */
+    static class DisconnectHandler implements HttpHandler {
+        public void handle(HttpExchange httpexchange) throws IOException {
+            if (httpexchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                String response = "0";
+
+                try {
+                    InputStream is = httpexchange.getRequestBody();
+                    String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+
+                    Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
+                    JsonObject jsonobject = gson.fromJson(body, JsonObject.class);
+                    Set keys = jsonobject.keySet();
+
+
+                    if (keys.contains("user") && keys.contains("chat")) {
+                        User user = gson.fromJson(jsonobject.getAsJsonObject("user"), User.class);
+                        String chat = jsonobject.get("chat").getAsString();
+                        // ----REPLACE----
+                        dummy_disconnect(user, chat);
+                        // ----REPLACE----
+                        response = "true";
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                httpexchange.getResponseHeaders().add("Content-Type", "application/json");
+                httpexchange.sendResponseHeaders(200, response.getBytes().length);
+                
+                try (OutputStream os = httpexchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+            } else {
+                httpexchange.sendResponseHeaders(451, -1);
             }
         }
     }
 
+    /**
+     * Http handler for sending messages to a chat
+     * 
+     * Example:
+     * curl --header "Content-type: application/json" \
+     * --request POST \
+     * --data '{"chat": "Hennings Privata chat", "message": {"text": "Hämligt meddelande :)", "user": {"name": "Coola Henning", "id": "1"}, "time": "2026-02-04T11:14:05Z"}}' \
+     * http://localhost:2345/send_message
+     * 
+     * Expects a json string following this json schema:
+     * {
+     *    "type": "object",
+     *    "properties": {
+     *        "chat": {
+     *            "type": "string",
+     *            "description": "chat_name"
+     *        },
+     *        "message": {
+     *            "type": "object",
+     *            "properties": {
+     *                "text": {
+     *                    "type": "string"
+     *                },
+     *                "user": {
+     *                    "type": "object",
+     *                    "properties": {
+     *                        "name": {
+     *                            "type": "string"
+     *                        },
+     *                        "id": {
+     *                            "type": "string"
+     *                        }
+     *                    },
+     *                    "required": [
+     *                        "name",
+     *                        "id"
+     *                    ]
+     *                },
+     *                "time": {
+     *                    "type": "string"
+     *                }
+     *            },
+     *            "required": [
+     *                "text",
+     *                "user"
+     *            ]
+     *        }
+     *    },
+     *    "required": [
+     *        "chat",
+     *        "message"
+     *    ]
+     *}
+     */
+    static class Send_MessageHandler implements HttpHandler {
+        public void handle(HttpExchange httpexchange) throws IOException {
+            
+            if (httpexchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                String response = "0";
+
+                try {
+                    InputStream is = httpexchange.getRequestBody();
+                    String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+
+                    Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
+                    JsonObject jsonobject = gson.fromJson(body, JsonObject.class);
+                    Set keys = jsonobject.keySet();
+                    if (keys.contains("chat") && keys.contains("message")) {
+                        String chat_name = jsonobject.get("chat").getAsString();
+                        Message message = gson.fromJson(jsonobject.getAsJsonObject("message"), Message.class);
+
+                        // ----REPLACE----
+                        dummy_send_message(message, chat_name);
+                        // ----REPLACE----
+
+                        response = "1";
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+                httpexchange.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8");
+                httpexchange.sendResponseHeaders(200, responseBytes.length);
+                
+                try (OutputStream os = httpexchange.getResponseBody()) {
+                    os.write(responseBytes);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                httpexchange.sendResponseHeaders(451, -1);
+            }
+
+        }
+    }
     private static Chat dummy_get_chat(String chat_name) {
         Chat dummy = new Chat(chat_name);
         User dummy_u1 = new User("1", "Coola Henning");
@@ -74,10 +288,22 @@ public class Server {
         dummy.addMessage(new Message("Jepp, hehe", Instant.now().plus(834, ChronoUnit.SECONDS), dummy_u3));
         return dummy;
     }
-    private static ArrayList<String> dummy_get_chats(String name) {
+    private static ArrayList<String> dummy_get_chats(User user) {
         ArrayList<String> dummy = new ArrayList<>();
         dummy.add("Hennings Privata chat");
-        dummy.add("Johans och Claude's chat");
+        dummy.add("Johans och Claudes chat");
         return dummy;
+    }
+    private static void dummy_connect(User user, String chat_name) {
+        System.out.println(user.toString());
+        System.out.println(chat_name);
+    }
+    private static void dummy_disconnect(User user, String chat_name) {
+        System.out.println(user.getName());
+        System.out.println(chat_name);
+    }
+    private static void dummy_send_message(Message message, String chat_name) {
+        System.out.println(message.toString());
+        System.out.println(chat_name);
     }
 }
