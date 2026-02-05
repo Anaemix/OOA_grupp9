@@ -2,6 +2,12 @@ package server;
 
 import java.sql.*;
 import java.util.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+
+import client.User;
+import client.Message;
+import client.Chat;
 
 public class DatabaseHandler {
 
@@ -10,137 +16,77 @@ public class DatabaseHandler {
     public DatabaseHandler() {
         connectToDatabase();
     }
-
+  
     // Connect to SQLite database (database.db file)
     private void connectToDatabase() {
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:database.db");
             System.out.println("Connected to SQLite database.");
+           // enableforeignkeys();
             createTablesIfNotExist();
+
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void enableforeignkeys() {
+
+        String statement = "PRAGMA foreign_keys = ON;";
+        try (PreparedStatement stmt = connection.prepareStatement(statement)) {
+            stmt.execute();
+        }
+        catch(SQLException e) {
             e.printStackTrace();
         }
     }
 
     // Create tables if they do not exist
     private void createTablesIfNotExist() {
+        
+        
+        
         // SQL statements to create the tables
         String createUsersTable = "CREATE TABLE IF NOT EXISTS users (" +
-                                  "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                  "name TEXT NOT NULL)";
+                                  "name TEXT PRIMARY KEY)";
+
         String createChatsTable = "CREATE TABLE IF NOT EXISTS chats (" +
-                                  "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                  "name TEXT NOT NULL)";
+                                  "name TEXT PRIMARY KEY)";
+
         String createMessagesTable = "CREATE TABLE IF NOT EXISTS messages (" +
                                      "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                     "chat_id INTEGER, " +
-                                     "user_id INTEGER, " +
-                                     "message TEXT, " +
-                                     "imagepath TEXT, " +
-                                     "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
-                                     "FOREIGN KEY (chat_id) REFERENCES chats(id), " +
-                                     "FOREIGN KEY (user_id) REFERENCES users(id))";
+                                     "sender TEXT NOT NULL, " +
+                                     "chatname TEXT NOT NULL," + 
+                                     "content TEXT, " +
+                                     "FOREIGN KEY (sender) REFERENCES users(name), " +
+                                     "FOREIGN KEY (chatname) REFERENCES chats(name))";
+
         String createChatUsersTable = "CREATE TABLE IF NOT EXISTS chat_users (" +
-                                      "chat_id INTEGER, " +
-                                      "user_id INTEGER, " +
-                                      "FOREIGN KEY (chat_id) REFERENCES chats(id), " +
-                                      "FOREIGN KEY (user_id) REFERENCES users(id))";
+                                      "chatname TEXT NOT NULL, " +
+                                      "username TEXT NOT NULL, " +
+                                      "FOREIGN KEY (chatname) REFERENCES chats(name), " +
+                                      "FOREIGN KEY (username) REFERENCES users(name))";
         
         try (Statement stmt = connection.createStatement()) {
             // Execute table creation queries
+            stmt.execute("DROP TABLE IF EXISTS users;");
+            stmt.execute("DROP TABLE IF EXISTS chat_users;");
+            stmt.execute("DROP TABLE IF EXISTS chats;");
+            stmt.execute("DROP TABLE IF EXISTS messages;");
+           // System.out.println("all tables have been deleted");
             stmt.execute(createUsersTable);
             stmt.execute(createChatsTable);
             stmt.execute(createMessagesTable);
             stmt.execute(createChatUsersTable);
+              
             System.out.println("Tables are created or already exist.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // Add a new user to the database
-    public void addUser(String userName) {
-        String insertUserSQL = "INSERT INTO users (name) VALUES (?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(insertUserSQL)) {
-            pstmt.setString(1, userName);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Add a new chat to the database
-    public void addChat(String chatName) {
-        String insertChatSQL = "INSERT INTO chats (name) VALUES (?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(insertChatSQL)) {
-            pstmt.setString(1, chatName);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Add a user to a chat
-    public void addUserToChat(int userId, int chatId) {
-        String insertChatUserSQL = "INSERT INTO chat_users (user_id, chat_id) VALUES (?, ?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(insertChatUserSQL)) {
-            pstmt.setInt(1, userId);
-            pstmt.setInt(2, chatId);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Add a message to a chat
-    public void addMessage(int chatId, int userId, String messageText, String imagePath) {
-        String insertMessageSQL = "INSERT INTO messages (chat_id, user_id, message, imagepath) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(insertMessageSQL)) {
-            pstmt.setInt(1, chatId);
-            pstmt.setInt(2, userId);
-            pstmt.setString(3, messageText);
-            pstmt.setString(4, imagePath);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Get message history for a chat
-    public List<String> getMessageHistory(int chatId) {
-        List<String> messages = new ArrayList<>();
-        String fetchMessagesSQL = "SELECT m.message, u.name, m.timestamp FROM messages m " +
-                                  "JOIN users u ON m.user_id = u.id " +
-                                  "WHERE m.chat_id = ? ORDER BY m.timestamp";
-        try (PreparedStatement pstmt = connection.prepareStatement(fetchMessagesSQL)) {
-            pstmt.setInt(1, chatId);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                String message = rs.getString("message");
-                String user = rs.getString("name");
-                String timestamp = rs.getString("timestamp");
-                messages.add(user + " [" + timestamp + "]: " + message);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return messages;
-    }
-
-    // Get a list of all chats
-    public List<String> getAllChats() {
-        List<String> chats = new ArrayList<>();
-        String fetchChatsSQL = "SELECT id, name FROM chats";
-        try (Statement stmt = connection.createStatement()) {
-            ResultSet rs = stmt.executeQuery(fetchChatsSQL);
-            while (rs.next()) {
-                chats.add(rs.getInt("id") + ": " + rs.getString("name"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return chats;
-    }
+    
 
     // Close the database connection
     public void closeConnection() {
@@ -153,9 +99,294 @@ public class DatabaseHandler {
             e.printStackTrace();
         }
     }
-    public static void main(String[] args) {
-        DatabaseHandler dbHandler = new DatabaseHandler();
-        dbHandler.addUser("exampleUser");
-        dbHandler.addChat("GROUP9CHAT");           
+
+    public void removeUserFromChat(User user, String chatName) {
+        String remove = "DELETE FROM chat_users WHERE username = ? AND chatname = (?)";
+        try(PreparedStatement pstmt = connection.prepareStatement(remove)) {
+            pstmt.setString(1, user.getName());
+            pstmt.setString(2, chatName);
+            pstmt.executeUpdate();
+            System.out.println("user removed from chat");
+
+        }
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
     }
+
+    public void adduser(User user) {
+
+    
+        String adduser = "INSERT OR IGNORE INTO users (name) VALUES (?)";
+        try(PreparedStatement pstmt = connection.prepareStatement(adduser)) {
+            pstmt.setString(1, user.getName());
+            pstmt.executeUpdate();
+
+        }catch(SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void sendMessage( String chatName, Message message) {
+        try(PreparedStatement insertmessage = connection.prepareStatement("INSERT INTO messages ( content, sender, chatname) VALUES (?,?,?)")) {
+
+            // insertmessage.setInt(1,null);
+            insertmessage.setString(1, message.getText());
+            insertmessage.setString(2, message.getUser().getName());
+            insertmessage.setString(3, chatName);
+            insertmessage.executeUpdate();
+            System.out.println("Message added!");        
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+    } 
+    
+
+    
+    private boolean checkIfUserExists(User user) {
+
+        String check = "SELECT EXISTS( SELECT 1 FROM users where name = (?)";
+
+        try(PreparedStatement stmt = connection.prepareStatement(check);) {
+            stmt.setString(1,user.getName());
+            
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return true;
+            }
+            
+        }
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean checkIfChatExists(String chat) {
+
+        String check = "SELECT EXISTS( SELECT 1 FROM chats where name = (?)";
+
+        try(PreparedStatement stmt = connection.prepareStatement(check);) {
+            stmt.setString(1,chat);
+            
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return true;
+            }
+            
+        }
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+    private void getmessages(Chat chat, String chatname) {
+        String getmessages = "SELECT * FROM messages WHERE chatname = (?)";
+
+        try(PreparedStatement pstmt = connection.prepareStatement(getmessages)) {
+            pstmt.setString(1, chatname);
+            ResultSet rs = pstmt.executeQuery();
+
+            while(rs.next()) {
+                String message = rs.getString("content");
+                String sender = rs.getString("sender");
+                chat.addMessage(new Message(message, Instant.now() ,new User(0, sender)));
+                
+            }
+
+        }
+
+
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+    public Chat getChat(String chatname){
+    
+        Chat chat = new Chat(chatname);
+        String getusers = "SELECT username FROM chat_users WHERE chatname = (?)";
+
+
+        try(PreparedStatement pstmt = connection.prepareStatement(getusers)) {
+            pstmt.setString(1, chatname);
+            ResultSet rs = pstmt.executeQuery();
+
+            while(rs.next()) {
+                String username = rs.getString("username");
+                chat.addUser(new User(0, username));
+                
+            }
+
+        }
+
+
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        getmessages(chat, chatname);
+        return chat;
+        
+    }
+
+
+    public void addUserToChat(User user, String chatname) {
+        String adduser = "INSERT OR IGNORE INTO chat_users (username,chatname) VALUES (?,?)"; 
+
+        try(PreparedStatement stmt = connection.prepareStatement(adduser)){
+            stmt.setString(1, user.getName());
+            stmt.setString(2, chatname);
+            stmt.executeUpdate();
+
+        }
+            
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addchat(String chatname) {
+        String addchat = "INSERT OR IGNORE INTO chats (name) VALUES (?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(addchat)) {
+            pstmt.setString(1, chatname);
+            pstmt.executeUpdate();
+            System.out.println("chat added to chats table");
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public void Connect(User user,String chat){
+        if (checkIfChatExists(chat)) {
+            addUserToChat(user, chat);
+        }
+        else {
+            addchat(chat);
+            addUserToChat(user, chat);
+        }
+
+
+    }
+    public  ArrayList<Chat> getAllChats(User user){
+        ArrayList<Chat> list = new ArrayList<>();
+        String getchatname = "SELECT chatname FROM chat_users where username = (?)";
+
+        try(PreparedStatement pstmt = connection.prepareStatement(getchatname)) {
+            pstmt.setString(1, user.getName());
+            ResultSet rs = pstmt.executeQuery();
+
+            while(rs.next()) {
+
+                String chatname = rs.getString("chatname");
+                list.add(getChat(chatname));
+            }
+        }   
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    public void seedDatabaseRealistic() {
+    try {
+        // --- USERS ---
+        List<User> users = new ArrayList<>();
+        String[] names = {"Alice", "Bob", "Charlie", "David", "Eve", "Frank"};
+        for (String name : names) {
+            User user = new User(0, name);
+            adduser(user);
+            users.add(user);
+        }
+
+        // --- CHATS ---
+        List<String> chats = Arrays.asList("ChatA", "ChatB", "ChatC", "ChatD", "ChatE");
+        for (String chat : chats) {
+            addchat(chat);
+        }
+
+        // --- CHAT MEMBERSHIPS ---
+        // Randomly assign users to chats
+        Random rand = new Random();
+        for (String chat : chats) {
+            int numMembers = 2 + rand.nextInt(3); // 2 to 4 members per chat
+            Set<Integer> addedIndexes = new HashSet<>();
+            while (addedIndexes.size() < numMembers) {
+                int userIndex = rand.nextInt(users.size());
+                if (!addedIndexes.contains(userIndex)) {
+                    addUserToChat(users.get(userIndex), chat);
+                    addedIndexes.add(userIndex);
+                }
+            }
+        }
+
+        // --- MESSAGES ---
+        String[] sampleMessages = {
+            "Hello!", "How are you?", "What's up?", "Good morning!", "Did you see that?", 
+            "Let's meet later.", "I agree!", "That's funny 😂", "See you soon.", "Thanks!"
+        };
+
+        for (String chat : chats) {
+            // Pick 3-6 random messages per chat
+            int numMessages = 3 + rand.nextInt(4); // 3-6 messages
+            for (int i = 0; i < numMessages; i++) {
+                User sender = users.get(rand.nextInt(users.size()));
+                String messageText = sampleMessages[rand.nextInt(sampleMessages.length)];
+                sendMessage(chat, new Message(messageText, Instant.now(), sender));
+            }
+        }
+
+        System.out.println("Database seeded with realistic data successfully!");
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+public static void main(String[] args) {
+    DatabaseHandler dbHandler = new DatabaseHandler();
+    User user = new User(0,"Alice");
+    /*   
+    User user2 = new User(0,"testing1");
+
+        dbHandler.adduser(user);
+        dbHandler.adduser(user2);
+        dbHandler.addchat("chat1");
+        dbHandler.addUserToChat(user, "chat1");
+        dbHandler.addUserToChat(user2, "chat1");
+        dbHandler.addUserToChat(user, "chat2");
+        dbHandler.addUserToChat(user, "chat3");
+        System.out.println(dbHandler.getChat("chat1").getUsers());
+        Message message = new Message("hello world😀" ,Instant.now() , user);
+        Message message2 = new Message("hello friend" ,Instant.now()  , user2);
+        dbHandler.sendMessage("chat1",message);   
+        dbHandler.sendMessage("chat1",message2);   
+        System.out.println(dbHandler.getChat("chat1").getMessages()); */
+        dbHandler.seedDatabaseRealistic();
+        System.out.println(dbHandler.getAllChats(user).getFirst().getMessages()); 
+        System.out.println(dbHandler.getAllChats(user).getLast().getMessages()); 
+       // LocalDateTime now = LocalDateTime.now();
+    }
+    
+    
 } 
+
+
+// All of these methods should check if the user exists else they should add them, they should do the same thing for creating/joining a chat if the
+//chat is not they are trying to join does not exist then create it 
+
+// I should add select chat from a chatlist, select user from a userlist 
+
+// addMessage(userName, chatName) done 
+// add/joinchat(chatName,userName) done 
+// check if chat exists 
+// disconnect(userName, chatName) done
+//getChats(userName) 
+//getChat(chatname) done
+   
