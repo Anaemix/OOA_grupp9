@@ -22,7 +22,7 @@ public class DatabaseHandler {
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:database.db");
             System.out.println("Connected to SQLite database.");
-           // enableforeignkeys();
+          //  enableforeignkeys();
             createTablesIfNotExist();
 
         } catch (SQLException e) {
@@ -70,10 +70,6 @@ public class DatabaseHandler {
         
         try (Statement stmt = connection.createStatement()) {
             // Execute table creation queries
-            stmt.execute("DROP TABLE IF EXISTS users;");
-            stmt.execute("DROP TABLE IF EXISTS chat_users;");
-            stmt.execute("DROP TABLE IF EXISTS chats;");
-            stmt.execute("DROP TABLE IF EXISTS messages;");
            // System.out.println("all tables have been deleted");
             stmt.execute(createUsersTable);
             stmt.execute(createChatsTable);
@@ -275,8 +271,8 @@ public class DatabaseHandler {
 
 
     }
-    public  ArrayList<Chat> getAllChats(User user){
-        ArrayList<Chat> list = new ArrayList<>();
+    public  ArrayList<String> getAllChats(User user){
+        ArrayList<String> list = new ArrayList<>();
         String getchatname = "SELECT chatname FROM chat_users where username = (?)";
 
         try(PreparedStatement pstmt = connection.prepareStatement(getchatname)) {
@@ -286,7 +282,7 @@ public class DatabaseHandler {
             while(rs.next()) {
 
                 String chatname = rs.getString("chatname");
-                list.add(getChat(chatname));
+                list.add(chatname);
             }
         }   
         catch(SQLException e) {
@@ -350,31 +346,8 @@ public class DatabaseHandler {
 }
 
 public static void main(String[] args) {
-    DatabaseHandler dbHandler = new DatabaseHandler();
-    User user = new User(0,"Alice");
-    /*   
-    User user2 = new User(0,"testing1");
-
-        dbHandler.adduser(user);
-        dbHandler.adduser(user2);
-        dbHandler.addchat("chat1");
-        dbHandler.addUserToChat(user, "chat1");
-        dbHandler.addUserToChat(user2, "chat1");
-        dbHandler.addUserToChat(user, "chat2");
-        dbHandler.addUserToChat(user, "chat3");
-        System.out.println(dbHandler.getChat("chat1").getUsers());
-        Message message = new Message("hello world😀" ,Instant.now() , user);
-        Message message2 = new Message("hello friend" ,Instant.now()  , user2);
-        dbHandler.sendMessage("chat1",message);   
-        dbHandler.sendMessage("chat1",message2);   
-        System.out.println(dbHandler.getChat("chat1").getMessages()); */
-        dbHandler.seedDatabaseRealistic();
-        System.out.println(dbHandler.getAllChats(user).getFirst().getMessages()); 
-        System.out.println(dbHandler.getAllChats(user).getLast().getMessages()); 
-       // LocalDateTime now = LocalDateTime.now();
-    }
-    
-    
+  
+     
 } 
 
 
