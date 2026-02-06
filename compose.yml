@@ -1,0 +1,11 @@
+services:
+  java-app:
+    ports:
+      - 2345:2345
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: OOA
+    # Optional: mount your source code so changes are reflected inside
+    volumes:
+      - .:/app
