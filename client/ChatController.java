@@ -32,11 +32,12 @@ public class ChatController {
             attachEventListeners();
 
         // Mock-chattar för test (anropas EFTER UI är skapad). Låg i ChatView tidigare
-        ArrayList<Chat> chats = new ArrayList<>();
-        chats.add(new Chat("chat1"));
-        chats.add(new Chat("chat2"));
-        chats.add(new Chat("chat3"));
-        chats.add(new Chat("chat4"));
+        ArrayList<String> chats = new ArrayList<>();
+        chats.add("chat1");
+        chats.add("chat2");
+        chats.add("chat3");
+        chats.add("chat4");
+        // chats.add(new Chat("chat4")); //Hur det var när vi hade chatobjekt innan vi bytte till strängar.
         model.setChats(chats);
         });
     }
@@ -56,7 +57,7 @@ public class ChatController {
     private void handleAddChat() {
     String chatName = view.getAddChatText();
     if (chatName != null && !chatName.trim().isEmpty()) {
-        model.addChat(new Chat(chatName));
+        model.addChat(chatName);
         view.clearAddChatField();
     }
 }
