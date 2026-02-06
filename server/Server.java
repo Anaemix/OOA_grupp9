@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 public class Server {
-
+    private static DatabaseHandler db = new DatabaseHandler();
     public static void main(String[] args) throws IOException {
         int port = 2345;
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0); 
@@ -43,11 +43,11 @@ public class Server {
                 Gson gson = new Gson();
                 String input = httpexchange.getRequestURI().getPath().replace("/get_chats/", "");
                 if(input.contains("/")) {
-                    User user = new User(input.split("/")[1], input.split("/")[0]);
+                    User user = new User(Integer.parseInt(input.split("/")[1]), input.split("/")[0]);
                     
 
                     // ----REPLACE----
-                    String response = gson.toJson(dummy_get_chats(user));
+                    String response = gson.toJson(db.getAllChats(user));
                     // ----REPLACE----
 
                     httpexchange.getResponseHeaders().add("Content-Type", "application/json");
@@ -80,10 +80,9 @@ public class Server {
             Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
 
             String chat_name = httpexchange.getRequestURI().getPath().replace("/get_chat/", "");
-
-            // ----REPLACE----
-            String response = gson.toJson(dummy_get_chat(chat_name));
-            // ----REPLACE----
+            Chat c = db.getChat(chat_name);
+            System.out.println(c.getUsers());
+            String response = gson.toJson(c);
 
             httpexchange.getResponseHeaders().add("Content-Type", "application/json");
             httpexchange.sendResponseHeaders(200, response.getBytes().length);
@@ -114,7 +113,9 @@ public class Server {
                         User user = gson.fromJson(jsonobject.getAsJsonObject("user"), User.class);
                         String chat = jsonobject.get("chat").getAsString();
                         // ----REPLACE----
-                        dummy_connect(user, chat);
+                        db.addchat(chat);
+                        db.adduser(user);
+                        db.addUserToChat(user, chat);
                         // ----REPLACE----
                         response = "true";
                     }
@@ -154,7 +155,8 @@ public class Server {
                         User user = gson.fromJson(jsonobject.getAsJsonObject("user"), User.class);
                         String chat = jsonobject.get("chat").getAsString();
                         // ----REPLACE----
-                        dummy_disconnect(user, chat);
+                        //dummy_disconnect(user, chat);
+                        db.removeUserFromChat(user, chat);
                         // ----REPLACE----
                         response = "true";
                     }
@@ -246,7 +248,7 @@ public class Server {
                         Message message = gson.fromJson(jsonobject.getAsJsonObject("message"), Message.class);
 
                         // ----REPLACE----
-                        dummy_send_message(message, chat_name);
+                        db.sendMessage(chat_name, message);
                         // ----REPLACE----
 
                         response = "1";
@@ -274,9 +276,9 @@ public class Server {
     }
     private static Chat dummy_get_chat(String chat_name) {
         Chat dummy = new Chat(chat_name);
-        User dummy_u1 = new User("1", "Coola Henning");
-        User dummy_u2 = new User("2", "Najibis");
-        User dummy_u3 = new User("3", "Mega Hugo");
+        User dummy_u1 = new User(1, "Coola Henning");
+        User dummy_u2 = new User(2, "Najibis");
+        User dummy_u3 = new User(3, "Mega Hugo");
         dummy.addUser(dummy_u1);
         dummy.addUser(dummy_u2);
         dummy.addUser(dummy_u3);
