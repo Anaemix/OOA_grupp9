@@ -24,7 +24,7 @@ public interface ChatModelListener {
      */
     void onMessagesLoaded(List<String> messages);
 
-    void onChatsLoaded(ArrayList<Chat> chats);
+    void onChatsLoaded(ArrayList<String> chats);
 
-    void onChatSelected(Chat chat);
+    void onChatSelected(String chat);
 }

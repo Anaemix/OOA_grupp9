@@ -7,7 +7,7 @@ import javax.swing.*;
 public class ChatListGUI {
     private final JPanel chatListPanel;
 
-    public ChatListGUI(ArrayList<Chat> chats) {
+    public ChatListGUI(ArrayList<String> chats) {
         GridBagLayout gridBag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -16,8 +16,8 @@ public class ChatListGUI {
         c.gridwidth = GridBagConstraints.REMAINDER;
         this.chatListPanel = new JPanel(gridBag);
 
-        for (Chat chat : chats) {
-            JButton chatButton = new JButton(chat.getChatName());
+        for (String chat : chats) {
+            JButton chatButton = new JButton(chat);
             gridBag.setConstraints(chatButton, c);
             chatListPanel.add(chatButton);
         }
