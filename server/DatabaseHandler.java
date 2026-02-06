@@ -22,7 +22,7 @@ public class DatabaseHandler {
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:database.db");
             System.out.println("Connected to SQLite database.");
-          //  enableforeignkeys();
+            enableforeignkeys();
             createTablesIfNotExist();
 
         } catch (SQLException e) {
@@ -70,7 +70,6 @@ public class DatabaseHandler {
         
         try (Statement stmt = connection.createStatement()) {
             // Execute table creation queries
-           // System.out.println("all tables have been deleted");
             stmt.execute(createUsersTable);
             stmt.execute(createChatsTable);
             stmt.execute(createMessagesTable);
@@ -110,7 +109,7 @@ public class DatabaseHandler {
         }
     }
 
-    public void adduser(User user) {
+    public void addUser(User user) {
 
     
         String adduser = "INSERT OR IGNORE INTO users (name) VALUES (?)";
@@ -124,7 +123,7 @@ public class DatabaseHandler {
     }
 
 
-    public void sendMessage( String chatName, Message message) {
+    public void addMessage( String chatName, Message message) {
         try(PreparedStatement insertmessage = connection.prepareStatement("INSERT INTO messages ( content, sender, chatname) VALUES (?,?,?)")) {
 
             // insertmessage.setInt(1,null);
@@ -249,7 +248,7 @@ public class DatabaseHandler {
         }
     }
 
-    public void addchat(String chatname) {
+    public void addChat(String chatname) {
         String addchat = "INSERT OR IGNORE INTO chats (name) VALUES (?)";
         try (PreparedStatement pstmt = connection.prepareStatement(addchat)) {
             pstmt.setString(1, chatname);
@@ -265,7 +264,7 @@ public class DatabaseHandler {
             addUserToChat(user, chat);
         }
         else {
-            addchat(chat);
+            addChat(chat);
             addUserToChat(user, chat);
         }
 
@@ -297,14 +296,14 @@ public class DatabaseHandler {
         String[] names = {"Alice", "Bob", "Charlie", "David", "Eve", "Frank"};
         for (String name : names) {
             User user = new User(0, name);
-            adduser(user);
+            addUser(user);
             users.add(user);
         }
 
         // --- CHATS ---
         List<String> chats = Arrays.asList("ChatA", "ChatB", "ChatC", "ChatD", "ChatE");
         for (String chat : chats) {
-            addchat(chat);
+            addChat(chat);
         }
 
         // --- CHAT MEMBERSHIPS ---
@@ -334,7 +333,7 @@ public class DatabaseHandler {
             for (int i = 0; i < numMessages; i++) {
                 User sender = users.get(rand.nextInt(users.size()));
                 String messageText = sampleMessages[rand.nextInt(sampleMessages.length)];
-                sendMessage(chat, new Message(messageText, Instant.now(), sender));
+                addMessage(chat, new Message(messageText, Instant.now(), sender));
             }
         }
 
@@ -350,6 +349,7 @@ public static void main(String[] args) {
      
 } 
 
+}      
 
 // All of these methods should check if the user exists else they should add them, they should do the same thing for creating/joining a chat if the
 //chat is not they are trying to join does not exist then create it 
@@ -363,3 +363,11 @@ public static void main(String[] args) {
 //getChats(userName) 
 //getChat(chatname) done
    
+
+
+
+//adduser -> addUser
+//sendMessage -> addMessage
+//addchat -> addChat
+// enableforeignkeys = true
+// dropalltables removed
