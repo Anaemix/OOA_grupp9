@@ -343,12 +343,10 @@ public class DatabaseHandler {
     } catch (Exception e) {
         e.printStackTrace();
     }
+    }
 }
 
-public static void main(String[] args) {
-  
-     
-} 
+
 
 
 // All of these methods should check if the user exists else they should add them, they should do the same thing for creating/joining a chat if the
