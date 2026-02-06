@@ -36,6 +36,7 @@ public class ChatView implements ChatModelListener {
     private DefaultListModel<String> displayModel;
     private ChatListGUI chatListGUI;
     private JPanel chatListPanel;
+    private JScrollPane chatListScrollPane;
     private JPanel leftPanel;
 
     /**
@@ -140,14 +141,17 @@ public class ChatView implements ChatModelListener {
     @Override
     public void onChatsLoaded(ArrayList<String> chats) {
         // Ta bort gammal chattlista om den finns
-        if (chatListPanel != null) {
-            leftPanel.remove(chatListPanel);
+        if (chatListScrollPane != null) {
+            leftPanel.remove(chatListScrollPane);
         }
         
         // Skapa ny chattlista
         chatListGUI = new ChatListGUI(chats);
         chatListPanel = chatListGUI.getChatListPanel();
-        leftPanel.add(chatListPanel, BorderLayout.CENTER);
+        chatListScrollPane = new JScrollPane(chatListPanel);
+        chatListScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        chatListScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        leftPanel.add(chatListScrollPane, BorderLayout.CENTER);
         
         // Uppdatera UI
         leftPanel.revalidate();
