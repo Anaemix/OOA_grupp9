@@ -1,0 +1,1 @@
+curl http://localhost:2345/get_chat/Hennings%20Privata%20chat
