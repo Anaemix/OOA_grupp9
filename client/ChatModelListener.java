@@ -1,5 +1,6 @@
 package client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,4 +23,8 @@ public interface ChatModelListener {
      * Called when messages are bulk-loaded into the model.
      */
     void onMessagesLoaded(List<String> messages);
+
+    void onChatsLoaded(ArrayList<Chat> chats);
+
+    void onChatSelected(Chat chat);
 }

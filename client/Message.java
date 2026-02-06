@@ -1,13 +1,13 @@
 package client;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class Message {
     private final String text;
-    private final LocalDateTime time;
+    private final Instant time;
     private final User user;
 
-    public Message(String text, LocalDateTime time, User user) {
+    public Message(String text, Instant time, User user) {
         this.text = text;
         this.time = time;
         this.user = user;
@@ -17,7 +17,7 @@ public class Message {
         return text;
     }
 
-    public LocalDateTime getTime() {
+    public Instant getTime() {
         return time;
     }
 

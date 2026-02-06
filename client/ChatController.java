@@ -1,6 +1,7 @@
 package client;
 
 import java.awt.EventQueue;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFileChooser;
@@ -29,6 +30,14 @@ public class ChatController {
         EventQueue.invokeLater(() -> {
             view.createAndShowUi();
             attachEventListeners();
+
+        // Mock-chattar för test (anropas EFTER UI är skapad). Låg i ChatView tidigare
+        ArrayList<Chat> chats = new ArrayList<>();
+        chats.add(new Chat("chat1"));
+        chats.add(new Chat("chat2"));
+        chats.add(new Chat("chat3"));
+        chats.add(new Chat("chat4"));
+        model.setChats(chats);
         });
     }
 
@@ -41,7 +50,16 @@ public class ChatController {
         view.addLoadButtonListener(evt -> handleLoadMockMessages());
         view.addClearButtonListener(evt -> handleClearMessages());
         view.addSendImageButtonListener(evt -> handleSendImageMessage());
+        view.addAddChatButtonListener(evt -> handleAddChat());
     }
+
+    private void handleAddChat() {
+    String chatName = view.getAddChatText();
+    if (chatName != null && !chatName.trim().isEmpty()) {
+        model.addChat(new Chat(chatName));
+        view.clearAddChatField();
+    }
+}
 
     /**
      * Handles the send message action.
