@@ -138,7 +138,7 @@ public class ChatView implements ChatModelListener {
     }
 
     @Override
-    public void onChatsLoaded(ArrayList<Chat> chats) {
+    public void onChatsLoaded(ArrayList<String> chats) {
         // Ta bort gammal chattlista om den finns
         if (chatListPanel != null) {
             leftPanel.remove(chatListPanel);
@@ -155,7 +155,7 @@ public class ChatView implements ChatModelListener {
     }
 
     @Override
-    public void onChatSelected(Chat chat) {
+    public void onChatSelected(String chat) {
 
     }
 

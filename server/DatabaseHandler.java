@@ -1,5 +1,6 @@
 package server;
 
+
 import java.sql.*;
 import java.util.*;
 import java.time.Instant;
@@ -289,67 +290,15 @@ public class DatabaseHandler {
         }
         return list;
     }
-    public void seedDatabaseRealistic() {
-    try {
-        // --- USERS ---
-        List<User> users = new ArrayList<>();
-        String[] names = {"Alice", "Bob", "Charlie", "David", "Eve", "Frank"};
-        for (String name : names) {
-            User user = new User(0, name);
-            addUser(user);
-            users.add(user);
-        }
+    public static void main(String[] args) {
 
-        // --- CHATS ---
-        List<String> chats = Arrays.asList("ChatA", "ChatB", "ChatC", "ChatD", "ChatE");
-        for (String chat : chats) {
-            addChat(chat);
-        }
-
-        // --- CHAT MEMBERSHIPS ---
-        // Randomly assign users to chats
-        Random rand = new Random();
-        for (String chat : chats) {
-            int numMembers = 2 + rand.nextInt(3); // 2 to 4 members per chat
-            Set<Integer> addedIndexes = new HashSet<>();
-            while (addedIndexes.size() < numMembers) {
-                int userIndex = rand.nextInt(users.size());
-                if (!addedIndexes.contains(userIndex)) {
-                    addUserToChat(users.get(userIndex), chat);
-                    addedIndexes.add(userIndex);
-                }
-            }
-        }
-
-        // --- MESSAGES ---
-        String[] sampleMessages = {
-            "Hello!", "How are you?", "What's up?", "Good morning!", "Did you see that?", 
-            "Let's meet later.", "I agree!", "That's funny 😂", "See you soon.", "Thanks!"
-        };
-
-        for (String chat : chats) {
-            // Pick 3-6 random messages per chat
-            int numMessages = 3 + rand.nextInt(4); // 3-6 messages
-            for (int i = 0; i < numMessages; i++) {
-                User sender = users.get(rand.nextInt(users.size()));
-                String messageText = sampleMessages[rand.nextInt(sampleMessages.length)];
-                addMessage(chat, new Message(messageText, Instant.now(), sender));
-            }
-        }
-
-        System.out.println("Database seeded with realistic data successfully!");
-
-    } catch (Exception e) {
-        e.printStackTrace();
     }
+    
 }
 
-public static void main(String[] args) {
-  
-     
-} 
 
-}      
+
+     
 
 // All of these methods should check if the user exists else they should add them, they should do the same thing for creating/joining a chat if the
 //chat is not they are trying to join does not exist then create it 
@@ -371,3 +320,6 @@ public static void main(String[] args) {
 //addchat -> addChat
 // enableforeignkeys = true
 // dropalltables removed
+
+
+//add timestamp to messages 
