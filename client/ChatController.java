@@ -53,7 +53,7 @@ public class ChatController {
         view.addSendImageButtonListener(evt -> handleSendImageMessage());
         view.addAddChatButtonListener(evt -> handleAddChat());
         view.addLoginButtonListener(evt -> handleLogin());
-        //view.addChatSelectionListener(evt -> handleChatSelection());
+        view.addChatSelectionListener(evt -> handleChatSelection(new Chat(evt.getActionCommand())));
     }
 
     private void handleAddChat() {
@@ -64,9 +64,10 @@ public class ChatController {
         }
     }
 
-    private void handleChatSelection() {
-        System.out.println("Chat selected: ");
-        // This method can be implemented to handle chat selection events
+    private void handleChatSelection(Chat chatName) {
+        Chat currentChat = ConnectionHandler.Get_Chat(chatName.getChatName());
+        System.out.println("Chat selected: " + currentChat.getChatName());
+        model.setCurrentChat(currentChat);
     }
 
 

@@ -1,6 +1,7 @@
 package client;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -42,6 +43,7 @@ public class ChatView implements ChatModelListener {
     private JTextField loginField;
     private JScrollPane scrollPane;
     private ChatGUI chatGUI;
+    private ActionListener chatSelectionListener;
 
     /**
      * Creates and displays the UI.
@@ -146,6 +148,8 @@ public class ChatView implements ChatModelListener {
         }
     }
 
+
+
     @Override
     public void onChatsLoaded(ArrayList<String> chats) {
         // Ta bort gammal chattlista om den finns
@@ -160,7 +164,9 @@ public class ChatView implements ChatModelListener {
         chatListScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         chatListScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         leftPanel.add(chatListScrollPane, BorderLayout.CENTER);
-        
+
+        applyChatSelectionListener(); // <-- Återapplicera listenern på de nya knapparna
+
         // Uppdatera UI
         leftPanel.revalidate();
         leftPanel.repaint();
@@ -171,8 +177,11 @@ public class ChatView implements ChatModelListener {
         if (messageList != null) {
             scrollPane.remove(chatListScrollPane);
         }
-
-        //Load messages for selected chat
+        chatGUI = new ChatGUI(chat);
+        scrollPane.setViewportView(chatGUI.getMainPanel());
+        //scrollPane.add(chatGUI.getMainPanel());
+        //scrollPane.revalidate();
+        //scrollPane.repaint();
 
 
 
@@ -193,17 +202,20 @@ public class ChatView implements ChatModelListener {
     public void addAddChatButtonListener(ActionListener listener) {
         addChatButton.addActionListener(listener);
     }
-    /*
+
     public void addChatSelectionListener(ActionListener listener) {
-        for(Component chats : chatListGUI.getChatListPanel().getComponents()) {
+        chatSelectionListener = listener; // Spara utanför loopen
+        applyChatSelectionListener();     // Applicera på nuvarande knappar
+    }
+
+    private void applyChatSelectionListener() {
+    if (chatSelectionListener == null || chatListGUI == null) return;
+        for (Component chats : chatListGUI.getChatListPanel().getComponents()) {
             if (chats instanceof JButton button) {
-                button.addActionListener(listener);
+                button.addActionListener(chatSelectionListener);
             }
         }
-        // This method can be implemented to add a listener to chat selection events
-    } 
-    //* hfhfhf
-    // jdasji */
+    }
 
     public String getLoginText() {
         return loginField.getText();

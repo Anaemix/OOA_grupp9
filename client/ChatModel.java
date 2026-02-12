@@ -12,7 +12,7 @@ public class ChatModel {
     private final List<String> messages;
     private final List<ChatModelListener> listeners;
     private ArrayList<String> chats = new ArrayList<>();
-    private String currentChat;
+    private Chat currentChat;
     private ConnectionHandler connectionHandler;
     private User user;
 
@@ -39,12 +39,12 @@ public class ChatModel {
         return chats;
     }
 
-    public void setCurrentChat(String currentChat) {
+    public void setCurrentChat(Chat currentChat) {
         this.currentChat = currentChat;
         notifyChatSelected(currentChat);
     }
 
-    public String getCurrentChat() {
+    public Chat getCurrentChat() {
         return currentChat;
     }
 

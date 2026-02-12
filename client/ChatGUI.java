@@ -7,15 +7,17 @@ public class ChatGUI {
     private JPanel mainPanel;
 
     public ChatGUI() {
-        // Default constructor for empty chat view
+        mainPanel = new JPanel(new BorderLayout());
     }
     
     public ChatGUI(Chat chat) {
         BorderLayout layout = new BorderLayout();
         mainPanel = new JPanel(layout);
 
-        ScrollPane messagePanel = new ScrollPane();
+        JScrollPane messagePanel = new JScrollPane(new Box(BoxLayout.Y_AXIS));
         JPanel userPanel = new JPanel();
+        BoxLayout boxLayout = new BoxLayout(userPanel, BoxLayout.Y_AXIS);
+        userPanel.setLayout(boxLayout);
 
         mainPanel.add(messagePanel, BorderLayout.CENTER);
         mainPanel.add(userPanel, BorderLayout.EAST);
