@@ -38,6 +38,10 @@ public class ChatView implements ChatModelListener {
     private JPanel chatListPanel;
     private JScrollPane chatListScrollPane;
     private JPanel leftPanel;
+    private JButton loginButton;
+    private JTextField loginField;
+    private JScrollPane scrollPane;
+    private ChatGUI chatGUI;
 
     /**
      * Creates and displays the UI.
@@ -51,7 +55,7 @@ public class ChatView implements ChatModelListener {
 
         // Chat message list
         messageList = new JList<>(displayModel);
-        JScrollPane scrollPane = new JScrollPane(messageList);
+        scrollPane = new JScrollPane(messageList);
         scrollPane.setPreferredSize(new Dimension(360, 240));
         scrollPane.setBorder(BorderFactory.createTitledBorder("Messages"));
 
@@ -80,9 +84,9 @@ public class ChatView implements ChatModelListener {
         addChat.add(addChatField);
         addChat.add(addChatButton);
 
-        JTextField loginField = new JTextField();
+        loginField = new JTextField();
         loginField.setPreferredSize(new Dimension(100, 28));
-        JButton loginButton = new JButton("Login");
+        loginButton = new JButton("Login");
         JPanel login = new JPanel(new GridLayout(1, 2));
         login.add(loginField);
         login.add(loginButton);
@@ -94,8 +98,6 @@ public class ChatView implements ChatModelListener {
         leftPanel.add(addChat, BorderLayout.NORTH);
         leftPanel.add(login, BorderLayout.SOUTH);
 
-        // Flyttade testchattar till ChatController för MVC-struktur
-
         JPanel chatUsers = new JPanel();
         chatUsers.setLayout(new BoxLayout(chatUsers, BoxLayout.Y_AXIS));
         chatUsers.setBorder(BorderFactory.createTitledBorder("Users"));
@@ -105,12 +107,18 @@ public class ChatView implements ChatModelListener {
         
         chatUsers.add(label);
         chatUsers.add(label2);
+        
+//        chatListGUI = new ChatListGUI(); // TODO skapar weird DRA MUS ÖVER FÖR ATT SE
+//        leftPanel.add(chatListGUI.getChatListPanel());
+
+        //chatGUI = new ChatGUI();
+        //scrollPane.add(chatGUI.getMainPanel());
 
         // Assemble frame
         frame.add(scrollPane, BorderLayout.CENTER);
         frame.add(controls, BorderLayout.SOUTH);
         frame.add(leftPanel, BorderLayout.WEST);
-        frame.add(chatUsers, BorderLayout.EAST);
+        //frame.add(chatUsers, BorderLayout.EAST);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -159,8 +167,16 @@ public class ChatView implements ChatModelListener {
     }
 
     @Override
-    public void onChatSelected(String chat) {
+    public void onChatSelected(Chat chat) {
+        if (messageList != null) {
+            scrollPane.remove(chatListScrollPane);
+        }
 
+        //Load messages for selected chat
+
+
+
+        // This method can be implemented to update the UI when a chat is selected
     }
 
     // --- Getters and listener registration ---
@@ -169,8 +185,28 @@ public class ChatView implements ChatModelListener {
 
     public String getAddChatText() { return addChatField.getText();}
 
+    public String setSelectedChat(String chat) {
+        // This method can be implemented to update the UI when a chat is selected
+        return chat;
+    }
+
     public void addAddChatButtonListener(ActionListener listener) {
         addChatButton.addActionListener(listener);
+    }
+    /*
+    public void addChatSelectionListener(ActionListener listener) {
+        for(Component chats : chatListGUI.getChatListPanel().getComponents()) {
+            if (chats instanceof JButton button) {
+                button.addActionListener(listener);
+            }
+        }
+        // This method can be implemented to add a listener to chat selection events
+    } 
+    //* hfhfhf
+    // jdasji */
+
+    public String getLoginText() {
+        return loginField.getText();
     }
 
     /**
@@ -213,6 +249,11 @@ public class ChatView implements ChatModelListener {
      */
     public void addClearButtonListener(ActionListener listener) {
         clearButton.addActionListener(listener);
+    }
+
+    public void addLoginButtonListener(ActionListener listener) {
+        // This method can be implemented to add a listener to the login button when it's created
+        loginButton.addActionListener(listener);
     }
 
     /**

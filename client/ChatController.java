@@ -52,6 +52,8 @@ public class ChatController {
         view.addClearButtonListener(evt -> handleClearMessages());
         view.addSendImageButtonListener(evt -> handleSendImageMessage());
         view.addAddChatButtonListener(evt -> handleAddChat());
+        view.addLoginButtonListener(evt -> handleLogin());
+        //view.addChatSelectionListener(evt -> handleChatSelection());
     }
 
     private void handleAddChat() {
@@ -59,8 +61,21 @@ public class ChatController {
     if (chatName != null && !chatName.trim().isEmpty()) {
         model.addChat(chatName);
         view.clearAddChatField();
+        }
     }
-}
+
+    private void handleChatSelection() {
+        System.out.println("Chat selected: ");
+        // This method can be implemented to handle chat selection events
+    }
+
+
+    private void handleLogin() {
+        String username = view.getLoginText();
+        if (username != null && !username.trim().isEmpty()) {
+            model.setUser(new User(0, username));
+        }
+    }
 
     /**
      * Handles the send message action.

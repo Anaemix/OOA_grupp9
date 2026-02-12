@@ -6,6 +6,10 @@ import javax.swing.*;
 
 public class ChatListGUI {
     private final JPanel chatListPanel;
+    
+    public ChatListGUI() {
+        this.chatListPanel = new JPanel(new GridBagLayout());
+    }
 
     public ChatListGUI(ArrayList<String> chats) {
         GridBagLayout gridBag = new GridBagLayout();
