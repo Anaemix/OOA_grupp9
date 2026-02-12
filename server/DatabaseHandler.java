@@ -3,8 +3,8 @@ package server;
 
 import java.sql.*;
 import java.util.*;
+
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 import client.User;
 import client.Message;
@@ -23,7 +23,7 @@ public class DatabaseHandler {
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:database.db");
             System.out.println("Connected to SQLite database.");
-            enableforeignkeys();
+            enableForeignkeys();
             createTablesIfNotExist();
 
         } catch (SQLException e) {
@@ -32,7 +32,7 @@ public class DatabaseHandler {
     }
 
 
-    private void enableforeignkeys() {
+    private void enableForeignkeys() {
 
         String statement = "PRAGMA foreign_keys = ON;";
         try (PreparedStatement stmt = connection.prepareStatement(statement)) {
@@ -56,10 +56,11 @@ public class DatabaseHandler {
                                   "name TEXT PRIMARY KEY)";
 
         String createMessagesTable = "CREATE TABLE IF NOT EXISTS messages (" +
-                                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                                     "timestamp INTEGER NOT NULL," +
                                      "sender TEXT NOT NULL, " +
                                      "chatname TEXT NOT NULL," + 
                                      "content TEXT, " +
+                                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                                      "FOREIGN KEY (sender) REFERENCES users(name), " +
                                      "FOREIGN KEY (chatname) REFERENCES chats(name))";
 
@@ -125,12 +126,18 @@ public class DatabaseHandler {
 
 
     public void addMessage( String chatName, Message message) {
-        try(PreparedStatement insertmessage = connection.prepareStatement("INSERT INTO messages ( content, sender, chatname) VALUES (?,?,?)")) {
 
+        
+        
+        
+        try(PreparedStatement insertmessage = connection.prepareStatement("INSERT INTO messages (timestamp, content, sender, chatname) VALUES (?,?,?,?)")) {
+            
+            long formattedTime = message.getTime().getEpochSecond();
             // insertmessage.setInt(1,null);
-            insertmessage.setString(1, message.getText());
-            insertmessage.setString(2, message.getUser().getName());
-            insertmessage.setString(3, chatName);
+            insertmessage.setLong(1, formattedTime);
+            insertmessage.setString(2, message.getText());
+            insertmessage.setString(3, message.getUser().getName());
+            insertmessage.setString(4, chatName);
             insertmessage.executeUpdate();
             System.out.println("Message added!");        
 
@@ -183,18 +190,19 @@ public class DatabaseHandler {
         return false;
     }
 
+    // a private method used to add messages to a chat object 
+    private void getMessagesInChat(Chat chat, String chatname) {
+        String getMessages = "SELECT * FROM messages WHERE chatname = (?)";
 
-    private void getmessages(Chat chat, String chatname) {
-        String getmessages = "SELECT * FROM messages WHERE chatname = (?)";
-
-        try(PreparedStatement pstmt = connection.prepareStatement(getmessages)) {
+        try(PreparedStatement pstmt = connection.prepareStatement(getMessages)) {
             pstmt.setString(1, chatname);
             ResultSet rs = pstmt.executeQuery();
 
             while(rs.next()) {
+                long timestamp = rs.getInt("timestamp");
                 String message = rs.getString("content");
                 String sender = rs.getString("sender");
-                chat.addMessage(new Message(message, Instant.now() ,new User(0, sender)));
+                chat.addMessage(new Message(message, Instant.ofEpochSecond(timestamp) ,new User(0, sender)));
                 
             }
 
@@ -228,7 +236,7 @@ public class DatabaseHandler {
         catch(SQLException e){
             e.printStackTrace();
         }
-        getmessages(chat, chatname);
+        getMessagesInChat(chat, chatname);
         return chat;
         
     }
@@ -290,9 +298,13 @@ public class DatabaseHandler {
         }
         return list;
     }
-    public static void main(String[] args) {
 
+
+    public static void main(String[] args) {
+        
+    
     }
+
     
 }
 
