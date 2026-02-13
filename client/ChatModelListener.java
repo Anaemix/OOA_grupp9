@@ -12,7 +12,7 @@ public interface ChatModelListener {
     /**
      * Called when a single message is added to the model.
      */
-    void onMessageAdded(String message);
+    void onMessageAdded(Chat chat);
     
     /**
      * Called when all messages are cleared from the model.
@@ -27,4 +27,6 @@ public interface ChatModelListener {
     void onChatsLoaded(ArrayList<String> chats);
 
     void onChatSelected(Chat chat);
+
+    void notifyMessageAdded(Chat chat);
 }

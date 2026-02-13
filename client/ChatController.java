@@ -58,6 +58,7 @@ public class ChatController {
 
     private void handleAddChat() {
     String chatName = view.getAddChatText();
+
     if (chatName != null && !chatName.trim().isEmpty()) {
         model.addChat(chatName);
         view.clearAddChatField();
@@ -83,8 +84,10 @@ public class ChatController {
      */
     private void handleSendMessage() {
         String text = view.getInputText();
+        Message message = model.createMessage(text);
+        Chat chat = model.getCurrentChat();
         if (text != null && !text.trim().isEmpty()) {
-            model.addMessage(text);
+            model.addMessage(message, chat);
             view.clearInputField();
         }
     }

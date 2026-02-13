@@ -41,7 +41,7 @@ public class ChatView implements ChatModelListener {
     private JPanel leftPanel;
     private JButton loginButton;
     private JTextField loginField;
-    private JScrollPane scrollPane;
+    private JPanel chatPanel;
     private ChatGUI chatGUI;
     private ActionListener chatSelectionListener;
 
@@ -56,10 +56,10 @@ public class ChatView implements ChatModelListener {
         displayModel = new DefaultListModel<>();
 
         // Chat message list
-        messageList = new JList<>(displayModel);
-        scrollPane = new JScrollPane(messageList);
-        scrollPane.setPreferredSize(new Dimension(360, 240));
-        scrollPane.setBorder(BorderFactory.createTitledBorder("Messages"));
+        //messageList = new JList<>(displayModel);
+        chatPanel = new JPanel(new BorderLayout());
+        chatPanel.setPreferredSize(new Dimension(360, 240));
+        //scrollPane.setBorder(BorderFactory.createTitledBorder("Messages"));
 
         // Input area
         inputField = new JTextField();
@@ -117,7 +117,7 @@ public class ChatView implements ChatModelListener {
         //scrollPane.add(chatGUI.getMainPanel());
 
         // Assemble frame
-        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(chatPanel, BorderLayout.CENTER);
         frame.add(controls, BorderLayout.SOUTH);
         frame.add(leftPanel, BorderLayout.WEST);
         //frame.add(chatUsers, BorderLayout.EAST);
@@ -129,10 +129,23 @@ public class ChatView implements ChatModelListener {
     // --- ChatModelListener implementation (Observer pattern) ---
 
     @Override
-    public void onMessageAdded(String message) {
-        displayModel.addElement(message);
+    public void onMessageAdded(Chat chat) {
+        if (messageList != null) {
+            chatPanel.removeAll();
+        }
+
+        chatGUI = new ChatGUI(chat);
+        //chatGUI.Update(chat);
+        chatPanel.removeAll();
+        chatPanel.add(chatGUI.getMainPanel(), BorderLayout.CENTER);
+        chatPanel.revalidate();
+        chatPanel.repaint();
+
+
+
+        //displayModel.addElement(message);
         // Auto-scroll to bottom
-        messageList.ensureIndexIsVisible(displayModel.size() - 1);
+        //messageList.ensureIndexIsVisible(displayModel.size() - 1);
     }
 
     @Override
@@ -175,10 +188,15 @@ public class ChatView implements ChatModelListener {
     @Override
     public void onChatSelected(Chat chat) {
         if (messageList != null) {
-            scrollPane.remove(chatListScrollPane);
+            chatPanel.removeAll();
         }
         chatGUI = new ChatGUI(chat);
-        scrollPane.setViewportView(chatGUI.getMainPanel());
+        //chatGUI.Update(chat);
+        chatPanel.removeAll();
+        chatPanel.add(chatGUI.getMainPanel(), BorderLayout.CENTER);
+        chatPanel.revalidate();
+        chatPanel.repaint();
+        //scrollPane.setViewportView(chatGUI.getMainPanel());
         //scrollPane.add(chatGUI.getMainPanel());
         //scrollPane.revalidate();
         //scrollPane.repaint();
