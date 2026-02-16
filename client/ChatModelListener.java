@@ -28,5 +28,5 @@ public interface ChatModelListener {
 
     void onChatSelected(Chat chat);
 
-    void notifyMessageAdded(Chat chat);
+    //void notifyMessageAdded(Chat chat);
 }

@@ -51,7 +51,7 @@ public class ChatGUI {
             .ofPattern("MMM dd HH:mm")
             .withZone(ZoneId.of("GMT+1"));
 
-            JLabel messageLabel = new JLabel(message.toString() + "   ( " + message.getUser().getName() + " │ " + formatter.format(message.getTime()) + " )");
+            JLabel messageLabel = new JLabel(" " + message.toString() + "   ( " + message.getUser().getName() + " │ " + formatter.format(message.getTime()) + " )");
             System.out.println(message.toString());
             //JButton chatButton = new JButton(message.toString());
             //System.out.println(chatButton.getText());
