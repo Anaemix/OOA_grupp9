@@ -59,6 +59,7 @@ public class ChatView implements ChatModelListener {
         //messageList = new JList<>(displayModel);
         chatPanel = new JPanel(new BorderLayout());
         chatPanel.setPreferredSize(new Dimension(360, 240));
+        chatPanel.setBorder(BorderFactory.createTitledBorder("Messages"));
         //scrollPane.setBorder(BorderFactory.createTitledBorder("Messages"));
 
         // Input area
