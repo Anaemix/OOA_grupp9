@@ -21,10 +21,19 @@ public interface ChatModelListener {
     
     /**
      * Called when messages are bulk-loaded into the model.
+     * @param messages The list of messages that were loaded.
      */
     void onMessagesLoaded(List<String> messages);
 
+    /**
+     * Called when the list of chats is loaded or updated in the model.
+     * @param chats The updated list of chat names.
+     */
     void onChatsLoaded(ArrayList<String> chats);
 
-    void onChatSelected(Chat chat);
+    /**
+     * Called when a chat is selected in the UI.
+     * @param chat The name of the chat that was selected.
+     */
+    void onChatSelected(String chat);
 }

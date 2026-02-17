@@ -15,21 +15,6 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.util.ArrayList;
 import java.lang.reflect.Type;
 
-/*     public static ArrayList<String> Get_Chats(User user) {    
--> returnar lista av alla chatter som User är med i
-
-public static Chat Get_Chat(String chat) {
--> Returnerar en chat baserat på dess namn (med messages och users etc)
-
-    public static void Connect(User user, String chat) {
--> lägger till en user i en chatt (eller skapar chatten/usern om den inte redan finns)
-
-    public static void Disconnect(User user, String chat) {
--> tar bort user från en chat
-
-    public static void Send_Message(Message message, String chat) {
-->selfexplanatory */
-
 public class ConnectionHandler {
 	private static String ip_address = "localhost";
 	private static String port = "2345";
@@ -39,7 +24,7 @@ public class ConnectionHandler {
 		this.ip_address = ip_address;
 		this.port = port;
 	}
-//   public static void main(String[] args) {
+    public static void main(String[] args) {
 		//System.out.println(Get_Chats(new User("1", "Henning")).toString());
 
 		//Chat chat = Get_Chat("Hennings Privata chat");
@@ -51,15 +36,13 @@ public class ConnectionHandler {
 
 		//Message message = new Message("My new message", Instant.now(), new User("1", "Henning"));
 		//Send_Message(message, "My new chat");
-//	}
+	}
 
 	public static ArrayList<String> Get_Chats(User user) {	
 		String url = String.format("%s/%s/%s", Create_url("get_chats"), user.getName(), user.getId());
 		
 		ArrayList<String> output = new ArrayList<>();
 		ServerResponse response = MakeGetRequest(url);
-
-		System.out.println("Response received for Get_Chats:");
 
 		if(response.getStatusCode() == 200) {
 			Type listArrayType = new TypeToken<ArrayList<String>>() {}.getType();

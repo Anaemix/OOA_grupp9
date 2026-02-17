@@ -1,13 +1,17 @@
 package client;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -18,6 +22,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 /**
  * ChatView - The View component of the MVC pattern.
@@ -33,37 +38,39 @@ public class ChatView implements ChatModelListener {
     private JButton loadButton;
     private JButton clearButton;
     private JButton addChatButton;
+    private JButton loginButton;
+    private JButton disconnectButton;
+    private JTextField loginField;
     private JTextField addChatField;
     private DefaultListModel<String> displayModel;
     private ChatListGUI chatListGUI;
     private JPanel chatListPanel;
     private JScrollPane chatListScrollPane;
     private JPanel leftPanel;
-    private JButton loginButton;
-    private JTextField loginField;
-    private JScrollPane scrollPane;
-    private ChatGUI chatGUI;
-    private ActionListener chatSelectionListener;
+    private Consumer<String> chatSelectedCallback;
 
     /**
      * Creates and displays the UI.
      */
     public void createAndShowUi() {
         frame = new JFrame("Chat Client");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    
+        
+        
 
         // Internal display model for Swing (View's own data)
         displayModel = new DefaultListModel<>();
 
         // Chat message list
         messageList = new JList<>(displayModel);
-        scrollPane = new JScrollPane(messageList);
+        JScrollPane scrollPane = new JScrollPane(messageList);
         scrollPane.setPreferredSize(new Dimension(360, 240));
         scrollPane.setBorder(BorderFactory.createTitledBorder("Messages"));
 
         // Input area
         inputField = new JTextField();
-        inputField.setPreferredSize(new Dimension(200, 28));
+        inputField.setPreferredSize(new Dimension(600, 28));
 
         // Buttons
         sendButton = new JButton("Send");
@@ -71,14 +78,21 @@ public class ChatView implements ChatModelListener {
         loadButton = new JButton("Load mock array");
         clearButton = new JButton("Clear");
 
-        // Controls panel
-        JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        controls.add(inputField);
-        controls.add(sendButton);
-        controls.add(sendImageButton);
-        controls.add(loadButton);
-        controls.add(clearButton);
+        // Message control panel for constructing and sending a message/image or clearing messages
+        JPanel messageControler = new JPanel(new BorderLayout());
+        messageControler.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buttonPanel.add(sendButton);
+        buttonPanel.add(sendImageButton);
+        buttonPanel.add(loadButton);
+        buttonPanel.add(clearButton);
 
+        messageControler.add(inputField, BorderLayout.CENTER);
+        messageControler.add(buttonPanel, BorderLayout.EAST);
+
+        
+        
         addChatField = new JTextField();
         addChatField.setPreferredSize(new Dimension(100, 28));
         addChatButton = new JButton("Add Chat");
@@ -89,17 +103,22 @@ public class ChatView implements ChatModelListener {
         loginField = new JTextField();
         loginField.setPreferredSize(new Dimension(100, 28));
         loginButton = new JButton("Login");
-        JPanel login = new JPanel(new GridLayout(1, 2));
+        disconnectButton = new JButton ("Disconnect");
+        JPanel login = new JPanel(new GridLayout(2, 2));
         login.add(loginField);
         login.add(loginButton);
- 
-        leftPanel = new JPanel();
-        leftPanel.setLayout(new BorderLayout());
+        login.add(new JLabel("")); //Utfyllnadslabel för att få disconnect-knappen på rätt plats
+        login.add(disconnectButton);
+        
+        
+        leftPanel = new JPanel(new BorderLayout());
         leftPanel.setBorder(BorderFactory.createTitledBorder("Chats"));
-
+        
         leftPanel.add(addChat, BorderLayout.NORTH);
         leftPanel.add(login, BorderLayout.SOUTH);
-
+        
+        // Flyttade testchattar till ChatController för MVC-struktur
+        
         JPanel chatUsers = new JPanel();
         chatUsers.setLayout(new BoxLayout(chatUsers, BoxLayout.Y_AXIS));
         chatUsers.setBorder(BorderFactory.createTitledBorder("Users"));
@@ -110,21 +129,26 @@ public class ChatView implements ChatModelListener {
         chatUsers.add(label);
         chatUsers.add(label2);
         
-//        chatListGUI = new ChatListGUI(); // TODO skapar weird DRA MUS ÖVER FÖR ATT SE
-//        leftPanel.add(chatListGUI.getChatListPanel());
+        JScrollPane chatUserScrollPane = new JScrollPane(chatUsers);
+        chatUserScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        chatUserScrollPane.getVerticalScrollBar().setValue(chatUserScrollPane.getVerticalScrollBar().getMaximum());
+        
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        rightPanel.add(scrollPane, BorderLayout.CENTER);
+        rightPanel.add(chatUserScrollPane, BorderLayout.EAST);
+        rightPanel.add(messageControler, BorderLayout.SOUTH);
 
-        //chatGUI = new ChatGUI();
-        //scrollPane.add(chatGUI.getMainPanel());
 
         // Assemble frame
-        frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(controls, BorderLayout.SOUTH);
+        
+        frame.add(rightPanel, BorderLayout.CENTER);
         frame.add(leftPanel, BorderLayout.WEST);
-        //frame.add(chatUsers, BorderLayout.EAST);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
+    
 
     // --- ChatModelListener implementation (Observer pattern) ---
 
@@ -148,8 +172,6 @@ public class ChatView implements ChatModelListener {
         }
     }
 
-
-
     @Override
     public void onChatsLoaded(ArrayList<String> chats) {
         // Ta bort gammal chattlista om den finns
@@ -158,34 +180,27 @@ public class ChatView implements ChatModelListener {
         }
         
         // Skapa ny chattlista
-        chatListGUI = new ChatListGUI(chats);
+        chatListGUI = new ChatListGUI(chats, callback -> {
+            if (chatSelectedCallback != null) {
+                chatSelectedCallback.accept(callback);
+            }
+        });
         chatListPanel = chatListGUI.getChatListPanel();
         chatListScrollPane = new JScrollPane(chatListPanel);
         chatListScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         chatListScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        
+        SwingUtilities.invokeLater(() -> { chatListScrollPane.getVerticalScrollBar().setValue(chatListScrollPane.getVerticalScrollBar().getMaximum()); });
         leftPanel.add(chatListScrollPane, BorderLayout.CENTER);
-
-        applyChatSelectionListener(); // <-- Återapplicera listenern på de nya knapparna
-
+        
         // Uppdatera UI
         leftPanel.revalidate();
         leftPanel.repaint();
     }
 
     @Override
-    public void onChatSelected(Chat chat) {
-        if (messageList != null) {
-            scrollPane.remove(chatListScrollPane);
-        }
-        chatGUI = new ChatGUI(chat);
-        scrollPane.setViewportView(chatGUI.getMainPanel());
-        //scrollPane.add(chatGUI.getMainPanel());
-        //scrollPane.revalidate();
-        //scrollPane.repaint();
+    public void onChatSelected(String chat) {
 
-
-
-        // This method can be implemented to update the UI when a chat is selected
     }
 
     // --- Getters and listener registration ---
@@ -194,31 +209,8 @@ public class ChatView implements ChatModelListener {
 
     public String getAddChatText() { return addChatField.getText();}
 
-    public String setSelectedChat(String chat) {
-        // This method can be implemented to update the UI when a chat is selected
-        return chat;
-    }
-
     public void addAddChatButtonListener(ActionListener listener) {
         addChatButton.addActionListener(listener);
-    }
-
-    public void addChatSelectionListener(ActionListener listener) {
-        chatSelectionListener = listener; // Spara utanför loopen
-        applyChatSelectionListener();     // Applicera på nuvarande knappar
-    }
-
-    private void applyChatSelectionListener() {
-    if (chatSelectionListener == null || chatListGUI == null) return;
-        for (Component chats : chatListGUI.getChatListPanel().getComponents()) {
-            if (chats instanceof JButton button) {
-                button.addActionListener(chatSelectionListener);
-            }
-        }
-    }
-
-    public String getLoginText() {
-        return loginField.getText();
     }
 
     /**
@@ -233,6 +225,10 @@ public class ChatView implements ChatModelListener {
      */
     public void clearInputField() {
         inputField.setText("");
+    }
+
+    public String getLoginFieldText() {
+        return loginField.getText();
     }
 
     /**
@@ -263,11 +259,6 @@ public class ChatView implements ChatModelListener {
         clearButton.addActionListener(listener);
     }
 
-    public void addLoginButtonListener(ActionListener listener) {
-        // This method can be implemented to add a listener to the login button when it's created
-        loginButton.addActionListener(listener);
-    }
-
     /**
      * Adds an action listener to the input field (for Enter key).
      */
@@ -275,10 +266,33 @@ public class ChatView implements ChatModelListener {
         inputField.addActionListener(listener);
     }
 
+    public void addWindowCloseListener(WindowListener listener) {
+        frame.addWindowListener(listener);
+    }
+
+
+    public void addLoginButtonListener(ActionListener listener) {
+        loginButton.addActionListener(listener);
+    }
+
+    public void addDisconnectButtonListener(ActionListener listener) {
+        disconnectButton.addActionListener(listener);
+    }
     /**
      * Returns the main frame.
      */
     public JFrame getFrame() {
         return frame;
     }
+
+    public void setChatSelectedCallback(Consumer<String> callback) {
+        this.chatSelectedCallback = callback;
+    }
+
+
+    public void setChatSelectedCallback(Object callback) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setChatSelectedCallback'");
+    }
 }
+
