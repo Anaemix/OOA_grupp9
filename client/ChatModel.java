@@ -11,13 +11,14 @@ import java.util.List;
 public class ChatModel {
     private final List<String> messages;
     private final List<ChatModelListener> listeners;
-    private ArrayList<String> chats = new ArrayList<>();
+    private ArrayList<String> chats;
     private String currentChat;
     private User currentUser;
 
     public ChatModel() {
         this.messages = new ArrayList<>();
         this.listeners = new ArrayList<>();
+        this.chats = new ArrayList<>();
     }
 
     public void setChats(ArrayList<String> chats) {

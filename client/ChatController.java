@@ -62,6 +62,9 @@ public class ChatController {
 
 
     private void handleChatSelected(String chatName) {
+        model.setCurrentChat(chatName);
+        ConnectionHandler.Connect(loggedInUser, chatName);
+        
     }
 
     private void handleLogin() {
