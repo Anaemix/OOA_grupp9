@@ -18,7 +18,7 @@ public class DatabaseHandler {
     // Connect to SQLite database (database.db file)
     private void connectToDatabase() {
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:database.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:database.db?journal_mode=WAL&busy_timeout=5000");
             System.out.println("Connected to SQLite database.");
             enableForeignkeys();
             createTablesIfNotExist();
