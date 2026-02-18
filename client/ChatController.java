@@ -64,8 +64,16 @@ public class ChatController {
     private void handleChatSelected(String chatName) {
         model.setCurrentChat(chatName);
         ConnectionHandler.Connect(loggedInUser, chatName);
-        
+        Chat chat = ConnectionHandler.Get_Chat(chatName);
+        List<String> formatted = new ArrayList<>();
+        for(Message msg : chat.getMessages()) {
+            formatted.add(msg.getUser().getName() + "\n" 
+            + msg.getText());
+        }
+        model.loadMessages(formatted);
     }
+
+    
 
     private void handleLogin() {
         String username = view.getLoginFieldText();
