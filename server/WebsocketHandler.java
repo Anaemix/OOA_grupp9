@@ -6,7 +6,6 @@ import org.java_websocket.server.WebSocketServer;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import java.net.InetSocketAddress;
-import java.util.Collection;
 import java.util.HashMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -72,9 +71,6 @@ public class WebsocketHandler extends WebSocketServer {
             System.out.println(String.format("%s connected as %s", conn.getRemoteSocketAddress().toString(), j.get("user").getAsString()));
             
         }
-        //for (WebSocket client : getConnections()) {
-        //    conn.send(String.format("port: %d", client.getRemoteSocketAddress().getPort()));
-        //}
     }
 
     @Override
