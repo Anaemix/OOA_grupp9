@@ -40,21 +40,21 @@ public class ConnectionHandler {
 		this.port = port;
 	}
 //   public static void main(String[] args) {
-		//System.out.println(Get_Chats(new User("1", "Henning")).toString());
+		//System.out.println(Get_Chats(new User("Henning")).toString());
 
 		//Chat chat = Get_Chat("Hennings Privata chat");
 		//System.out.println(String.format("\nChatname: %s\nMessages: %s\nUsers: %s", chat.toString(), chat.getMessages().toString(), chat.getUsers().toString()));
 		
-		//Connect(new User("1", "Henning"), "Hennings Hemliga Chat");
+		//Connect(new User("Henning"), "Hennings Hemliga Chat");
 
-		//Disconnect(new User("1", "Henning"), "Hennings Hemliga Chat");
+		//Disconnect(new User("Henning"), "Hennings Hemliga Chat");
 
-		//Message message = new Message("My new message", Instant.now(), new User("1", "Henning"));
+		//Message message = new Message("My new message", Instant.now(), new User("Henning"));
 		//Send_Message(message, "My new chat");
 //	}
 
 	public static ArrayList<String> Get_Chats(User user) {	
-		String url = String.format("%s/%s/%s", Create_url("get_chats"), user.getName(), user.getId());
+		String url = String.format("%s/%s", Create_url("get_chats"), user.getName());
 		
 		ArrayList<String> output = new ArrayList<>();
 		ServerResponse response = MakeGetRequest(url);

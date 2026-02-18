@@ -41,23 +41,15 @@ public class Server {
         public void handle(HttpExchange httpexchange) throws IOException {
             if (httpexchange.getRequestMethod().equals("GET")) {
                 Gson gson = new Gson();
-                String input = httpexchange.getRequestURI().getPath().replace("/get_chats/", "");
-                if(input.contains("/")) {
-                    User user = new User(Integer.parseInt(input.split("/")[1]), input.split("/")[0]);
-                    
+                String username = httpexchange.getRequestURI().getPath().replace("/get_chats/", "");
+                User user = new User(username);
+                String response = gson.toJson(db.getAllChats(user));
 
-                    // ----REPLACE----
-                    String response = gson.toJson(db.getAllChats(user));
-                    // ----REPLACE----
-
-                    httpexchange.getResponseHeaders().add("Content-Type", "application/json");
-                    httpexchange.sendResponseHeaders(200, response.getBytes().length);
-                    
-                    try (OutputStream os = httpexchange.getResponseBody()) {
-                        os.write(response.getBytes());
-                    }
-                } else {
-                    httpexchange.sendResponseHeaders(400, -1);
+                httpexchange.getResponseHeaders().add("Content-Type", "application/json");
+                httpexchange.sendResponseHeaders(200, response.getBytes().length);
+                
+                try (OutputStream os = httpexchange.getResponseBody()) {
+                    os.write(response.getBytes());
                 }
 
             } else {
@@ -276,9 +268,9 @@ public class Server {
     }
     private static Chat dummy_get_chat(String chat_name) {
         Chat dummy = new Chat(chat_name);
-        User dummy_u1 = new User(1, "Coola Henning");
-        User dummy_u2 = new User(2, "Najibis");
-        User dummy_u3 = new User(3, "Mega Hugo");
+        User dummy_u1 = new User("Coola Henning");
+        User dummy_u2 = new User("Najibis");
+        User dummy_u3 = new User("Mega Hugo");
         dummy.addUser(dummy_u1);
         dummy.addUser(dummy_u2);
         dummy.addUser(dummy_u3);
