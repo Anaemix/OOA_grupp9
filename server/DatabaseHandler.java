@@ -18,7 +18,7 @@ public class DatabaseHandler {
     // Connect to SQLite database (database.db file)
     private void connectToDatabase() {
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:database.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:database.db?journal_mode=WAL&busy_timeout=5000");
             System.out.println("Connected to SQLite database.");
             enableForeignkeys();
             createTablesIfNotExist();
@@ -178,7 +178,7 @@ public class DatabaseHandler {
                 long timestamp = rs.getLong("timestamp");
                 String message = rs.getString("content");
                 String sender = rs.getString("sender");
-                messagelist.add((new Message(message, Instant.ofEpochSecond(timestamp) ,new User(0, sender))));
+                messagelist.add((new Message(message, Instant.ofEpochSecond(timestamp) ,new User(sender))));
             }
 
         }
@@ -201,7 +201,7 @@ public class DatabaseHandler {
                 long timestamp = rs.getInt("timestamp");
                 String message = rs.getString("content");
                 String sender = rs.getString("sender");
-                chat.addMessage(new Message(message, Instant.ofEpochSecond(timestamp) ,new User(0, sender)));
+                chat.addMessage(new Message(message, Instant.ofEpochSecond(timestamp) ,new User(sender)));
                 
             }
         }
@@ -222,7 +222,7 @@ public class DatabaseHandler {
 
             while(rs.next()) {
                 String username = rs.getString("username");
-                chat.addUser(new User(0, username)); 
+                chat.addUser(new User(username)); 
             }
 
         }

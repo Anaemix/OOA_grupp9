@@ -94,7 +94,7 @@ public class ChatGUI {
         mainPanel.add(chatScroll, BorderLayout.CENTER);
         mainPanel.add(userScroll, BorderLayout.EAST);
 
-        //Message exMsg1 = new Message("hej", Instant.now(), new User(1,"hugo1"));
+        //Message exMsg1 = new Message("hej", Instant.now(), new User("hugo1"));
         //chat.addMessage(exMsg1);
         //Update();
         }

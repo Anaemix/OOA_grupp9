@@ -5,19 +5,10 @@ package client;
  * Stores user information for identifying message senders.
  */
 public class User {
-    private final int id;
     private String name;
 
-    public User(int id, String name) {
-        this.id = id;
+    public User(String name) {
         this.name = name;
-    }
-
-    /**
-     * Returns the unique user ID.
-     */
-    public int getId() {
-        return id;
     }
 
     /**
@@ -44,11 +35,11 @@ public class User {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         User user = (User) obj;
-        return id == user.id;
+        return name == user.name;
     }
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(id);
+        return name.hashCode();
     }
 }

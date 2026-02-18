@@ -75,7 +75,7 @@ public class ChatController {
     private void handleLogin() {
         String username = view.getLoginText();
         if (username != null && !username.trim().isEmpty()) {
-            model.setUser(new User(0, username));
+            model.setUser(new User(username));
         }
     }
 
