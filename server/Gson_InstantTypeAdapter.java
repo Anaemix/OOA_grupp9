@@ -22,7 +22,7 @@ public class Gson_InstantTypeAdapter extends TypeAdapter < Instant >
     /**
      * Constructor added to prevent javadoc warning
      */
-    Gson_InstantTypeAdapter() {}
+    public Gson_InstantTypeAdapter() {}
     /** 
      * Serialization step. Turns the Instant into a String with ISO 8601 format
      */
