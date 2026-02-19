@@ -4,7 +4,23 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+/**
+ * This class creates and starts the Database connection, Http server and Websocket server.
+ * 
+ * @author Henning
+ * @version 0.1
+ */
 public class Server {
+
+    /** Constructor added to prevent javadoc warning */
+    public Server() {}
+
+    /**
+     * This class creates and starts the Database connection, Http server and Websocket server.
+     * @param args Input arguments
+     * @throws IOException Exceptions that could be thrown
+     */
+    @SuppressWarnings("deprecation")
     public static void main(String[] args) throws IOException {
         int http_port = 2345;
         int websocket_port = 2346;

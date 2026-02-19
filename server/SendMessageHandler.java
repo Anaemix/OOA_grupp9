@@ -16,24 +16,44 @@ import com.google.gson.JsonObject;
 import java.time.Instant;
 import java.util.Set;
 
+/**
+ * This http handler class handles sending messages to a chat.
+ * This class and its functions are considered deprecated. Instead use {@link server.WebsocketHandler WebsocketHandler} connection for sending messages. 
+ * @author Henning
+ * @version 0.1
+ */
+@Deprecated
 public class SendMessageHandler implements HttpHandler {
+    /** The handler used for database persistence. */
     private final DatabaseHandler db;
+    /** Gson object used for deserialization of json. */
     private static Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
-    
+
+    /**
+     * Constructor 
+     * @param databaseHandler handles the database connection, writing/reading.
+     */
+    @Deprecated
     public SendMessageHandler(DatabaseHandler databaseHandler) {
         this.db = databaseHandler;
     }
 
     /**
+     * **************************************<br>
+     * ************Deprecated**************<br>
+     * **{@link server.WebsocketHandler use WebsocketHandler instead}**<br>
+     * **************************************<br>
      * Http handler for sending messages to a chat
-     * 
+     * Never Responds with any data. <br>
+     * Will set statuscodes: <br>
+     * -200 OK <br>
+     * -400 Bad Request, if an exception was raised in the json parsing or addition of the user in the database <br>
+     * -405 Method Not Allowed, if POST request method was not used <br>
      * Example:
-     * curl --header "Content-type: application/json" \
-     * --request POST \
-     * --data '{"chat": "Hennings Privata chat", "message": {"text": "Hämligt meddelande :)", "user": {"name": "Coola Henning", "id": "1"}, "time": "2026-02-04T11:14:05Z"}}' \
-     * http://localhost:2345/send_message
-     * 
+     * curl --header "Content-type: application/json" --request POST -data '{"chat": "Hennings Privata chat", "message": {"text": "Not so secret message :)", "user": {"name": "Coola Henning"}, "time": "2026-02-04T11:14:05Z"}}' http://fjenhh.me:2345/send_message
+     * @param httpexchange http exchange to be handled by the function
      */
+    @Deprecated
     public void handle(HttpExchange httpexchange) throws IOException {
         if (httpexchange.getRequestMethod().equalsIgnoreCase("POST")) {
             String response = "0";
