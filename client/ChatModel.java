@@ -1,5 +1,6 @@
 package client;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,14 @@ public class ChatModel {
     public ChatModel() {
         this.messages = new ArrayList<>();
         this.listeners = new ArrayList<>();
-        this.chats = new ArrayList<>();
+        this.connectionHandler = //new ConnectionHandler("localhost", "2345");
+        new ConnectionHandler("FJENHH.me", "2345");
+        setUser(new User(0, "DefaultUser")); // Initialize with a default user or provide a method to set the user
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+        setChats(ConnectionHandler.Get_Chats(user));
     }
 
     public void setChats(ArrayList<String> chats) {
@@ -75,12 +83,21 @@ public class ChatModel {
     /**
      * Adds a single message to the model.
      */
-    public void addMessage(String message) {
-        if (message != null && !message.trim().isEmpty()) {
-            String trimmed = message.trim();
+    public void addMessage(Message message, Chat chat) {
+        if (message != null && !message.toString().trim().isEmpty()) {
+            System.out.println("sending message" + message);
+            String trimmed = message.toString().trim();
             messages.add(trimmed);
-            notifyMessageAdded(trimmed);
+            ConnectionHandler.Send_Message(message, chat.getChatName());
+            Chat updatedChat = ConnectionHandler.Get_Chat(chat.getChatName());
+            notifyMessageAdded(updatedChat);
         }
+    }
+
+    public Message createMessage(String m) {
+        Instant timestamp = Instant.now();
+        User currentUser = this.user;
+        return new Message(m, timestamp, currentUser);
     }
 
     /**
@@ -131,9 +148,9 @@ public class ChatModel {
         }
     }
 
-    private void notifyMessageAdded(String message) {
+    private void notifyMessageAdded(Chat chat) {
         for (ChatModelListener listener : listeners) {
-            listener.onMessageAdded(message);
+            listener.onMessageAdded(chat);
         }
     }
 

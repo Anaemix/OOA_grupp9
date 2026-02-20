@@ -1,14 +1,10 @@
 package client;
 
 import java.awt.EventQueue;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 /**
  * ChatController - The Controller component of the MVC pattern.
@@ -17,7 +13,6 @@ import javax.swing.JOptionPane;
 public class ChatController {
     private final ChatModel model;
     private final ChatView view;
-    private User loggedInUser;
 
     public ChatController(ChatModel model, ChatView view) {
         this.model = model;
@@ -36,6 +31,14 @@ public class ChatController {
             view.createAndShowUi();
             attachEventListeners();
 
+        // Mock-chattar för test (anropas EFTER UI är skapad). Låg i ChatView tidigare
+        ArrayList<String> chats = new ArrayList<>();
+        chats.add("chat1");
+        chats.add("chat2");
+        chats.add("chat3");
+        chats.add("chat4");
+        // chats.add(new Chat("chat4")); //Hur det var när vi hade chatobjekt innan vi bytte till strängar.
+        model.setChats(chats);
         });
     }
 
@@ -49,71 +52,43 @@ public class ChatController {
         view.addClearButtonListener(evt -> handleClearMessages());
         view.addSendImageButtonListener(evt -> handleSendImageMessage());
         view.addAddChatButtonListener(evt -> handleAddChat());
-        view.addWindowCloseListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                handleCloseWindow();
-            }
-        });
-        view.addLoginButtonListener(e -> handleLogin());
-        view.addDisconnectButtonListener(e -> handleDisconnect());
-        view.setChatSelectedCallback(this::handleChatSelected);
+        view.addLoginButtonListener(evt -> handleLogin());
+        view.addChatSelectionListener(evt -> handleChatSelection(new Chat(evt.getActionCommand())));
     }
-
-
-    private void handleChatSelected(String chatName) {
-        model.setCurrentChat(chatName);
-        ConnectionHandler.Connect(loggedInUser, chatName);
-        Chat chat = ConnectionHandler.Get_Chat(chatName);
-        List<String> formatted = new ArrayList<>();
-        for(Message msg : chat.getMessages()) {
-            formatted.add(msg.getUser().getName() + "\n" 
-            + msg.getText());
-        }
-        model.loadMessages(formatted);
-    }
-
-
-
-    private void handleLogin() {
-        String username = view.getLoginFieldText();
-        if(username != null && !username.trim().isEmpty()) {
-            loggedInUser = new User(0, username);
-            model.setCurrentUser(loggedInUser);
-            ArrayList<String> chats = ConnectionHandler.Get_Chats(loggedInUser);
-            model.setChats(chats);
-        } 
-    }
-
-
-    private void handleDisconnect() {
-            ConnectionHandler.Disconnect(loggedInUser, model.getCurrentChat());
-            loggedInUser = null;
-            model.clearMessages();
-            model.setChats(new ArrayList<>());
-    }
-
-
 
     private void handleAddChat() {
     String chatName = view.getAddChatText();
+
     if (chatName != null && !chatName.trim().isEmpty()) {
         model.addChat(chatName);
         view.clearAddChatField();
+        }
     }
-}
+
+    private void handleChatSelection(Chat chatName) {
+        Chat currentChat = ConnectionHandler.Get_Chat(chatName.getChatName());
+        System.out.println("Chat selected: " + currentChat.getChatName());
+        model.setCurrentChat(currentChat);
+    }
+
+
+    private void handleLogin() {
+        String username = view.getLoginText();
+        if (username != null && !username.trim().isEmpty()) {
+            model.setUser(new User(username));
+        }
+    }
 
     /**
      * Handles the send message action.
      */
     private void handleSendMessage() {
         String text = view.getInputText();
-        if (text != null && !text.trim().isEmpty()
-            && loggedInUser != null && model.getCurrentChat() != null) {
-        ConnectionHandler.Send_Message(new Message(text, Instant.now(), loggedInUser), model.getCurrentChat());
-        model.addMessage(loggedInUser.getName() + "\n" 
-            + text);
-        view.clearInputField();
+        Message message = model.createMessage(text);
+        Chat chat = model.getCurrentChat();
+        if (text != null && !text.trim().isEmpty()) {
+            model.addMessage(message, chat);
+            view.clearInputField();
         }
     }
 
@@ -136,15 +111,6 @@ public class ChatController {
             "Use it as your chat history"
         );
         model.loadMessages(mockMessages);
-    }
-
-
-    private void handleCloseWindow() { 
-        int option = JOptionPane.showConfirmDialog(view.getFrame(), "Are you sure you want to exit", "Exit", 
-            JOptionPane.YES_NO_OPTION);
-            if(option == JOptionPane.YES_OPTION) {
-                System.exit(0);
-            }
     }
 
     /**
