@@ -73,7 +73,7 @@ public class ChatController {
         model.loadMessages(formatted);
     }
 
-    
+
 
     private void handleLogin() {
         String username = view.getLoginFieldText();
@@ -110,9 +110,10 @@ public class ChatController {
         String text = view.getInputText();
         if (text != null && !text.trim().isEmpty()
             && loggedInUser != null && model.getCurrentChat() != null) {
-            model.addMessage(text);
-            view.clearInputField();
-            ConnectionHandler.Send_Message(new Message(text, Instant.now(), loggedInUser), model.getCurrentChat());
+        ConnectionHandler.Send_Message(new Message(text, Instant.now(), loggedInUser), model.getCurrentChat());
+        model.addMessage(loggedInUser.getName() + "\n" 
+            + text);
+        view.clearInputField();
         }
     }
 

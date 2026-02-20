@@ -200,7 +200,8 @@ public class ChatView implements ChatModelListener {
 
     @Override
     public void onChatSelected(String chat) {
-
+        displayModel.clear();
+        frame.setTitle("Chat " + chat);
     }
 
     // --- Getters and listener registration ---
