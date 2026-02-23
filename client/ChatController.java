@@ -1,10 +1,17 @@
 package client;
 
 import java.awt.EventQueue;
+import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFileChooser;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import server.Gson_InstantTypeAdapter;
 
 /**
  * ChatController - The Controller component of the MVC pattern.
@@ -13,12 +20,44 @@ import javax.swing.JFileChooser;
 public class ChatController {
     private final ChatModel model;
     private final ChatView view;
+    private ClientWebSocketHandler webSocket;
 
     public ChatController(ChatModel model, ChatView view) {
         this.model = model;
         this.view = view;
+        initializeWebSocket();
     }
 
+    public void initializeWebSocket() {
+        try {
+            URI uri = new URI("ws://fjenhh.me:2346");
+            webSocket = new ClientWebSocketHandler(uri);
+            webSocket.addListener(new WebSocketEventListener() {
+                @Override
+                public void onMessageReceived(String message) {
+                    handleIncomingMessage(message);
+                }
+                
+                @Override
+                public void onConnected() {
+                    System.out.println("WebSocket connected");
+                }
+                
+                @Override
+                public void onDisconnected() {
+                    System.out.println("WebSocket disconnected");
+                }
+                
+                @Override
+                public void onError(String error) {
+                    System.out.println("WebSocket error: " + error);
+                }
+            });
+            webSocket.connectBlocking();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     /**
      * Initializes the controller by setting up the view and attaching event listeners.
      */
@@ -65,9 +104,23 @@ public class ChatController {
         }
     }
 
+
+    private void handleIncomingMessage(String message) {
+        view.onMessageReceived(message);
+    // Parse JSON and update model
+    //Message msg = gson.fromJson(message, Message.class);
+    //model.addMessage(msg, model.getCurrentChat());
+    }
+    public void sendMessage(Message message) {
+    //    String json = gson.toJson(message);
+    //    webSocket.sendMessageToServer(json);
+    }
+
+
     private void handleChatSelection(Chat chatName) {
         Chat currentChat = ConnectionHandler.Get_Chat(chatName.getChatName());
         System.out.println("Chat selected: " + currentChat.getChatName());
+        webSocket.sendMessageToServer("{\"t\":\"enterchat\", \"chat\":\"" + chatName.getChatName() + "\"}");
         model.setCurrentChat(currentChat);
     }
 
@@ -75,6 +128,8 @@ public class ChatController {
     private void handleLogin() {
         String username = view.getLoginText();
         if (username != null && !username.trim().isEmpty()) {
+            System.err.println("Attempting to connect with username: " + username);
+            webSocket.sendMessageToServer("{\"t\":\"connect\", \"user\":\"" + username + "\"}");
             model.setUser(new User(username));
         }
     }
@@ -87,7 +142,10 @@ public class ChatController {
         Message message = model.createMessage(text);
         Chat chat = model.getCurrentChat();
         if (text != null && !text.trim().isEmpty()) {
-            model.addMessage(message, chat);
+            Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
+            
+            webSocket.sendMessageToServer("{\"t\":\"send\", \"chat\":\"" + chat.getChatName() + "\", \"message\":" + gson.toJson(message, Message.class) + "}");
+            //model.addMessage(message, chat);
             view.clearInputField();
         }
     }
