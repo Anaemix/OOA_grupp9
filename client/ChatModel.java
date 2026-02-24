@@ -92,7 +92,7 @@ public class ChatModel {
     public Message createMessage(String m) {
         Instant timestamp = Instant.now();
         User currentUser = this.user;
-        return new Message(m, timestamp, currentUser);
+        return new Message(m, timestamp, currentUser, false);
     }
 
     /**
