@@ -1,10 +1,15 @@
 package client;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class ChatGUI {
@@ -125,11 +130,53 @@ public class ChatGUI {
     }
 
     public void addMessage(Message message) {
-        JLabel messageLabel = new JLabel(formatMessage(message));
+        JLabel messageLabel;
+        
+        if (message.isImage() != null && message.isImage()) {
+            messageLabel = createImageLabel(message);
+        } else {
+            messageLabel = new JLabel(formatMessage(message));
+        }
+        
         messagePanel.add(messageLabel);
         messagePanel.revalidate();
         messagePanel.repaint();
     }
+
+    private JLabel createImageLabel(Message message) {
+        try {
+            byte[] imageBytes = Base64.getDecoder().decode(message.getText());
+            BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
+
+            if (img != null) {
+                int maxDim = 300;
+                int width = img.getWidth();
+                int height = img.getHeight();
+
+                if (width > maxDim || height > maxDim) {
+                    double scale = Math.min((double) (maxDim / width), (double) (maxDim / height));
+                    width = (int) (width * scale);
+                    height = (int) (height * scale);
+                }
+            Image scaledImage = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd HH:mm")
+                .withZone(ZoneId.of("GMT+1"));
+
+            JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+            imageLabel.setToolTipText("Image from " + message.getUser().getName() + " | "
+                + formatter.format(message.getTime()));
+
+                return imageLabel;
+            }
+
+        } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return new JLabel("Image could not be loaded");
+    }
+
 
     private String formatMessage(Message message) {
         DateTimeFormatter formatter = DateTimeFormatter
