@@ -54,7 +54,8 @@ public class DatabaseHandler {
                                      "timestamp INTEGER NOT NULL," +
                                      "sender TEXT NOT NULL, " +
                                      "chatname TEXT NOT NULL," + 
-                                     "content TEXT, " +
+                                     "content TEXT," +
+                                     "isImage INTEGER," +
                                      "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                                      "FOREIGN KEY (sender) REFERENCES users(name), " +
                                      "FOREIGN KEY (chatname) REFERENCES chats(name))";
@@ -131,7 +132,7 @@ public class DatabaseHandler {
             e.printStackTrace();
         }
     }
-    //This method adds a user to chat if they are not part of the chat already
+    //This method adds a user to chat or creates a new chat 
     public void addUserToChat(User user, String chatname) {
         String adduser = "INSERT OR IGNORE INTO chat_users (username,chatname) VALUES (?,?)"; 
 
@@ -149,7 +150,7 @@ public class DatabaseHandler {
     //This method adds a message to the messages table 
     public void addMessage(String chatName, Message message) {        
         
-        try(PreparedStatement insertmessage = connection.prepareStatement("INSERT INTO messages (timestamp, content, sender, chatname) VALUES (?,?,?,?)")) {
+        try(PreparedStatement insertmessage = connection.prepareStatement("INSERT INTO messages (timestamp, content, sender, chatname, isImage) VALUES (?,?,?,?,?)")) {
             
             long formattedTime = message.getTime().getEpochSecond();
             // insertmessage.setInt(1,null);
@@ -157,6 +158,7 @@ public class DatabaseHandler {
             insertmessage.setString(2, message.getText());
             insertmessage.setString(3, message.getUser().getName());
             insertmessage.setString(4, chatName);
+            insertmessage.setBoolean(5, message.isImage());
             insertmessage.executeUpdate();
             System.out.println("Message added!");        
 
@@ -178,7 +180,8 @@ public class DatabaseHandler {
                 long timestamp = rs.getLong("timestamp");
                 String message = rs.getString("content");
                 String sender = rs.getString("sender");
-                messagelist.add((new Message(message, Instant.ofEpochSecond(timestamp) ,new User(sender), false)));
+                boolean isImage = rs.getBoolean("isImage");
+                messagelist.add((new Message(message, Instant.ofEpochSecond(timestamp) ,new User(sender), isImage)));
             }
 
         }
@@ -189,7 +192,7 @@ public class DatabaseHandler {
     }
 
 
-    // a private method used to add messages to a chat object 
+    // a private method used to get messages from a specific chat 
     private void getMessagesInChat(Chat chat, String chatname) {
         String getMessages = "SELECT * FROM messages WHERE chatname = (?)";
 
@@ -201,7 +204,8 @@ public class DatabaseHandler {
                 long timestamp = rs.getInt("timestamp");
                 String message = rs.getString("content");
                 String sender = rs.getString("sender");
-                chat.addMessage(new Message(message, Instant.ofEpochSecond(timestamp) ,new User(sender), false));
+                boolean isImage = rs.getBoolean("isImage");
+                chat.addMessage(new Message(message, Instant.ofEpochSecond(timestamp) ,new User(sender), isImage));
                 
             }
         }
