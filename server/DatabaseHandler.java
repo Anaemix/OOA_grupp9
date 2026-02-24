@@ -7,6 +7,30 @@ import client.User;
 import client.Message;
 import client.Chat;
 
+/**
+ * Handles all database operations for the chat server.
+ * <p>
+ * This class manages the connection to a local SQLite database and provides
+ * methods for creating tables, inserting and retrieving users, chats,
+ * and messages.
+ * </p>
+ *
+ * <p>
+ * The database schema consists of four tables:
+ * <ul>
+ *   <li><b>users</b> – Stores registered usernames.</li>
+ *   <li><b>chats</b> – Stores available chat rooms.</li>
+ *   <li><b>messages</b> – Stores messages sent in chats.</li>
+ *   <li><b>chat_users</b> – Maps users to the chats they participate in.</li>
+ * </ul>
+ * </p>
+ *
+ * Foreign key constraints are enabled to maintain referential integrity.
+ *
+ * @author Najib
+ * @version 1.0
+ */
+
 public class DatabaseHandler {
 
     private Connection connection;
@@ -15,7 +39,13 @@ public class DatabaseHandler {
         connectToDatabase();
     }
   
-    // Connect to SQLite database (database.db file)
+    /**
+    * Establishes a connection to the SQLite database file.
+    * <p>
+    * Enables Write-Ahead Logging (WAL) mode and sets a busy timeout.
+    * Also ensures foreign key constraints are active and required tables exist.
+    * </p>
+    */
     private void connectToDatabase() {
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:database.db?journal_mode=WAL&busy_timeout=5000");
@@ -28,6 +58,12 @@ public class DatabaseHandler {
         }
     }
 
+    /**
+    * Enables SQLite foreign key constraints.
+    * <p>
+    * This ensures referential integrity between related tables.
+    * </p>
+    */
     private void enableForeignkeys() {
 
         String statement = "PRAGMA foreign_keys = ON;";
@@ -39,7 +75,18 @@ public class DatabaseHandler {
         }
     }
 
-    // Create tables if they do not exist
+    /**
+    * Creates all required database tables if they do not already exist.
+    * <p>
+    * Tables created:
+    * <ul>
+    *   <li>users</li>
+    *   <li>chats</li>
+    *   <li>messages</li>
+    *   <li>chat_users</li>
+    * </ul>
+    * </p>
+    */
     private void createTablesIfNotExist() {
         
         
@@ -54,7 +101,8 @@ public class DatabaseHandler {
                                      "timestamp INTEGER NOT NULL," +
                                      "sender TEXT NOT NULL, " +
                                      "chatname TEXT NOT NULL," + 
-                                     "content TEXT, " +
+                                     "content TEXT," +
+                                     "isImage INTEGER DEFAULT 0," +
                                      "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                                      "FOREIGN KEY (sender) REFERENCES users(name), " +
                                      "FOREIGN KEY (chatname) REFERENCES chats(name))";
@@ -71,6 +119,11 @@ public class DatabaseHandler {
             stmt.execute(createUsersTable);
             stmt.execute(createChatsTable);
             stmt.execute(createMessagesTable);
+            try {
+                stmt.execute("ALTER TABLE messages ADD COLUMN isImage INT DEFAULT 0"); 
+            } catch (SQLException e) {
+                System.out.println("Column 'isImage' already exists in 'messages' table.");
+            }
             stmt.execute(createChatUsersTable);
               
             System.out.println("Tables are created or already exist.");
@@ -79,7 +132,12 @@ public class DatabaseHandler {
         }
     }
 
-    // Close the database connection
+    /**
+    * Closes the active database connection.
+    * <p>
+    * Should be called when the server shuts down to release resources.
+    * </p>
+    */
     public void closeConnection() {
         try {
             if (connection != null) {
@@ -91,7 +149,12 @@ public class DatabaseHandler {
         }
     }
 
-    // This method removes a user from the chatusers table 
+    /**
+    * Removes a user from a specific chat.
+    *
+    * @param user     the user to remove
+    * @param chatName the name of the chat
+    */
     public void removeUserFromChat(User user, String chatName) {
         String remove = "DELETE FROM chat_users WHERE username = ? AND chatname = (?)";
         try(PreparedStatement pstmt = connection.prepareStatement(remove)) {
@@ -106,7 +169,14 @@ public class DatabaseHandler {
         }
     }
 
-    //This method adds a user to the users table
+    /**
+    * Adds a user to the database.
+    * <p>
+    * If the user already exists, the operation is ignored.
+    * </p>
+    *
+    * @param user the user to add
+    */
     public void addUser(User user) {
         
         String adduser = "INSERT OR IGNORE INTO users (name) VALUES (?)";
@@ -119,7 +189,14 @@ public class DatabaseHandler {
         }
     }
 
-    //This method adds a chat to the chats table
+    /**
+    * Adds a new chat to the database.
+    * <p>
+    * If the chat already exists, the operation is ignored.
+    * </p>
+    *
+    * @param chatname the name of the chat
+    */
     public void addChat(String chatname) {
         String addchat = "INSERT OR IGNORE INTO chats (name) VALUES (?)";
         try (PreparedStatement pstmt = connection.prepareStatement(addchat)) {
@@ -131,7 +208,16 @@ public class DatabaseHandler {
             e.printStackTrace();
         }
     }
-    //This method adds a user to chat if they are not part of the chat already
+
+    /**
+    * Adds a user to a specific chat.
+    * <p>
+    * If the user is already a member of the chat, the operation is ignored.
+    * </p>
+    *
+    * @param user     the user to add
+    * @param chatname the name of the chat
+    */
     public void addUserToChat(User user, String chatname) {
         String adduser = "INSERT OR IGNORE INTO chat_users (username,chatname) VALUES (?,?)"; 
 
@@ -146,10 +232,16 @@ public class DatabaseHandler {
             e.printStackTrace();
         }
     }
-    //This method adds a message to the messages table 
+    /**
+    * Inserts a message into the database.
+    *
+    * @param chatName the name of the chat where the message was sent
+    * @param message  the message object containing content, sender, timestamp,
+    *                 and image flag
+    */
     public void addMessage(String chatName, Message message) {        
-        
-        try(PreparedStatement insertmessage = connection.prepareStatement("INSERT INTO messages (timestamp, content, sender, chatname) VALUES (?,?,?,?)")) {
+
+        try(PreparedStatement insertmessage = connection.prepareStatement("INSERT INTO messages (timestamp, content, sender, chatname, isImage) VALUES (?,?,?,?,?)")) {
             
             long formattedTime = message.getTime().getEpochSecond();
             // insertmessage.setInt(1,null);
@@ -157,6 +249,7 @@ public class DatabaseHandler {
             insertmessage.setString(2, message.getText());
             insertmessage.setString(3, message.getUser().getName());
             insertmessage.setString(4, chatName);
+            insertmessage.setBoolean(5, message.isImage());
             insertmessage.executeUpdate();
             System.out.println("Message added!");        
 
@@ -165,7 +258,14 @@ public class DatabaseHandler {
         }
     } 
     
-    //This method returns an array of all messages sent to a chat after a specific timestamp
+    /**
+    * Retrieves all messages from a specific chat that were sent
+    * after a given timestamp.
+    *
+    * @param chatname the name of the chat
+    * @param time     only messages sent after this time are returned
+    * @return a list of messages ordered by timestamp (ascending)
+    */
     public ArrayList<Message> getMessages(String chatname, Instant time){
 
         ArrayList<Message> messagelist = new ArrayList<Message>();
@@ -178,7 +278,8 @@ public class DatabaseHandler {
                 long timestamp = rs.getLong("timestamp");
                 String message = rs.getString("content");
                 String sender = rs.getString("sender");
-                messagelist.add((new Message(message, Instant.ofEpochSecond(timestamp) ,new User(sender), false)));
+                boolean isImage = rs.getBoolean("isImage");
+                messagelist.add((new Message(message, Instant.ofEpochSecond(timestamp) ,new User(sender), isImage)));
             }
 
         }
@@ -189,7 +290,13 @@ public class DatabaseHandler {
     }
 
 
-    // a private method used to add messages to a chat object 
+    /**
+    * Retrieves all messages belonging to a specific chat and
+    * adds them to the provided Chat object.
+    *
+    * @param chat     the chat object to populate
+    * @param chatname the name of the chat
+    */ 
     private void getMessagesInChat(Chat chat, String chatname) {
         String getMessages = "SELECT * FROM messages WHERE chatname = (?)";
 
@@ -201,7 +308,8 @@ public class DatabaseHandler {
                 long timestamp = rs.getInt("timestamp");
                 String message = rs.getString("content");
                 String sender = rs.getString("sender");
-                chat.addMessage(new Message(message, Instant.ofEpochSecond(timestamp) ,new User(sender), false));
+                boolean isImage = rs.getBoolean("isImage");
+                chat.addMessage(new Message(message, Instant.ofEpochSecond(timestamp) ,new User(sender), isImage));
                 
             }
         }
@@ -211,7 +319,19 @@ public class DatabaseHandler {
         }
 
     }
-    //This method returns a chat object
+    /**
+    * Retrieves a complete Chat object from the database.
+    * <p>
+    * The returned Chat includes:
+    * <ul>
+    *   <li>All users in the chat</li>
+    *   <li>All messages in the chat</li>
+    * </ul>
+    * </p>
+    *
+    * @param chatname the name of the chat
+    * @return a fully populated Chat object
+    */
     public Chat getChat(String chatname){
     
         Chat chat = new Chat(chatname);
@@ -232,8 +352,13 @@ public class DatabaseHandler {
         getMessagesInChat(chat, chatname);
         return chat;
     }
-    //This method returns an arraylist of allchats that a user is a part of
-    public  ArrayList<String> getAllChats(User user){
+    /**
+    * Retrieves the names of all chats that a user participates in.
+    *
+    * @param user the user whose chats should be retrieved
+    * @return a list of chat names
+    */
+       public  ArrayList<String> getAllChats(User user){
         ArrayList<String> list = new ArrayList<>();
         String getchatname = "SELECT chatname FROM chat_users where username = (?)";
 
@@ -261,8 +386,4 @@ public class DatabaseHandler {
     
 }
 
-
-// a user should be able to create a username or login
-// a user should be able to join or create a chat
-// no duplicate users or duplicate chats
 

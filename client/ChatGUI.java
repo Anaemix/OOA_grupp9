@@ -51,21 +51,22 @@ public class ChatGUI {
         userPanel.setBorder(BorderFactory.createTitledBorder("Users"));
 
         for(Message message : chat.getMessages()) {
+            JLabel messageLabel;
             
-            DateTimeFormatter formatter = DateTimeFormatter
-            .ofPattern("MMM dd HH:mm")
-            .withZone(ZoneId.of("GMT+1"));
-
-            JLabel messageLabel = new JLabel(" " + message.toString() + "   ( " + message.getUser().getName() + " │ " + formatter.format(message.getTime()) + " )");
+            if(message.isImage() != null && message.isImage()) {
+                messageLabel = createImageLabel(message);
+            } else {
+                messageLabel = new JLabel(formatMessage(message));
+            }
+            messagePanel.add(messageLabel);
+            }
             //System.out.println(message.toString());
             //JButton chatButton = new JButton(message.toString());
             //System.out.println(chatButton.getText());
 
 
             //gridBag.setConstraints(messageLabel, c);
-            messagePanel.add(messageLabel);
 
-        }
 
         Set<String> addedUsers = new HashSet<>(); // maybe for the database
         for(User user : chat.getUsers()) {
@@ -111,13 +112,14 @@ public class ChatGUI {
 
     public void Update(Chat chat) {
         for(Message message : chat.getMessages()) {
-            JLabel messageLabel = new JLabel(formatMessage(message));
+            JLabel messageLabel;
+            if(message.isImage() != null && message.isImage()) {
+                messageLabel = createImageLabel(message);
+            } else { 
+                    messageLabel = new JLabel(formatMessage(message));
+                }
             messagePanel.add(messageLabel);
-            System.out.println(message.toString());
-            JButton chatButton = new JButton("hejhej");
-            System.out.println(chatButton.getText());
-            messagePanel.add(chatButton);
-        }
+            }
 
         Set<String> addedUsers = new HashSet<>(); // maybe for the database
         for(User user : chat.getUsers()) {
@@ -125,9 +127,9 @@ public class ChatGUI {
                 JLabel userLabel = new JLabel(user.toString());
                 userPanel.add(userLabel);
             }
-        
         }
-    }
+        }
+    
 
     public void addMessage(Message message) {
         JLabel messageLabel;
@@ -154,9 +156,9 @@ public class ChatGUI {
                 int height = img.getHeight();
 
                 if (width > maxDim || height > maxDim) {
-                    double scale = Math.min((double) (maxDim / width), (double) (maxDim / height));
-                    width = (int) (width * scale);
-                    height = (int) (height * scale);
+                    double scaling = Math.min((double) maxDim / width, (double) maxDim / height);
+                    width = (int) (width * scaling);
+                    height = (int) (height * scaling);
                 }
             Image scaledImage = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 

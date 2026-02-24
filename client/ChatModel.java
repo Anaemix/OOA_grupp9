@@ -15,12 +15,12 @@ public class ChatModel {
     private ArrayList<String> chats = new ArrayList<>();
     private Chat currentChat;
     private User user;
+    private ConnectionHandler connectionHandler;
 
     public ChatModel() {
         this.messages = new ArrayList<>();
         this.listeners = new ArrayList<>();
-        this.connectionHandler = //new ConnectionHandler("localhost", "2345");
-        new ConnectionHandler("FJENHH.me", "2345");
+        this.connectionHandler = new ConnectionHandler("FJENHH.me", "2345"); //new ConnectionHandler("localhost", "2345"); 
         setUser(new User("DefaultUser")); // Initialize with a default user or provide a method to set the user
     }
 

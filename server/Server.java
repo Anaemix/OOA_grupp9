@@ -31,6 +31,8 @@ public class Server {
         server.createContext("/connect", new ConnectHandler(db));
         server.createContext("/disconnect", new DisconnectHandler(db));
         server.createContext("/send_message", new SendMessageHandler(db));
+        server.createContext("/post_image", new PostImageHandler(db));
+        server.createContext("/get_image", new GetImageHandler(db));
         server.setExecutor(null);
         server.start();
         System.out.println(String.format("Http Server up at port: %d", http_port));

@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.time.Instant;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.URI;
@@ -14,6 +15,11 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.util.ArrayList;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 
 /*     public static ArrayList<String> Get_Chats(User user) {    
 -> returnar lista av alla chatter som User är med i
@@ -110,6 +116,39 @@ public class ConnectionHandler {
 		MakePostRequest(url, gson.toJson(payload));
 	}	
 
+	public static boolean Get_Image(String hash) {
+		String url = String.format("%s/%s", Create_url("get_image"), hash);
+		
+		ServerResponse response = MakeGetRequest(url);
+
+		try {
+			byte[] imageBytes = Base64.getDecoder().decode(response.getBody());
+			Files.write(Paths.get("resources", hash + ".png"), imageBytes);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public static void Send_Image(String image_path) {
+		try {
+
+			byte[] imageBytes = Files.readAllBytes(Paths.get(image_path));
+			String hash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(imageBytes));
+			String url = String.format("%s/%s", Create_url("post_image"), hash);
+
+			JsonObject payload = new JsonObject();
+
+
+			String imageString = Base64.getEncoder().encodeToString(imageBytes);
+			payload.addProperty("image", imageString);
+
+			MakePostRequest(url, gson.toJson(payload));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	private static String Create_url(String path) {
 		return String.format("http://%s:%s/%s", ip_address, port, path);
 	}
