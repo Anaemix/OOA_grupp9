@@ -6,6 +6,13 @@
     "java.project.referencedLibraries": [
         "libs\\gson-2.13.2.jar",
         "libs\\sqlite-jdbc-3.51.1.0.jar",
+<<<<<<< HEAD
         "libs/**/*.jar"
+=======
+        "libs\\Java-WebSocket-1.6.0.jar",
+        "libs\\slf4j-api-2.0.9.jar",
+        "libs\\slf4j-nop-2.0.17.jar",
+        "libs/*.jar"
+>>>>>>> 1b44d2b949d9b13789861d930f5dfbff55ee21fd
     ]
 }

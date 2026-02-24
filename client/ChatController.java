@@ -1,10 +1,19 @@
 package client;
 
 import java.awt.EventQueue;
+import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import server.Gson_InstantTypeAdapter;
 
 /**
  * ChatController - The Controller component of the MVC pattern.
@@ -13,12 +22,44 @@ import javax.swing.JFileChooser;
 public class ChatController {
     private final ChatModel model;
     private final ChatView view;
+    private ClientWebSocketHandler webSocket;
 
     public ChatController(ChatModel model, ChatView view) {
         this.model = model;
         this.view = view;
+        initializeWebSocket();
     }
 
+    public void initializeWebSocket() {
+        try {
+            URI uri = new URI("ws://fjenhh.me:2346");
+            webSocket = new ClientWebSocketHandler(uri);
+            webSocket.addListener(new WebSocketEventListener() {
+                @Override
+                public void onMessageReceived(String message) {
+                    handleIncomingMessage(message);
+                }
+                
+                @Override
+                public void onConnected() {
+                    System.out.println("▪ws   ◀─▶ Connection established with address: " + webSocket.getLocalSocketAddress());
+                }
+                
+                @Override
+                public void onDisconnected() {
+                    System.out.println("WebSocket disconnected");
+                }
+                
+                @Override
+                public void onError(String error) {
+                    System.out.println("WebSocket error: " + error);
+                }
+            });
+            webSocket.connectBlocking();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     /**
      * Initializes the controller by setting up the view and attaching event listeners.
      */
@@ -65,9 +106,24 @@ public class ChatController {
         }
     }
 
+
+    private void handleIncomingMessage(String message) {
+        view.onMessageReceived(message);
+    // Parse JSON and update model
+    //Message msg = gson.fromJson(message, Message.class);
+    //model.addMessage(msg, model.getCurrentChat());
+    }
+    public void sendMessage(Message message) {
+    //    String json = gson.toJson(message);
+    //    webSocket.sendMessageToServer(json);
+    }
+
+
     private void handleChatSelection(Chat chatName) {
         Chat currentChat = ConnectionHandler.Get_Chat(chatName.getChatName());
-        System.out.println("Chat selected: " + currentChat.getChatName());
+        String jsonMessage = "{\"t\":\"enterchat\", \"chat\":\"" + chatName.getChatName() + "\"}";
+        webSocket.sendMessageToServer(jsonMessage);
+        System.out.println("▪ws   ──▶ type: enterchat, Body: " + jsonMessage);
         model.setCurrentChat(currentChat);
     }
 
@@ -75,6 +131,9 @@ public class ChatController {
     private void handleLogin() {
         String username = view.getLoginText();
         if (username != null && !username.trim().isEmpty()) {
+            String jsonMessage = "{\"t\":\"connect\", \"user\":\"" + username + "\"}";
+            webSocket.sendMessageToServer(jsonMessage);
+            System.err.println("▪ws   ──▶ type: connect, Body: " + jsonMessage);
             model.setUser(new User(username));
         }
     }
@@ -87,7 +146,11 @@ public class ChatController {
         Message message = model.createMessage(text);
         Chat chat = model.getCurrentChat();
         if (text != null && !text.trim().isEmpty()) {
-            model.addMessage(message, chat);
+            Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
+            String jsonMessage = "{\"t\":\"send\", \"chat\":\"" + chat.getChatName() + "\", \"message\":" + gson.toJson(message, Message.class) + "}";
+            webSocket.sendMessageToServer(jsonMessage);
+            System.out.println("▪ws   ──▶ type: send, Body: " + jsonMessage);
+            //model.addMessage(message, chat);
             view.clearInputField();
         }
     }
@@ -96,8 +159,37 @@ public class ChatController {
      * Handles the send message action.
      */
     private void handleSendImageMessage() {
-        JFileChooser j = new JFileChooser(".");
-        j.showSaveDialog(null);
+        JFileChooser file = new JFileChooser();
+        file.setFileFilter(new FileNameExtensionFilter("Images (PNG, JPG, GIF)", "png", "jpg", "jpeg", "gif"));
+
+        int result = file.showOpenDialog(null);
+        if (result == JFileChooser.APPROVE_OPTION) {
+           File selectedFile = file.getSelectedFile();
+           
+           long maxSize = 5*1024*1024;
+           if (selectedFile.length() > maxSize) {
+                JOptionPane.showMessageDialog(null, "Image must be smaller than 5 MB", "File too large", JOptionPane.ERROR_MESSAGE);
+                return;
+           }
+
+           try {
+                byte[] fileBytes = Files.readAllBytes(selectedFile.toPath());
+                String base64Image = Base64.getEncoder().encodeToString(fileBytes);
+
+                Message message = model.createImageMessage(base64Image);
+                Chat chat = model.getCurrentChat();
+
+                Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter())
+                    .create();
+                    String jsonMessage = "{\"t\":\"send\", \"chat\":\"" + chat.getChatName() + "\", \"message\":" + gson.toJson(message, Message.class) + "}";
+                    webSocket.sendMessageToServer(jsonMessage);
+                    System.out.println("▪ws   ──▶ type: send (image), Body: " + jsonMessage.length());
+           } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Failed to read image file.", "Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+           }
+        }
     }
 
     /**

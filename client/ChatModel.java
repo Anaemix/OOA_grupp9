@@ -14,7 +14,6 @@ public class ChatModel {
     private final List<ChatModelListener> listeners;
     private ArrayList<String> chats = new ArrayList<>();
     private Chat currentChat;
-    private ConnectionHandler connectionHandler;
     private User user;
 
     public ChatModel() {
@@ -92,7 +91,14 @@ public class ChatModel {
     public Message createMessage(String m) {
         Instant timestamp = Instant.now();
         User currentUser = this.user;
-        return new Message(m, timestamp, currentUser);
+        return new Message(m, timestamp, currentUser, false);
+    }
+
+
+    public Message createImageMessage(String base64Data) {
+        Instant timestamp = Instant.now();
+        User currentUser = this.user;
+        return new Message(base64Data, timestamp, currentUser, true);
     }
 
     /**

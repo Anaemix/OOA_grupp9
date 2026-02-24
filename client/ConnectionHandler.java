@@ -59,8 +59,6 @@ public class ConnectionHandler {
 		ArrayList<String> output = new ArrayList<>();
 		ServerResponse response = MakeGetRequest(url);
 
-		System.out.println("Response received for Get_Chats:");
-
 		if(response.getStatusCode() == 200) {
 			Type listArrayType = new TypeToken<ArrayList<String>>() {}.getType();
 			output = gson.fromJson(response.getBody(), listArrayType);
@@ -124,12 +122,12 @@ public class ConnectionHandler {
 			.uri(URI.create(url))
 			.GET()
 			.build();
-		System.out.println(String.format("+---------http request sent------------\n|Requesting: %s", url));
+		System.out.println(String.format("┌http ──▶ Requesting: %s", url));
 		try {
 			HttpResponse<String> httpresponse = client.send(request, HttpResponse.BodyHandlers.ofString());
 			response.setBody(httpresponse.body());
 			response.setStatusCode(httpresponse.statusCode());
-			System.out.println(String.format("|>Statuscode: %d\n|>Body: %s", response.getStatusCode(), response.getBody()));
+			System.out.println(String.format("└http ◀── Statuscode: %d, Body: %s", response.getStatusCode(), response.getBody().length() <= 150 ? response.getBody() : response.getBody().substring(0,149)));
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -146,12 +144,12 @@ public class ConnectionHandler {
 			.header("Content-Type", "application/json")
 			.POST(BodyPublishers.ofString(body))
 			.build();
-		System.out.println(String.format("+---------http request sent------------\n|Requesting: %s", url));
+		System.out.println(String.format("┌http ──▶ Requesting: %s, Body: %s", url, body));
 		try {
 			HttpResponse<String> httpresponse = client.send(request, HttpResponse.BodyHandlers.ofString());
 			response.setBody(httpresponse.body());
 			response.setStatusCode(httpresponse.statusCode());
-			System.out.println(String.format("|>Statuscode: %d\n|>Body: %s", response.getStatusCode(), response.getBody()));
+			System.out.println(String.format("└http ◀── %d, Body: %s", response.getStatusCode(), response.getBody()));
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}

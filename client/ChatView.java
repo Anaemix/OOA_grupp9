@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
@@ -18,6 +19,12 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
+import server.Gson_InstantTypeAdapter;
 
 /**
  * ChatView - The View component of the MVC pattern.
@@ -162,7 +169,14 @@ public class ChatView implements ChatModelListener {
         }
     }
 
-
+    @Override
+    public void onMessageReceived(String message){
+        System.out.println("Received message: " + message);
+        Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
+        JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
+        Message messageObj = gson.fromJson(jsonObject.get("message"), Message.class);
+        chatGUI.addMessage(messageObj);
+    }
 
     @Override
     public void onChatsLoaded(ArrayList<String> chats) {
