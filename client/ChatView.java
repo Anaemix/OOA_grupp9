@@ -171,10 +171,11 @@ public class ChatView implements ChatModelListener {
 
     @Override
     public void onMessageReceived(String message){
+        System.out.println("Received message: " + message);
         Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
         JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
         Message messageObj = gson.fromJson(jsonObject.get("message"), Message.class);
-        displayModel.addElement(messageObj.getText());
+        chatGUI.addMessage(messageObj);
     }
 
     @Override

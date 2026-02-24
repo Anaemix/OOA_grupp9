@@ -46,7 +46,7 @@ public class ChatGUI {
         userPanel.setBorder(BorderFactory.createTitledBorder("Users"));
 
         for(Message message : chat.getMessages()) {
-
+            
             DateTimeFormatter formatter = DateTimeFormatter
             .ofPattern("MMM dd HH:mm")
             .withZone(ZoneId.of("GMT+1"));
@@ -106,7 +106,7 @@ public class ChatGUI {
 
     public void Update(Chat chat) {
         for(Message message : chat.getMessages()) {
-            JLabel messageLabel = new JLabel(message.toString());
+            JLabel messageLabel = new JLabel(formatMessage(message));
             messagePanel.add(messageLabel);
             System.out.println(message.toString());
             JButton chatButton = new JButton("hejhej");
@@ -122,5 +122,19 @@ public class ChatGUI {
             }
         
         }
+    }
+
+    public void addMessage(Message message) {
+        JLabel messageLabel = new JLabel(formatMessage(message));
+        messagePanel.add(messageLabel);
+        messagePanel.revalidate();
+        messagePanel.repaint();
+    }
+
+    private String formatMessage(Message message) {
+        DateTimeFormatter formatter = DateTimeFormatter
+            .ofPattern("MMM dd HH:mm")
+            .withZone(ZoneId.of("GMT+1"));
+        return " " + message.toString() + "   ( " + message.getUser().getName() + " │ " + formatter.format(message.getTime()) + " )";
     }
 }
