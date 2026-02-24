@@ -40,7 +40,7 @@ public class ChatController {
                 
                 @Override
                 public void onConnected() {
-                    System.out.println("WebSocket connected");
+                    System.out.println("▪ws   ◀─▶ Connection established with address: " + webSocket.getLocalSocketAddress());
                 }
                 
                 @Override
@@ -119,8 +119,9 @@ public class ChatController {
 
     private void handleChatSelection(Chat chatName) {
         Chat currentChat = ConnectionHandler.Get_Chat(chatName.getChatName());
-        System.out.println("Chat selected: " + currentChat.getChatName());
-        webSocket.sendMessageToServer("{\"t\":\"enterchat\", \"chat\":\"" + chatName.getChatName() + "\"}");
+        String jsonMessage = "{\"t\":\"enterchat\", \"chat\":\"" + chatName.getChatName() + "\"}";
+        webSocket.sendMessageToServer(jsonMessage);
+        System.out.println("▪ws   ──▶ type: enterchat, Body: " + jsonMessage);
         model.setCurrentChat(currentChat);
     }
 
@@ -128,8 +129,9 @@ public class ChatController {
     private void handleLogin() {
         String username = view.getLoginText();
         if (username != null && !username.trim().isEmpty()) {
-            System.err.println("Attempting to connect with username: " + username);
-            webSocket.sendMessageToServer("{\"t\":\"connect\", \"user\":\"" + username + "\"}");
+            String jsonMessage = "{\"t\":\"connect\", \"user\":\"" + username + "\"}";
+            webSocket.sendMessageToServer(jsonMessage);
+            System.err.println("▪ws   ──▶ type: connect, Body: " + jsonMessage);
             model.setUser(new User(username));
         }
     }
@@ -143,8 +145,9 @@ public class ChatController {
         Chat chat = model.getCurrentChat();
         if (text != null && !text.trim().isEmpty()) {
             Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
-            
-            webSocket.sendMessageToServer("{\"t\":\"send\", \"chat\":\"" + chat.getChatName() + "\", \"message\":" + gson.toJson(message, Message.class) + "}");
+            String jsonMessage = "{\"t\":\"send\", \"chat\":\"" + chat.getChatName() + "\", \"message\":" + gson.toJson(message, Message.class) + "}";
+            webSocket.sendMessageToServer(jsonMessage);
+            System.out.println("▪ws   ──▶ type: send, Body: " + jsonMessage);
             //model.addMessage(message, chat);
             view.clearInputField();
         }

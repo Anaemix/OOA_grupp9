@@ -15,13 +15,12 @@ public class ClientWebSocketHandler extends WebSocketClient {
     
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        System.out.println("Connected to server");
         listeners.forEach(WebSocketEventListener::onConnected);
     }
     
     @Override
     public void onMessage(String message) {
-        System.out.println("Message received: " + message);
+        System.out.println("▪ws   ◀── type: incoming message, Body: " + message);
         // Trigger event for all listeners
         listeners.forEach(listener -> listener.onMessageReceived(message));
     }
