@@ -47,6 +47,7 @@ public class ChatView implements ChatModelListener {
     private JScrollPane chatListScrollPane;
     private JPanel leftPanel;
     private JButton loginButton;
+    private JButton disconnectButton;
     private JTextField loginField;
     private JPanel chatPanel;
     private ChatGUI chatGUI;
@@ -97,9 +98,13 @@ public class ChatView implements ChatModelListener {
         loginField = new JTextField();
         loginField.setPreferredSize(new Dimension(100, 28));
         loginButton = new JButton("Login");
-        JPanel login = new JPanel(new GridLayout(1, 2));
+        disconnectButton = new JButton("Disconnect");
+        JPanel login = new JPanel(new GridLayout(2, 2));
         login.add(loginField);
         login.add(loginButton);
+        login.add(new JLabel());
+        login.add(disconnectButton);
+
  
         leftPanel = new JPanel();
         leftPanel.setLayout(new BorderLayout());
@@ -298,6 +303,10 @@ public class ChatView implements ChatModelListener {
     public void addLoginButtonListener(ActionListener listener) {
         // This method can be implemented to add a listener to the login button when it's created
         loginButton.addActionListener(listener);
+    }
+
+    public void addDisconnectButtonListener(ActionListener listener) {
+        disconnectButton.addActionListener(listener);
     }
 
     /**

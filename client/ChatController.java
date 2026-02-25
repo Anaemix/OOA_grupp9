@@ -100,6 +100,7 @@ public class ChatController {
         view.addAddChatButtonListener(evt -> handleAddChat());
         view.addLoginButtonListener(evt -> handleLogin());
         view.addChatSelectionListener(evt -> handleChatSelection(new Chat(evt.getActionCommand())));
+        view.addDisconnectButtonListener(evt -> handleDisconnect());
     }
 
     private void handleAddChat() {
@@ -141,6 +142,12 @@ public class ChatController {
             System.err.println("▪ws   ──▶ type: connect, Body: " + jsonMessage);
             model.setUser(new User(username));
         }
+    }
+
+    private void handleDisconnect() {
+        ConnectionHandler.Disconnect(model.getUser(), model.getCurrentChat().getChatName());
+        model.setChats(ConnectionHandler.Get_Chats(model.getUser()));
+        model.setCurrentChat(null);
     }
 
     /**
