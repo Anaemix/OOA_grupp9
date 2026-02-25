@@ -125,10 +125,10 @@ public class ChatGUI {
         JLabel msgLabel;
         JLabel messageSpacer = new JLabel(" ");
 
-        JLabel userTimeLabel = new JLabel(" ( " + message.getUser().getName() + " │ " + formatter.format(message.getTime()) + " )");
+        JLabel userTimeLabel = new JLabel(" ( " + message.getUser().getName() 
+            + " │ " + formatter.format(message.getTime()) + " )");
 
         if (message.isImage()) {
-            msgLabel = new JLabel();
             try {
                 byte[] imageBytes = Files.readAllBytes(Path.of("resources", message.getText()));
                 BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
@@ -168,12 +168,13 @@ public class ChatGUI {
     
 
     public void addMessage(Message message) {
-        ArrayList<JLabel> messageLabel;
+        JPanel messageObject;
         
-        messageLabel = createMessagePanel(message);
-        for (JLabel m : messageLabel) {
-            messagePanel.add(m);
-        }
+        messageObject = createMessagePanel(message);
+        
+        messagePanel.add(messageObject);
+
+        chatScroll.getVerticalScrollBar().setValue(chatScroll.getVerticalScrollBar().getMaximum());
         messagePanel.revalidate();
         messagePanel.repaint();
         chatScroll.getVerticalScrollBar().setValue(chatScroll.getVerticalScrollBar().getMaximum());
