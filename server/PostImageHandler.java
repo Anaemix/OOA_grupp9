@@ -54,7 +54,7 @@ public class PostImageHandler implements HttpHandler {
             
 
             try {
-                String imagename = httpexchange.getRequestURI().getPath().replace("/post_image/", "");
+                String imagename = httpexchange.getRequestURI().getPath().replace("/post_image/", "") + ".png";
                 InputStream is = httpexchange.getRequestBody();
                 String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
                 String imageString = gson.fromJson(body, JsonObject.class).get("image").getAsString();

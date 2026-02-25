@@ -56,7 +56,7 @@ public class ChatView implements ChatModelListener {
     /**
      * Creates and displays the UI.
      */
-    public void createAndShowUi() {
+    public void createAndShowUi(String inituser) {
         frame = new JFrame("Chat Client");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -100,6 +100,7 @@ public class ChatView implements ChatModelListener {
         loginButton = new JButton("Login");
         disconnectButton = new JButton("Disconnect");
         JPanel login = new JPanel(new GridLayout(2, 2));
+        loginField.setText(inituser);
         login.add(loginField);
         login.add(loginButton);
         login.add(new JLabel());

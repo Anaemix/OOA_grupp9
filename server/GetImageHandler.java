@@ -52,7 +52,7 @@ public class GetImageHandler implements HttpHandler {
     public void handle(HttpExchange httpexchange) throws IOException {
         if (httpexchange.getRequestMethod().equalsIgnoreCase("GET")) {
             try {
-                String image_name = httpexchange.getRequestURI().getPath().replace("/get_image/", "");
+                String image_name = httpexchange.getRequestURI().getPath().replace("/get_image/", "") + ".png";
                 Path image_path = Paths.get("resources", image_name);
                 if (!Files.exists(image_path)) {
                     httpexchange.sendResponseHeaders(404, -1);
