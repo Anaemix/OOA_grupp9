@@ -128,8 +128,9 @@ public class ChatGUI {
         if (message.isImage()) {
             messageLabel = new JLabel();
             try {
-                byte[] imageBytes = Base64.getDecoder().decode(Files.readString(Path.of("resources", message.getText())));
+                byte[] imageBytes = Files.readAllBytes(Path.of("resources", message.getText()));
                 BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
+                
 
                 if (img != null) {
                     int maxDim = 300;
@@ -164,13 +165,9 @@ public class ChatGUI {
     
 
     public void addMessage(Message message) {
-        JLabel messageLabel;
+        JPanel messageLabel;
         
-        if (message.isImage() != null && message.isImage()) {
-            messageLabel = createImageLabel(message);
-        } else {
-            messageLabel = new JLabel(formatMessage(message));
-        }
+        messageLabel = createMessagePanel(message);
         
         messagePanel.add(messageLabel);
         messagePanel.revalidate();
