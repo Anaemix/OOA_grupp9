@@ -95,10 +95,10 @@ public class ChatModel {
     }
 
 
-    public Message createImageMessage(String base64Data) {
+    public Message createImageMessage(String hash) {
         Instant timestamp = Instant.now();
         User currentUser = this.user;
-        return new Message(base64Data, timestamp, currentUser, true);
+        return new Message(hash, timestamp, currentUser, true);
     }
 
     /**
