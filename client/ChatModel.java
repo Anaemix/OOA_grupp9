@@ -48,6 +48,10 @@ public class ChatModel {
         return currentChat;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     public void addChat(String chat) {
         if (chat != null && user != null && user.getName() != null) {
             System.out.println("Adding chat: " + chat);
