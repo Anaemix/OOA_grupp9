@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +20,7 @@ public class ChatGUI {
     private JPanel userPanel;
     private JScrollPane chatScroll;
     private JScrollPane userScroll;
+    Component glue = Box.createVerticalGlue();
 
     public ChatGUI() {
         mainPanel = new JPanel(new BorderLayout());
@@ -36,10 +38,9 @@ public class ChatGUI {
 
         //this.messagePanel = new JPanel(gridBag);
 
-        this.messagePanel = new JPanel();
+        this.messagePanel = new JPanel(new GridBagLayout());
         BoxLayout messageLayout = new BoxLayout(messagePanel, BoxLayout.Y_AXIS);
         messagePanel.setLayout(messageLayout);
-
 
         mainPanel = new JPanel(layout);
 
@@ -50,24 +51,18 @@ public class ChatGUI {
         //messagePanel.setBorder(BorderFactory.createTitledBorder("Messages"));
         userPanel.setBorder(BorderFactory.createTitledBorder("Users"));
 
+
         for(Message message : chat.getMessages()) {
-            JPanel messageLabel;
-            
-            //if(message.isImage() != null && message.isImage()) {
-            //    messageLabel = createImageLabel(message);
-            //} else {
-            //    messageLabel = new JLabel(formatMessage(message));
-            //}
+            ArrayList<JLabel> messageLabel;
+
 
             messageLabel = createMessagePanel(message);
-            messagePanel.add(messageLabel);
+
+            for (JLabel m : messageLabel) {
+                messagePanel.add(m);
             }
-            //System.out.println(message.toString());
-            //JButton chatButton = new JButton(message.toString());
-            //System.out.println(chatButton.getText());
 
-
-            //gridBag.setConstraints(messageLabel, c);
+            }
 
 
         Set<String> addedUsers = new HashSet<>(); // maybe for the database
@@ -87,7 +82,14 @@ public class ChatGUI {
         spacerGbc.fill = GridBagConstraints.VERTICAL;
         spacerGbc.gridwidth = GridBagConstraints.REMAINDER;
 
-        messagePanel.add(spacer, spacerGbc);
+        //messagePanel.add(spacer, spacerGbc);
+        //messagePanel.add(Box.createVerticalGlue());
+        //gbc.gridy = counter;
+        //gbc.weighty = 1.0;
+        //messagePanel.add(new JPanel(), gbc);
+
+        //addDynamicPanel();
+
         userPanel.add(spacer,spacerGbc);
 
 
@@ -115,19 +117,18 @@ public class ChatGUI {
         return mainPanel;
     }
 
-    public JPanel createMessagePanel(Message message) {
+    public ArrayList<JLabel> createMessagePanel(Message message) {
         DateTimeFormatter formatter = DateTimeFormatter
         .ofPattern("MMM dd HH:mm")
         .withZone(ZoneId.of("GMT+1"));
 
-        JPanel messagePanel = new JPanel(new BorderLayout());
-        JLabel messageLabel = new JLabel();
+        JLabel msgLabel;
         JLabel messageSpacer = new JLabel(" ");
 
         JLabel userTimeLabel = new JLabel(" ( " + message.getUser().getName() + " │ " + formatter.format(message.getTime()) + " )");
 
         if (message.isImage()) {
-            messageLabel = new JLabel();
+            msgLabel = new JLabel();
             try {
                 byte[] imageBytes = Files.readAllBytes(Path.of("resources", message.getText()));
                 BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
@@ -145,8 +146,8 @@ public class ChatGUI {
                     }
                     Image scaledImage = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 
-                    messageLabel = new JLabel(new ImageIcon(scaledImage));
-                    messageLabel.setToolTipText("Image from " + message.getUser().getName() + " | " + formatter.format(message.getTime()));
+                    msgLabel = new JLabel(new ImageIcon(scaledImage));
+                    msgLabel.setToolTipText("Image from " + message.getUser().getName() + " | " + formatter.format(message.getTime()));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -154,27 +155,28 @@ public class ChatGUI {
 
         }
         else {
-            messageLabel = new JLabel(" " + message.getText());
+            msgLabel = new JLabel(" " + message.getText());
         }
 
-        
-        messagePanel.add(userTimeLabel, BorderLayout.NORTH);
-        messagePanel.add(messageLabel, BorderLayout.WEST);
-        messagePanel.add(messageSpacer, BorderLayout.SOUTH);
-        return messagePanel;
+        ArrayList<JLabel> list = new ArrayList<>();
+        list.add(userTimeLabel);
+        list.add(msgLabel);
+        list.add(messageSpacer);
+
+        return list;
     }
     
 
     public void addMessage(Message message) {
-        JPanel messageLabel;
+        ArrayList<JLabel> messageLabel;
         
         messageLabel = createMessagePanel(message);
-        
-        messagePanel.add(messageLabel);
-
-        chatScroll.getVerticalScrollBar().setValue(chatScroll.getVerticalScrollBar().getMaximum());
+        for (JLabel m : messageLabel) {
+            messagePanel.add(m);
+        }
         messagePanel.revalidate();
         messagePanel.repaint();
+        chatScroll.getVerticalScrollBar().setValue(chatScroll.getVerticalScrollBar().getMaximum());
     }
 
     private JLabel createImageLabel(Message message) {
