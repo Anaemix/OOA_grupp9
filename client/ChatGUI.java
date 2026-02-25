@@ -53,15 +53,10 @@ public class ChatGUI {
 
 
         for(Message message : chat.getMessages()) {
-            ArrayList<JLabel> messageLabel;
-
-
-            messageLabel = createMessagePanel(message);
-
-            for (JLabel m : messageLabel) {
-                messagePanel.add(m);
-            }
-
+            JPanel messageContainer;
+            
+            messageContainer = createMessagePanel(message);
+            messagePanel.add(messageContainer);
             }
 
 
@@ -117,12 +112,12 @@ public class ChatGUI {
         return mainPanel;
     }
 
-    public ArrayList<JLabel> createMessagePanel(Message message) {
+    public JPanel createMessagePanel(Message message) {
         DateTimeFormatter formatter = DateTimeFormatter
         .ofPattern("MMM dd HH:mm")
         .withZone(ZoneId.of("GMT+1"));
-
-        JLabel msgLabel;
+        JPanel msgPanel = new JPanel();
+        JLabel msgLabel = new JLabel();
         JLabel messageSpacer = new JLabel(" ");
 
         JLabel userTimeLabel = new JLabel(" ( " + message.getUser().getName() 
@@ -158,12 +153,11 @@ public class ChatGUI {
             msgLabel = new JLabel(" " + message.getText());
         }
 
-        ArrayList<JLabel> list = new ArrayList<>();
-        list.add(userTimeLabel);
-        list.add(msgLabel);
-        list.add(messageSpacer);
+        msgPanel.add(userTimeLabel);
+        msgPanel.add(msgLabel);
+        msgPanel.add(messageSpacer);
 
-        return list;
+        return msgPanel;
     }
     
 
@@ -174,10 +168,13 @@ public class ChatGUI {
         
         messagePanel.add(messageObject);
 
+    
+    messagePanel.revalidate();
+    messagePanel.repaint();
+    SwingUtilities.invokeLater(() -> {
         chatScroll.getVerticalScrollBar().setValue(chatScroll.getVerticalScrollBar().getMaximum());
-        messagePanel.revalidate();
-        messagePanel.repaint();
-        chatScroll.getVerticalScrollBar().setValue(chatScroll.getVerticalScrollBar().getMaximum());
+    });
+    
     }
 
     private JLabel createImageLabel(Message message) {
