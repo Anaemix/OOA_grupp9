@@ -21,7 +21,7 @@ public class ChatModel {
         this.messages = new ArrayList<>();
         this.listeners = new ArrayList<>();
         this.connectionHandler = new ConnectionHandler("FJENHH.me", "2345"); //new ConnectionHandler("localhost", "2345"); 
-        setUser(new User("DefaultUser")); // Initialize with a default user or provide a method to set the user
+        //setUser(new User("DefaultUser")); // Initialize with a default user or provide a method to set the user
     }
 
     public void setUser(User user) {

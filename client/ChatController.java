@@ -4,12 +4,15 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -69,23 +72,23 @@ public class ChatController {
     /**
      * Initializes the controller by setting up the view and attaching event listeners.
      */
-    public void initialize() {
+    public void initialize(String inituser) {
         // Register the View as a listener to the Model (Observer pattern)
         model.addListener(view);
         
         // Create and show the UI on the Event Dispatch Thread
         EventQueue.invokeLater(() -> {
-            view.createAndShowUi();
+            view.createAndShowUi(inituser);
             attachEventListeners();
 
         // Mock-chattar för test (anropas EFTER UI är skapad). Låg i ChatView tidigare
-        ArrayList<String> chats = new ArrayList<>();
-        chats.add("chat1");
-        chats.add("chat2");
-        chats.add("chat3");
-        chats.add("chat4");
+        //ArrayList<String> chats = new ArrayList<>();
+        //chats.add("chat1");
+        //chats.add("chat2");
+        //chats.add("chat3");
+        //chats.add("chat4");
         // chats.add(new Chat("chat4")); //Hur det var när vi hade chatobjekt innan vi bytte till strängar.
-        model.setChats(chats);
+        //model.setChats(chats);
         });
     }
 
@@ -141,6 +144,9 @@ public class ChatController {
             webSocket.sendMessageToServer(jsonMessage);
             System.err.println("▪ws   ──▶ type: connect, Body: " + jsonMessage);
             model.setUser(new User(username));
+            try {Files.writeString(Path.of(".user"), username, StandardCharsets.UTF_8);}
+            catch (IOException e) {e.printStackTrace();}
+            
         }
     }
 
@@ -223,9 +229,17 @@ public class ChatController {
      * Main entry point for the application.
      */
     public static void main(String[] args) {
+        String inituser = "DefaultUser";
+        try {
+            if (Files.exists(Path.of(".user")))
+                inituser = Files.readString(Path.of(".user"), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         ChatModel model = new ChatModel();
         ChatView view = new ChatView();
         ChatController controller = new ChatController(model, view);
-        controller.initialize();
+        controller.initialize(inituser);
+        model.setUser(new User(inituser));
     }
 }
