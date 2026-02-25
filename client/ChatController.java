@@ -41,7 +41,8 @@ public class ChatController {
             webSocket = new ClientWebSocketHandler(uri);
             webSocket.addListener(new WebSocketEventListener() {
                 @Override
-                public void onMessageReceived(String message) {
+                public void onMessageReceived(Message message) {
+
                     handleIncomingMessage(message);
                 }
                 
@@ -113,7 +114,7 @@ public class ChatController {
     }
 
 
-    private void handleIncomingMessage(String message) {
+    private void handleIncomingMessage(Message message) {
         view.onMessageReceived(message);
     // Parse JSON and update model
     //Message msg = gson.fromJson(message, Message.class);
@@ -185,10 +186,11 @@ public class ChatController {
            }
 
            try {
-                byte[] fileBytes = Files.readAllBytes(selectedFile.toPath());
-                String base64Image = Base64.getEncoder().encodeToString(fileBytes);
+                String hash = ConnectionHandler.Send_Image(selectedFile.getAbsolutePath());
+                //byte[] fileBytes = Files.readAllBytes(selectedFile.toPath());
+                //String base64Image = Base64.getEncoder().encodeToString(fileBytes);
 
-                Message message = model.createImageMessage(base64Image);
+                Message message = model.createImageMessage(hash);
                 Chat chat = model.getCurrentChat();
 
                 Gson gson = new GsonBuilder()
@@ -197,7 +199,7 @@ public class ChatController {
                     String jsonMessage = "{\"t\":\"send\", \"chat\":\"" + chat.getChatName() + "\", \"message\":" + gson.toJson(message, Message.class) + "}";
                     webSocket.sendMessageToServer(jsonMessage);
                     System.out.println("▪ws   ──▶ type: send (image), Body: " + jsonMessage.length());
-           } catch (IOException e) {
+           } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Failed to read image file.", "Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
            }

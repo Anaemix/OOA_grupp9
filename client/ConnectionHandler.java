@@ -16,10 +16,14 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.util.ArrayList;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.security.MessageDigest;
 import java.util.HexFormat;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
 
 /*     public static ArrayList<String> Get_Chats(User user) {    
 -> returnar lista av alla chatter som User är med i
@@ -83,6 +87,13 @@ public class ConnectionHandler {
 			output = gson.fromJson(response.getBody(), Chat.class);
 		}
 		
+		//Verify that all images in messages are downloaded
+		for(Message message : output.getMessages()) {
+			if(message.isImage()) {
+				Get_Image(message.getText());
+			}
+		}
+
 		return output;
 	}
 
@@ -116,19 +127,21 @@ public class ConnectionHandler {
 		MakePostRequest(url, gson.toJson(payload));
 	}	
 
-	public static boolean Get_Image(String hash) {
+	public static void Get_Image(String hash) {
+		if (Files.exists(Path.of("resources", hash))) {
+			return;
+		}
 		String url = String.format("%s/%s", Create_url("get_image"), hash);
 		
 		ServerResponse response = MakeGetRequest(url);
-
+		
 		try {
 			byte[] imageBytes = Base64.getDecoder().decode(response.getBody());
-			Files.write(Paths.get("resources", hash + ".png"), imageBytes);
-			return true;
+			Files.write(Paths.get("resources", hash), imageBytes);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return false;
 		}
+		return;
 	}
 
 	public static String Send_Image(String image_path) {

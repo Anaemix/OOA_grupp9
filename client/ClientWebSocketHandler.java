@@ -2,7 +2,15 @@ package client;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
+import server.Gson_InstantTypeAdapter;
+
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +29,15 @@ public class ClientWebSocketHandler extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         System.out.println("▪ws   ◀── type: incoming message, Body: " + message);
-        // Trigger event for all listeners
-        listeners.forEach(listener -> listener.onMessageReceived(message));
+
+
+        Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
+        JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
+        Message messageObj = gson.fromJson(jsonObject.get("message"), Message.class);
+        if (messageObj.isImage()) {
+            ConnectionHandler.Get_Image(messageObj.getText());
+        }
+        listeners.forEach(listener -> listener.onMessageReceived(messageObj));
     }
     
     @Override
