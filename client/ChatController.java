@@ -41,7 +41,8 @@ public class ChatController {
             webSocket = new ClientWebSocketHandler(uri);
             webSocket.addListener(new WebSocketEventListener() {
                 @Override
-                public void onMessageReceived(String message) {
+                public void onMessageReceived(Message message) {
+
                     handleIncomingMessage(message);
                 }
                 
@@ -112,7 +113,7 @@ public class ChatController {
     }
 
 
-    private void handleIncomingMessage(String message) {
+    private void handleIncomingMessage(Message message) {
         view.onMessageReceived(message);
     // Parse JSON and update model
     //Message msg = gson.fromJson(message, Message.class);
