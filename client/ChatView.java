@@ -72,7 +72,7 @@ public class ChatView implements ChatModelListener {
 
         // Input area
         inputField = new JTextField();
-        inputField.setPreferredSize(new Dimension(200, 28));
+        inputField.setPreferredSize(new Dimension(500, 28));
 
         // Buttons
         sendButton = new JButton("Send");
@@ -87,6 +87,7 @@ public class ChatView implements ChatModelListener {
         controls.add(sendImageButton);
         controls.add(loadButton);
         controls.add(clearButton);
+         
 
         addChatField = new JTextField();
         addChatField.setPreferredSize(new Dimension(100, 28));
@@ -129,10 +130,13 @@ public class ChatView implements ChatModelListener {
 
         //chatGUI = new ChatGUI();
         //scrollPane.add(chatGUI.getMainPanel());
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(chatPanel, BorderLayout.CENTER);
+        centerPanel.add(controls, BorderLayout.SOUTH);
+
 
         // Assemble frame
-        frame.add(chatPanel, BorderLayout.CENTER);
-        frame.add(controls, BorderLayout.SOUTH);
+        frame.add(centerPanel, BorderLayout.CENTER);
         frame.add(leftPanel, BorderLayout.WEST);
         //frame.add(chatUsers, BorderLayout.EAST);
         frame.pack();

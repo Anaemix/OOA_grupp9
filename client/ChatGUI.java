@@ -46,7 +46,6 @@ public class ChatGUI {
         userPanel = new JPanel();
         BoxLayout boxLayout = new BoxLayout(userPanel, BoxLayout.Y_AXIS);
         userPanel.setLayout(boxLayout);
-        userPanel.setPreferredSize(new Dimension(100, 0));
 
         //messagePanel.setBorder(BorderFactory.createTitledBorder("Messages"));
         userPanel.setBorder(BorderFactory.createTitledBorder("Users"));
@@ -97,8 +96,10 @@ public class ChatGUI {
         chatScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         userScroll = new JScrollPane(userPanel);
+        userScroll.setPreferredSize(new Dimension(120, 0));
         userScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         userScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    
 
         mainPanel.add(chatScroll, BorderLayout.CENTER);
         mainPanel.add(userScroll, BorderLayout.EAST);
@@ -170,6 +171,8 @@ public class ChatGUI {
         messageLabel = createMessagePanel(message);
         
         messagePanel.add(messageLabel);
+
+        chatScroll.getVerticalScrollBar().setValue(chatScroll.getVerticalScrollBar().getMaximum());
         messagePanel.revalidate();
         messagePanel.repaint();
     }
