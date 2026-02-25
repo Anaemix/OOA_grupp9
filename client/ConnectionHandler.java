@@ -131,7 +131,7 @@ public class ConnectionHandler {
 		}
 	}
 
-	public static void Send_Image(String image_path) {
+	public static String Send_Image(String image_path) {
 		try {
 
 			byte[] imageBytes = Files.readAllBytes(Paths.get(image_path));
@@ -145,8 +145,10 @@ public class ConnectionHandler {
 			payload.addProperty("image", imageString);
 
 			MakePostRequest(url, gson.toJson(payload));
+			return hash;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return null;
 		}
 	}
 	private static String Create_url(String path) {
