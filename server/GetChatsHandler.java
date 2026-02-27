@@ -9,11 +9,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.time.Instant;
 
+
 /**
  * This http handler class handles the requesting of chatlists that a user is a member in.
- * 
- * @author Henning
- * @version 0.1
  */
 public class GetChatsHandler implements HttpHandler {
     /** The handler used for database persistence. */
@@ -28,8 +26,9 @@ public class GetChatsHandler implements HttpHandler {
     public GetChatsHandler(DatabaseHandler databaseHandler) {
         this.db = databaseHandler;
     }
+
     /**
-     * This handles the http request. 
+     * This handles the get_chats http request. 
      * Responds with a serialized json string of an array of Strings with the chat names that the user is part of
      * Will respond with statuscodes <br>
      * -200 OK <br>

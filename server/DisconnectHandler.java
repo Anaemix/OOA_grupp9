@@ -1,23 +1,19 @@
 package server;
 
 import client.User;
-
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-
 import java.time.Instant;
+
+
 /**
  * This http handler class handles the leaving/disconnecting from a chat room.
- * 
- * @author Henning
- * @version 0.1
  */
 public class DisconnectHandler implements HttpHandler {
     /** The handler used for database persistence. */
@@ -34,40 +30,12 @@ public class DisconnectHandler implements HttpHandler {
     }
 
     /**
-     * This handles the http request depending on the Request type. 
+     * This handles the disconnect http request. 
      * 
      * Will respond with statuscodes will never return any data to the requestee. <br>
      * -200 OK <br>
      * -400 Bad Request, if an exception was raised in the json parsing or addition of the user in the database <br>
      * -405 Method Not Allowed, if POST request method was not used <br>
-     * Http request requires a POST request containing a json of the following format <br>
-     * {
-     *   "$schema": "https://json-schema.org/draft-07/schema",
-     *   "type": "object",
-     *   "properties": {
-     *   "chat": {
-     *       "type": "string",
-     *       "description": "Name of chat to join"
-     *   },
-     *   "User": {
-     *       "type": "object",
-     *       "description": "User to join the chat",
-     *       "properties": {
-     *       "name": {
-     *           "type": "string",
-     *           "description": "Name of the user"
-     *       }
-     *       },
-     *       "required": [
-     *       "name"
-     *       ]
-     *   }
-     *   },
-     *   "required": [
-     *   "chat",
-     *   "User"
-     *   ]
-     * }
      * @param httpexchange http exchange to be handled by the function
      */
     public void handle(HttpExchange httpexchange) throws IOException {

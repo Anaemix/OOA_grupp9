@@ -9,9 +9,6 @@ import java.util.Set;
 /**
  * Supporting bi directional data structure for storing (user, chat) tuples.
  * Users are unique while chats are not.
- * 
- * @author Henning
- * @version 0.1
  */
 public class UserChatMap {
     /** Main hashmap storing the tuples */

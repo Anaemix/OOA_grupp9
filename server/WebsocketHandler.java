@@ -15,9 +15,6 @@ import java.time.Instant;
 
 /**
  * This class handles the websocket connections to the server.
- * 
- * @author Henning
- * @version 0.1
  */
 public class WebsocketHandler extends WebSocketServer {
     /** Hashmap that maps each connection address to a user to allow for simpler communication in the future */
