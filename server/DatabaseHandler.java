@@ -156,7 +156,6 @@ public class DatabaseHandler {
             pstmt.setString(1, user.getName());
             pstmt.setString(2, chatName);
             pstmt.executeUpdate();
-            System.out.println("user removed from chat");
 
         }
         catch(SQLException e) {
@@ -197,7 +196,6 @@ public class DatabaseHandler {
         try (PreparedStatement pstmt = connection.prepareStatement(addchat)) {
             pstmt.setString(1, chatname);
             pstmt.executeUpdate();
-            System.out.println("chat added to chats table");
         }
         catch (SQLException e) {
             e.printStackTrace();
@@ -246,7 +244,6 @@ public class DatabaseHandler {
             insertmessage.setString(4, chatName);
             insertmessage.setBoolean(5, message.isImage());
             insertmessage.executeUpdate();
-            System.out.println("Message added!");        
 
         }catch(SQLException e){
             e.printStackTrace();

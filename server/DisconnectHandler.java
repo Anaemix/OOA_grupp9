@@ -50,7 +50,8 @@ public class DisconnectHandler implements HttpHandler {
 
                 User user = gson.fromJson(jsonobject.getAsJsonObject("user"), User.class);
                 String chat = jsonobject.get("chat").getAsString();
-
+                
+                System.out.println(String.format("User %s removed from chat %s", user.getName(), chat));
                 db.removeUserFromChat(user, chat);
                 httpexchange.sendResponseHeaders(200, -1);
             } catch (Exception e) {

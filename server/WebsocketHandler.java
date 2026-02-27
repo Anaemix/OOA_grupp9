@@ -107,6 +107,7 @@ public class WebsocketHandler extends WebSocketServer {
 
         Set<String> updateUsers = userChatMap.getUsers(chat);
         //For each connected client, if its corresponding user is in the updateUsers Set, send the message.
+        System.out.println(String.format("Message received in chat %s, forwarding to to %d clients", chat, updateUsers.size()));
         for (WebSocket client : getConnections()) {
             if (updateUsers.contains(connToUsers.get(client.getRemoteSocketAddress())))
                 client.send(SerializedUpdate);

@@ -52,6 +52,7 @@ public class ConnectHandler implements HttpHandler {
                 db.addChat(chat);
                 db.addUserToChat(user, chat);
 
+                System.out.println(String.format("User %s added to chat %s", user.getName(), chat));
                 httpexchange.sendResponseHeaders(200, -1);
             } catch (Exception e) {
                 e.printStackTrace();
