@@ -100,9 +100,6 @@ public class ChatController {
      */
     private void attachEventListeners() {
         view.addSendButtonListener(evt -> handleSendMessage());
-        view.addInputFieldListener(evt -> handleSendMessage());
-        view.addLoadButtonListener(evt -> handleLoadMockMessages());
-        view.addClearButtonListener(evt -> handleClearMessages());
         view.addSendImageButtonListener(evt -> handleSendImageMessage());
         view.addAddChatButtonListener(evt -> handleAddChat());
         view.addLoginButtonListener(evt -> handleLogin());
@@ -213,26 +210,6 @@ public class ChatController {
                 e.printStackTrace();
            }
         }
-    }
-
-    /**
-     * Handles loading mock messages (simulating server data).
-     */
-    private void handleLoadMockMessages() {
-        // Pretend these arrived from the server
-        List<String> mockMessages = Arrays.asList(
-            "Hello there",
-            "This shows an array of strings",
-            "Use it as your chat history"
-        );
-        model.loadMessages(mockMessages);
-    }
-
-    /**
-     * Handles clearing all messages.
-     */
-    private void handleClearMessages() {
-        model.clearMessages();
     }
 
     /**

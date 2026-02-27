@@ -4,12 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -23,6 +25,7 @@ import javax.swing.JTextField;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import java.awt.GridBagConstraints;
 
 import server.Gson_InstantTypeAdapter;
 
@@ -66,28 +69,26 @@ public class ChatView implements ChatModelListener {
         // Chat message list
         //messageList = new JList<>(displayModel);
         chatPanel = new JPanel(new BorderLayout());
-        chatPanel.setPreferredSize(new Dimension(360, 240));
+        chatPanel.setPreferredSize(new Dimension(400, 240));
         chatPanel.setBorder(BorderFactory.createTitledBorder("Messages"));
         //scrollPane.setBorder(BorderFactory.createTitledBorder("Messages"));
 
         // Input area
         inputField = new JTextField();
-        inputField.setPreferredSize(new Dimension(500, 28));
 
         // Buttons
         sendButton = new JButton("Send");
         sendImageButton = new JButton("Send Image");
-        loadButton = new JButton("Load mock array");
-        clearButton = new JButton("Clear");
 
         // Controls panel
-        JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel controls = new JPanel();
+        controls.setLayout(new BoxLayout(controls, BoxLayout.X_AXIS));
+        controls.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         controls.add(inputField);
+        controls.add(Box.createRigidArea(new Dimension(5, 0)));
         controls.add(sendButton);
+        controls.add(Box.createRigidArea(new Dimension(5, 0)));
         controls.add(sendImageButton);
-        controls.add(loadButton);
-        controls.add(clearButton);
-         
 
         addChatField = new JTextField();
         addChatField.setPreferredSize(new Dimension(100, 28));
@@ -164,19 +165,6 @@ public class ChatView implements ChatModelListener {
         //displayModel.addElement(message);
         // Auto-scroll to bottom
         //messageList.ensureIndexIsVisible(displayModel.size() - 1);
-    }
-
-    @Override
-    public void onMessagesCleared() {
-        displayModel.clear();
-    }
-
-    @Override
-    public void onMessagesLoaded(List<String> messages) {
-        displayModel.clear();
-        for (String message : messages) {
-            displayModel.addElement(message);
-        }
     }
 
     @Override
@@ -286,20 +274,6 @@ public class ChatView implements ChatModelListener {
      */
     public void addSendImageButtonListener(ActionListener listener) {
         sendImageButton.addActionListener(listener);
-    }
-
-    /**
-     * Adds an action listener to the load button.
-     */
-    public void addLoadButtonListener(ActionListener listener) {
-        loadButton.addActionListener(listener);
-    }
-
-    /**
-     * Adds an action listener to the clear button.
-     */
-    public void addClearButtonListener(ActionListener listener) {
-        clearButton.addActionListener(listener);
     }
 
     public void addLoginButtonListener(ActionListener listener) {

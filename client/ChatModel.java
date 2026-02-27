@@ -106,25 +106,6 @@ public class ChatModel {
     }
 
     /**
-     * Clears all messages from the model.
-     */
-    public void clearMessages() {
-        messages.clear();
-        notifyMessagesCleared();
-    }
-
-    /**
-     * Loads a list of messages into the model, replacing any existing messages.
-     */
-    public void loadMessages(List<String> newMessages) {
-        messages.clear();
-        if (newMessages != null) {
-            messages.addAll(newMessages);
-        }
-        notifyMessagesLoaded(new ArrayList<>(messages));
-    }
-
-    /**
      * Returns the number of messages in the model.
      */
     public int getMessageCount() {
@@ -156,18 +137,6 @@ public class ChatModel {
     private void notifyMessageAdded(Chat chat) {
         for (ChatModelListener listener : listeners) {
             listener.onMessageAdded(chat);
-        }
-    }
-
-    private void notifyMessagesCleared() {
-        for (ChatModelListener listener : listeners) {
-            listener.onMessagesCleared();
-        }
-    }
-
-    private void notifyMessagesLoaded(List<String> messages) {
-        for (ChatModelListener listener : listeners) {
-            listener.onMessagesLoaded(messages);
         }
     }
 }
