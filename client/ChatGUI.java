@@ -13,6 +13,11 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+/**
+ * Handles the graphical user interface for a chat session.
+ * This class manages the display of chat messages (text and images)
+ * and the list of users in a split-pane view.
+ */
 public class ChatGUI {
     private final JPanel mainPanel;
     private JPanel messagePanel;
@@ -20,29 +25,33 @@ public class ChatGUI {
     private JScrollPane chatScroll;
     private JScrollPane userScroll;
 
+    /**
+     * Constructs a default ChatGUI with an empty border layout.
+     */
     public ChatGUI() {
         mainPanel = new JPanel(new BorderLayout());
     }
     
+    /**
+     * Constructs a ChatGUI populated with data from an existing Chat object.
+     * Initializes layouts, populates message history, and sets up the user list.
+     * * @param chat The Chat object containing message history and user data.
+     */
     public ChatGUI(Chat chat) {
         BorderLayout layout = new BorderLayout();
+        mainPanel = new JPanel(layout);
 
-        this.messagePanel = new JPanel(new GridBagLayout());
+        this.messagePanel = new JPanel();
         BoxLayout messageLayout = new BoxLayout(messagePanel, BoxLayout.Y_AXIS);
         messagePanel.setLayout(messageLayout);
-
-        mainPanel = new JPanel(layout);
 
         userPanel = new JPanel();
         BoxLayout boxLayout = new BoxLayout(userPanel, BoxLayout.Y_AXIS);
         userPanel.setLayout(boxLayout);
-
         userPanel.setBorder(BorderFactory.createTitledBorder("Users"));
-
 
         for(Message message : chat.getMessages()) {
             ArrayList<JLabel> messageLabel;
-
 
             messageLabel = createMessagePanel(message);
 
@@ -54,28 +63,15 @@ public class ChatGUI {
             SwingUtilities.invokeLater(() -> {
                 chatScroll.getVerticalScrollBar().setValue(chatScroll.getVerticalScrollBar().getMaximum());
             });
-
             }
 
-
-        Set<String> addedUsers = new HashSet<>(); // maybe for the database
+        Set<String> addedUsers = new HashSet<>();
         for(User user : chat.getUsers()) {
             if(addedUsers.add(user.getName())) {
                 JLabel userLabel = new JLabel(user.toString());
                 userPanel.add(userLabel);
             }
-        
         }
-
-        JPanel spacer = new JPanel();
-        GridBagConstraints spacerGbc = new GridBagConstraints();
-        spacerGbc.gridx = 0;
-        spacerGbc.gridy = GridBagConstraints.RELATIVE;
-        spacerGbc.weighty = 1.0;
-        spacerGbc.fill = GridBagConstraints.VERTICAL;
-        spacerGbc.gridwidth = GridBagConstraints.REMAINDER;
-
-        userPanel.add(spacer,spacerGbc);
 
         chatScroll = new JScrollPane(messagePanel);
         chatScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -90,11 +86,20 @@ public class ChatGUI {
         mainPanel.add(userScroll, BorderLayout.EAST);
         }
     
-
+    /**
+     * Returns the main container of the GUI.
+     * @return The JPanel containing the entire chat interface.
+     */
     public JPanel getMainPanel() {
         return mainPanel;
     }
 
+    /**
+     * Transforms a Message object into a list of JLabels for display.
+     * Handles timestamp formatting, user identification, and image rendering.
+     * @param message The message data to be converted.
+     * @return An ArrayList of JLabels (header, content, and spacer).
+     */
     public ArrayList<JLabel> createMessagePanel(Message message) {
         DateTimeFormatter formatter = DateTimeFormatter
         .ofPattern("MMM dd HH:mm")
@@ -110,7 +115,6 @@ public class ChatGUI {
             try {
                 byte[] imageBytes = Files.readAllBytes(Path.of("resources", message.getText()));
                 BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
-                
 
                 if (img != null) {
                     int maxDim = 300;
@@ -144,7 +148,11 @@ public class ChatGUI {
         return list;
     }
     
-
+    /**
+     * Adds a new message to the display in real-time.
+     * This method updates the UI components and scrolls to the bottom automatically.
+     * @param message The Message object to be added to the panel.
+     */
     public void addMessage(Message message) {
         ArrayList<JLabel> messageLabel;
         
