@@ -119,11 +119,6 @@ public class DatabaseHandler {
             stmt.execute(createUsersTable);
             stmt.execute(createChatsTable);
             stmt.execute(createMessagesTable);
-            try {
-                stmt.execute("ALTER TABLE messages ADD COLUMN isImage INT DEFAULT 0"); 
-            } catch (SQLException e) {
-                System.out.println("Column 'isImage' already exists in 'messages' table.");
-            }
             stmt.execute(createChatUsersTable);
               
             System.out.println("Tables are created or already exist.");
@@ -297,11 +292,11 @@ public class DatabaseHandler {
     * @param chat     the chat object to populate
     * @param chatname the name of the chat
     */ 
-    private void getMessagesInChat(Chat chat, String chatname) {
+    private void getMessagesInChat(Chat chat) {
         String getMessages = "SELECT * FROM messages WHERE chatname = (?)";
 
         try(PreparedStatement pstmt = connection.prepareStatement(getMessages)) {
-            pstmt.setString(1, chatname);
+            pstmt.setString(1, chat.getChatName());
             ResultSet rs = pstmt.executeQuery();
 
             while(rs.next()) {
@@ -349,7 +344,7 @@ public class DatabaseHandler {
         catch(SQLException e){
             e.printStackTrace();
         }
-        getMessagesInChat(chat, chatname);
+        getMessagesInChat(chat);
         return chat;
     }
     /**
