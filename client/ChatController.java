@@ -6,38 +6,37 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import server.Gson_InstantTypeAdapter;
 
 /**
  * ChatController - The Controller component of the MVC pattern.
  * Bridges the Model and View, handling user interactions and updating the model.
  */
 public class ChatController {
+    /** The model in the MVC */
     private final ChatModel model;
+    /** The view in the MVC */
     private final ChatView view;
+    /** Websocket client */
     private ClientWebSocketHandler webSocket;
 
+    /**
+     * Constructor for ChatController. Initializes the model, view, and WebSocket connection.
+     * @param model The ChatModel instance representing the application's data and business logic.
+     * @param view The ChatView instance responsible for the user interface and presentation logic.
+     */
     public ChatController(ChatModel model, ChatView view) {
         this.model = model;
         this.view = view;
         initializeWebSocket();
     }
 
+    /**
+     * Initializes the WebSocket connection to the server and sets up event listeners for WebSocket events.
+     */
     public void initializeWebSocket() {
         try {
             URI uri = new URI("ws://fjenhh.me:2346");
@@ -71,27 +70,17 @@ public class ChatController {
     }
     /**
      * Initializes the controller by setting up the view and attaching event listeners.
+     * @param inituser The initial username to log in with
      */
     public void initialize(String inituser) {
         // Register the View as a listener to the Model (Observer pattern)
         model.addListener(view);
-        String jsonMessage = "{\"t\":\"connect\", \"user\":\"" + inituser + "\"}";
-        webSocket.sendMessageToServer(jsonMessage);
-        System.err.println("▪ws   ──▶ type: connect, Body: " + jsonMessage);
+        webSocket.login(inituser);
         
         // Create and show the UI on the Event Dispatch Thread
         EventQueue.invokeLater(() -> {
             view.createAndShowUi(inituser);
             attachEventListeners();
-
-        // Mock-chattar för test (anropas EFTER UI är skapad). Låg i ChatView tidigare
-        //ArrayList<String> chats = new ArrayList<>();
-        //chats.add("chat1");
-        //chats.add("chat2");
-        //chats.add("chat3");
-        //chats.add("chat4");
-        // chats.add(new Chat("chat4")); //Hur det var när vi hade chatobjekt innan vi bytte till strängar.
-        //model.setChats(chats);
         });
     }
 
@@ -107,50 +96,55 @@ public class ChatController {
         view.addDisconnectButtonListener(evt -> handleDisconnect());
     }
 
+    /**
+     * Handles the action of adding a new chat room. Retrieves the chat name from the view, updates the model, and clears the input field.
+     */
     private void handleAddChat() {
     String chatName = view.getAddChatText();
 
-    if (chatName != null && !chatName.trim().isEmpty()) {
-        model.addChat(chatName);
-        view.clearAddChatField();
+        if (chatName != null && !chatName.trim().isEmpty()) {
+            model.addChat(chatName);
+            view.clearAddChatField();
         }
     }
 
 
+    /**
+     * Takes an incoming message and updates the view accordingly.
+     * @param message The Message object representing the incoming message from the server.
+     */
     private void handleIncomingMessage(Message message) {
         view.onMessageReceived(message);
-    // Parse JSON and update model
-    //Message msg = gson.fromJson(message, Message.class);
-    //model.addMessage(msg, model.getCurrentChat());
-    }
-    public void sendMessage(Message message) {
-    //    String json = gson.toJson(message);
-    //    webSocket.sendMessageToServer(json);
     }
 
-
-    private void handleChatSelection(Chat chatName) {
-        Chat currentChat = ConnectionHandler.Get_Chat(chatName.getChatName());
-        String jsonMessage = "{\"t\":\"enterchat\", \"chat\":\"" + chatName.getChatName() + "\"}";
-        webSocket.sendMessageToServer(jsonMessage);
-        System.out.println("▪ws   ──▶ type: enterchat, Body: " + jsonMessage);
+    /**
+     * Handles the selection of a chat room.
+     * @param chat The Chat object representing the selected chat room.
+     */
+    private void handleChatSelection(Chat chat) {
+        Chat currentChat = ConnectionHandler.Get_Chat(chat.getChatName());
+        webSocket.enterChat(chat.getChatName());
         model.setCurrentChat(currentChat);
     }
 
-
+    /**
+     * Logs in the user, updates the model with a new user and sends the login to the server
+     */
     private void handleLogin() {
         String username = view.getLoginText();
         if (username != null && !username.trim().isEmpty()) {
-            String jsonMessage = "{\"t\":\"connect\", \"user\":\"" + username + "\"}";
-            webSocket.sendMessageToServer(jsonMessage);
-            System.err.println("▪ws   ──▶ type: connect, Body: " + jsonMessage);
+            webSocket.login(username); // Send login message to server
             model.setUser(new User(username));
+
+            // Save the username to a file for future sessions
             try {Files.writeString(Path.of(".user"), username, StandardCharsets.UTF_8);}
             catch (IOException e) {e.printStackTrace();}
             
         }
     }
-
+    /**
+     * Handles the disconnect action. Notifies the server of the disconnection and reloads the chat list.
+     */
     private void handleDisconnect() {
         ConnectionHandler.Disconnect(model.getUser(), model.getCurrentChat().getChatName());
         model.setChats(ConnectionHandler.Get_Chats(model.getUser()));
@@ -158,24 +152,20 @@ public class ChatController {
     }
 
     /**
-     * Handles the send message action.
+     * Handles the send message action. Clears the input field and supplies the message to the WebSocket handler to send to the server.
      */
     private void handleSendMessage() {
         String text = view.getInputText();
         Message message = model.createMessage(text);
         Chat chat = model.getCurrentChat();
         if (text != null && !text.trim().isEmpty()) {
-            Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
-            String jsonMessage = "{\"t\":\"send\", \"chat\":\"" + chat.getChatName() + "\", \"message\":" + gson.toJson(message, Message.class) + "}";
-            webSocket.sendMessageToServer(jsonMessage);
-            System.out.println("▪ws   ──▶ type: send, Body: " + jsonMessage);
-            //model.addMessage(message, chat);
+            webSocket.sendMessageToServer(message, chat.getChatName());
             view.clearInputField();
         }
     }
 
-        /**
-     * Handles the send message action.
+    /**
+     * Handles the send image message action. 
      */
     private void handleSendImageMessage() {
         JFileChooser file = new JFileChooser();
@@ -193,18 +183,9 @@ public class ChatController {
 
            try {
                 String hash = ConnectionHandler.Send_Image(selectedFile.getAbsolutePath());
-                //byte[] fileBytes = Files.readAllBytes(selectedFile.toPath());
-                //String base64Image = Base64.getEncoder().encodeToString(fileBytes);
-
                 Message message = model.createImageMessage(hash);
                 Chat chat = model.getCurrentChat();
-
-                Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter())
-                    .create();
-                    String jsonMessage = "{\"t\":\"send\", \"chat\":\"" + chat.getChatName() + "\", \"message\":" + gson.toJson(message, Message.class) + "}";
-                    webSocket.sendMessageToServer(jsonMessage);
-                    System.out.println("▪ws   ──▶ type: send (image), Body: " + jsonMessage.length());
+                webSocket.sendMessageToServer(message, chat.getChatName());
            } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Failed to read image file.", "Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
@@ -223,6 +204,11 @@ public class ChatController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        try {
+            if (!Files.exists(Path.of("resources")))
+                Files.createDirectory(Path.of("resources"));
+        } catch (IOException e) {e.printStackTrace();}
+
         ChatModel model = new ChatModel();
         ChatView view = new ChatView();
         ChatController controller = new ChatController(model, view);
