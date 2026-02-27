@@ -3,31 +3,18 @@ package client;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import java.awt.GridBagConstraints;
-
-import server.Gson_InstantTypeAdapter;
 
 /**
  * ChatView - The View component of the MVC pattern.
@@ -36,15 +23,11 @@ import server.Gson_InstantTypeAdapter;
  */
 public class ChatView implements ChatModelListener {
     private JFrame frame;
-    private JList<String> messageList;
     private JTextField inputField;
     private JButton sendButton;
     private JButton sendImageButton;
-    private JButton loadButton;
-    private JButton clearButton;
     private JButton addChatButton;
     private JTextField addChatField;
-    private DefaultListModel<String> displayModel;
     private ChatListGUI chatListGUI;
     private JPanel chatListPanel;
     private JScrollPane chatListScrollPane;
@@ -57,30 +40,26 @@ public class ChatView implements ChatModelListener {
     private ActionListener chatSelectionListener;
 
     /**
-     * Creates and displays the UI.
+     * Initializes the GUI components, sets up layouts, and displays the main frame.
+     * @param inituser The initial username to display in the login field.
      */
     public void createAndShowUi(String inituser) {
         frame = new JFrame("Chat Client");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Internal display model for Swing (View's own data)
-        displayModel = new DefaultListModel<>();
-
         // Chat message list
-        //messageList = new JList<>(displayModel);
         chatPanel = new JPanel(new BorderLayout());
         chatPanel.setPreferredSize(new Dimension(400, 240));
         chatPanel.setBorder(BorderFactory.createTitledBorder("Messages"));
-        //scrollPane.setBorder(BorderFactory.createTitledBorder("Messages"));
 
-        // Input area
+        // Controls panel for the chat
+
+        // Message input control
         inputField = new JTextField();
-
-        // Buttons
         sendButton = new JButton("Send");
         sendImageButton = new JButton("Send Image");
 
-        // Controls panel
+        // Layout for controls panel
         JPanel controls = new JPanel();
         controls.setLayout(new BoxLayout(controls, BoxLayout.X_AXIS));
         controls.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -90,6 +69,7 @@ public class ChatView implements ChatModelListener {
         controls.add(Box.createRigidArea(new Dimension(5, 0)));
         controls.add(sendImageButton);
 
+        // AddChat panel
         addChatField = new JTextField();
         addChatField.setPreferredSize(new Dimension(100, 28));
         addChatButton = new JButton("Add Chat");
@@ -97,6 +77,7 @@ public class ChatView implements ChatModelListener {
         addChat.add(addChatField);
         addChat.add(addChatButton);
 
+        // Login panel
         loginField = new JTextField();
         loginField.setPreferredSize(new Dimension(100, 28));
         loginButton = new JButton("Login");
@@ -108,7 +89,7 @@ public class ChatView implements ChatModelListener {
         login.add(new JLabel());
         login.add(disconnectButton);
 
- 
+        // Panel for AddChat and Login
         leftPanel = new JPanel();
         leftPanel.setLayout(new BorderLayout());
         leftPanel.setBorder(BorderFactory.createTitledBorder("Chats"));
@@ -116,30 +97,13 @@ public class ChatView implements ChatModelListener {
         leftPanel.add(addChat, BorderLayout.NORTH);
         leftPanel.add(login, BorderLayout.SOUTH);
 
-        JPanel chatUsers = new JPanel();
-        chatUsers.setLayout(new BoxLayout(chatUsers, BoxLayout.Y_AXIS));
-        chatUsers.setBorder(BorderFactory.createTitledBorder("Users"));
-        chatUsers.setPreferredSize(new Dimension(100, 240));
-        JLabel label = new JLabel("Hugo");
-        JLabel label2 = new JLabel("Henning");
-        
-        chatUsers.add(label);
-        chatUsers.add(label2);
-        
-//        chatListGUI = new ChatListGUI(); // TODO skapar weird DRA MUS ÖVER FÖR ATT SE
-//        leftPanel.add(chatListGUI.getChatListPanel());
-
-        //chatGUI = new ChatGUI();
-        //scrollPane.add(chatGUI.getMainPanel());
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.add(chatPanel, BorderLayout.CENTER);
         centerPanel.add(controls, BorderLayout.SOUTH);
 
-
         // Assemble frame
         frame.add(centerPanel, BorderLayout.CENTER);
         frame.add(leftPanel, BorderLayout.WEST);
-        //frame.add(chatUsers, BorderLayout.EAST);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -147,31 +111,34 @@ public class ChatView implements ChatModelListener {
 
     // --- ChatModelListener implementation (Observer pattern) ---
 
+    /**
+     * Updates the UI when a message is added to a specific chat.
+     * Re-initializes the entire chat message panel.
+     * @param chat The Chat object containing the updated message history.
+     */
     @Override
     public void onMessageAdded(Chat chat) {
-        if (messageList != null) {
-            chatPanel.removeAll();
-        }
-
         chatGUI = new ChatGUI(chat);
-        //chatGUI.Update(chat);
         chatPanel.removeAll();
         chatPanel.add(chatGUI.getMainPanel(), BorderLayout.CENTER);
         chatPanel.revalidate();
         chatPanel.repaint();
-
-
-
-        //displayModel.addElement(message);
-        // Auto-scroll to bottom
-        //messageList.ensureIndexIsVisible(displayModel.size() - 1);
     }
 
+    /**
+     * Updates the current chat view with a single incoming message.
+     * @param message The Message object to append to the view.
+     */
     @Override
     public void onMessageReceived(Message message){
         chatGUI.addMessage(message);
     }
 
+    /**
+     * Populates the sidebar with the list of available chat rooms.
+     * Ensures listeners are reapplied to new buttons.
+     * @param chats An ArrayList of strings representing chat room names.
+     */
     @Override
     public void onChatsLoaded(ArrayList<String> chats) {
         // Ta bort gammal chattlista om den finns
@@ -194,47 +161,59 @@ public class ChatView implements ChatModelListener {
         leftPanel.repaint();
     }
 
+    /**
+     * Updates the display when a user selects a different chat room.
+     * @param chat The Chat room data to display.
+     */
     @Override
     public void onChatSelected(Chat chat) {
-        if (messageList != null) {
-            chatPanel.removeAll();
-        }
         chatGUI = new ChatGUI(chat);
-        //chatGUI.Update(chat);
         chatPanel.removeAll();
         chatPanel.add(chatGUI.getMainPanel(), BorderLayout.CENTER);
         chatPanel.revalidate();
         chatPanel.repaint();
-        //scrollPane.setViewportView(chatGUI.getMainPanel());
-        //scrollPane.add(chatGUI.getMainPanel());
-        //scrollPane.revalidate();
-        //scrollPane.repaint();
-
-
-
-        // This method can be implemented to update the UI when a chat is selected
     }
 
     // --- Getters and listener registration ---
 
+    /** Clears the text in the "Add Chat" input field. */
     public void clearAddChatField() { addChatField.setText("");}
 
+    /** @return The text currently in the "Add Chat" input field. */
     public String getAddChatText() { return addChatField.getText();}
 
-    public String setSelectedChat(String chat) {
-        // This method can be implemented to update the UI when a chat is selected
-        return chat;
-    }
-
-    public void addAddChatButtonListener(ActionListener listener) {
-        addChatButton.addActionListener(listener);
-    }
-
+    /**
+     * Registers a listener for selecting chat rooms. 
+     * The listener is stored to be reapplied when the chat list refreshes.
+     * @param listener The ActionListener for chat room selection buttons.
+     */
     public void addChatSelectionListener(ActionListener listener) {
-        chatSelectionListener = listener; // Spara utanför loopen
-        applyChatSelectionListener();     // Applicera på nuvarande knappar
+        chatSelectionListener = listener;
+        applyChatSelectionListener();
     }
 
+    /** Registers a listener for the "Add Chat" button. */
+    public void addAddChatButtonListener(ActionListener l) { addChatButton.addActionListener(l); }
+    
+    /** Registers a listener for the "Send" message button. */
+    public void addSendButtonListener(ActionListener l) { sendButton.addActionListener(l); }
+    
+    /** Registers a listener for the "Send Image" button. */
+    public void addSendImageButtonListener(ActionListener l) { sendImageButton.addActionListener(l); }
+    
+    /** Registers a listener for the "Login" button. */
+    public void addLoginButtonListener(ActionListener l) { loginButton.addActionListener(l); }
+    
+    /** Registers a listener for the "Disconnect" button. */
+    public void addDisconnectButtonListener(ActionListener l) { disconnectButton.addActionListener(l); }
+    
+    /** Registers a listener for the message input field (e.g., for Enter key). */
+    public void addInputFieldListener(ActionListener l) { inputField.addActionListener(l); }
+
+    /**
+     * Internal helper to apply the stored chatSelectionListener to all
+     * buttons in the current chat list panel.
+     */
     private void applyChatSelectionListener() {
     if (chatSelectionListener == null || chatListGUI == null) return;
         for (Component chats : chatListGUI.getChatListPanel().getComponents()) {
@@ -244,57 +223,22 @@ public class ChatView implements ChatModelListener {
         }
     }
 
+    /** @return The text currently in the Login input field. */
     public String getLoginText() {
         return loginField.getText();
     }
 
-    /**
-     * Returns the text from the input field.
-     */
+    /** @return The text currently in the message input field. */
     public String getInputText() {
         return inputField.getText();
     }
 
-    /**
-     * Clears the input field.
-     */
+    /** Clears the message input field. */
     public void clearInputField() {
         inputField.setText("");
     }
 
-    /**
-     * Adds an action listener to the send button.
-     */
-    public void addSendButtonListener(ActionListener listener) {
-        sendButton.addActionListener(listener);
-    }
-
-        /**
-     * Adds an action listener to the send button.
-     */
-    public void addSendImageButtonListener(ActionListener listener) {
-        sendImageButton.addActionListener(listener);
-    }
-
-    public void addLoginButtonListener(ActionListener listener) {
-        // This method can be implemented to add a listener to the login button when it's created
-        loginButton.addActionListener(listener);
-    }
-
-    public void addDisconnectButtonListener(ActionListener listener) {
-        disconnectButton.addActionListener(listener);
-    }
-
-    /**
-     * Adds an action listener to the input field (for Enter key).
-     */
-    public void addInputFieldListener(ActionListener listener) {
-        inputField.addActionListener(listener);
-    }
-
-    /**
-     * Returns the main frame.
-     */
+    /** @return The main JFrame of the application. */
     public JFrame getFrame() {
         return frame;
     }
