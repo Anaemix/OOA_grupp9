@@ -66,7 +66,7 @@ public class WebsocketHandler extends WebSocketServer {
         connToUsers.containsKey(conn.getRemoteSocketAddress()) && messageType.equals("enterchat"))
             enterChat(connToUsers.get(conn.getRemoteSocketAddress()), j.get("chat").getAsString());
         else if (messageType.equals("connect"))
-            connect(conn.getRemoteSocketAddress(), j.get("user").getAsString());
+            connect(conn.getRemoteSocketAddress(), j.get("name").getAsString());
     }
 
     /**

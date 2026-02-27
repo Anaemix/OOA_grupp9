@@ -84,7 +84,6 @@ public class ChatModel {
      */
     public void addChat(String chat) {
         if (chat != null && user != null && user.getName() != null) {
-            System.out.println("Adding chat: " + chat);
             chats.add(chat);
             ConnectionHandler.Connect(user, chat);
             getChats();
