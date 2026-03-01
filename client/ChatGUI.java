@@ -93,7 +93,6 @@ public class ChatGUI {
      */
     public void buildUserListPanel(ArrayList<String> activeUsers, ArrayList<String> inChatUsers) {
         userPanel.removeAll();
-        System.out.println("Updating user list panel with active users: " + activeUsers + " and in-chat users: " + inChatUsers);
         for(String user : inChatUsers) {
             if (activeUsers.contains(user)) {
                 JLabel userLabel = new JLabel(user.toString() + " (online)");
