@@ -1,5 +1,7 @@
 package client;
 
+import java.util.ArrayList;
+
 /**
  * WebSocketEventListener - Interface for handling WebSocket events.
  * Defines methods for message reception, connection status changes, and error handling.
@@ -13,4 +15,6 @@ public interface WebSocketEventListener {
     void onDisconnected();
     /** Called when an error occurs in the WebSocket connection */
     void onError(String error);
+    /** Called when a chat update occurs */
+    void updateUserList(String chatName, String[] activeUsers, ArrayList<String> inChatUsers);
 }

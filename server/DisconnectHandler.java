@@ -18,15 +18,18 @@ import java.time.Instant;
 public class DisconnectHandler implements HttpHandler {
     /** The handler used for database persistence. */
     private final DatabaseHandler db;
+    private WebsocketHandler wsHandler;
     /** Gson object used for deserialization of json. */
     private static Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
 
     /**
      * Constructor 
      * @param databaseHandler handles the database connection, writing/reading.
+     * @param wsHandler handles the websocket connections for updating userlists in the chat.
      */
-    public DisconnectHandler(DatabaseHandler databaseHandler) {
+    public DisconnectHandler(DatabaseHandler databaseHandler, WebsocketHandler wsHandler) {
         this.db = databaseHandler;
+        this.wsHandler = wsHandler;
     }
 
     /**
@@ -53,6 +56,7 @@ public class DisconnectHandler implements HttpHandler {
                 
                 System.out.println(String.format("User %s removed from chat %s", user.getName(), chat));
                 db.removeUserFromChat(user, chat);
+                wsHandler.send_chatlist(chat, gson);
                 httpexchange.sendResponseHeaders(200, -1);
             } catch (Exception e) {
                 e.printStackTrace();

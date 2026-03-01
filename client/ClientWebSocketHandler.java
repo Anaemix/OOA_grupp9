@@ -45,6 +45,21 @@ public class ClientWebSocketHandler extends WebSocketClient {
 
         Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
         JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
+        if (!jsonObject.has("message")) {
+            try {
+                String chatname = jsonObject.get("chat").getAsString();
+                String[] activeUsers = gson.fromJson(jsonObject.get("active"), String[].class);
+                ArrayList<String> inChatUsers = new ArrayList<>();
+                for (User user : gson.fromJson(jsonObject.get("inChat"), User[].class)) {
+                    inChatUsers.add(user.getName());
+                }
+                listeners.forEach(listener -> listener.updateUserList(chatname, activeUsers, inChatUsers));
+                return;
+            }catch (Exception e) {
+                System.out.println("Error parsing message: " + e.getMessage());
+                return;
+            }
+        }
         Message messageObj = gson.fromJson(jsonObject.get("message"), Message.class);
         if (messageObj.isImage()) {
             ConnectionHandler.Get_Image(messageObj.getText());

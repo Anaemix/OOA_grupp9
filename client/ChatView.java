@@ -38,6 +38,7 @@ public class ChatView implements ChatModelListener {
     private JPanel chatPanel;
     private ChatGUI chatGUI;
     private ActionListener chatSelectionListener;
+    private ArrayList<String> activeUsers = new ArrayList<>();
 
     /**
      * Initializes the GUI components, sets up layouts, and displays the main frame.
@@ -121,6 +122,9 @@ public class ChatView implements ChatModelListener {
         chatGUI = new ChatGUI(chat);
         chatPanel.removeAll();
         chatPanel.add(chatGUI.getMainPanel(), BorderLayout.CENTER);
+        ArrayList<String> users = new ArrayList<>();
+        for (User user : chat.getUsers()) {users.add(user.getName());}
+        chatGUI.buildUserListPanel(this.activeUsers, users);
         chatPanel.revalidate();
         chatPanel.repaint();
     }
@@ -132,6 +136,26 @@ public class ChatView implements ChatModelListener {
     @Override
     public void onMessageReceived(Message message){
         chatGUI.addMessage(message);
+    }
+
+    /**
+     * Updates the user list in the sidebar when a chat update is received.
+     * @param chatName The name of the chat room being updated.
+     * @param activeUsers An array of usernames currently active in the chat.
+     * @param inChatUsers An ArrayList of usernames currently in the chat.
+     */
+    @Override
+    public void updateUserList(String chatName, String[] activeUsers, ArrayList<String> inChatUsers) {
+        this.activeUsers = new ArrayList<>();
+        if (activeUsers != null) {
+            for (String user : activeUsers) {
+                this.activeUsers.add(user);
+            }
+        }
+
+        chatGUI.buildUserListPanel(this.activeUsers, inChatUsers);
+        chatPanel.revalidate();
+        chatPanel.repaint();
     }
 
     /**
@@ -170,6 +194,9 @@ public class ChatView implements ChatModelListener {
         chatGUI = new ChatGUI(chat);
         chatPanel.removeAll();
         chatPanel.add(chatGUI.getMainPanel(), BorderLayout.CENTER);
+        ArrayList<String> users = new ArrayList<>();
+        for (User user : chat.getUsers()) {users.add(user.getName());}
+        chatGUI.buildUserListPanel(this.activeUsers, users);
         chatPanel.revalidate();
         chatPanel.repaint();
     }

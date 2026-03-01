@@ -65,14 +65,6 @@ public class ChatGUI {
             });
             }
 
-        Set<String> addedUsers = new HashSet<>();
-        for(User user : chat.getUsers()) {
-            if(addedUsers.add(user.getName())) {
-                JLabel userLabel = new JLabel(user.toString());
-                userPanel.add(userLabel);
-            }
-        }
-
         chatScroll = new JScrollPane(messagePanel);
         chatScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         chatScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -92,6 +84,27 @@ public class ChatGUI {
      */
     public JPanel getMainPanel() {
         return mainPanel;
+    }
+
+    /**
+     * Updates the user list panel with the current active users
+     * @param activeUsers A list of usernames that are currently active/online.
+     * @param inChatUsers A list of usernames that are currently in the chat room.
+     */
+    public void buildUserListPanel(ArrayList<String> activeUsers, ArrayList<String> inChatUsers) {
+        userPanel.removeAll();
+        System.out.println("Updating user list panel with active users: " + activeUsers + " and in-chat users: " + inChatUsers);
+        for(String user : inChatUsers) {
+            if (activeUsers.contains(user)) {
+                JLabel userLabel = new JLabel(user.toString() + " (online)");
+                userPanel.add(userLabel);
+            } else {
+                JLabel userLabel = new JLabel(user.toString());
+                userPanel.add(userLabel);
+            }
+        }
+        userPanel.revalidate();
+        userPanel.repaint();
     }
 
     /**

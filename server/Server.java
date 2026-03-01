@@ -25,18 +25,19 @@ public class Server {
         int http_port = 2345;
         int websocket_port = 2346;
         DatabaseHandler db = new DatabaseHandler();
+        WebsocketHandler wsHandler = new WebsocketHandler(websocket_port, db);
         HttpServer server = HttpServer.create(new InetSocketAddress(http_port), 0); 
         server.createContext("/get_chat", new GetChatHandler(db));
         server.createContext("/get_chats", new GetChatsHandler(db));
-        server.createContext("/connect", new ConnectHandler(db));
-        server.createContext("/disconnect", new DisconnectHandler(db));
+        server.createContext("/connect", new ConnectHandler(db, wsHandler));
+        server.createContext("/disconnect", new DisconnectHandler(db, wsHandler));
         server.createContext("/send_message", new SendMessageHandler(db));
         server.createContext("/post_image", new PostImageHandler());
         server.createContext("/get_image", new GetImageHandler(db));
         server.setExecutor(null);
         server.start();
         System.out.println(String.format("Http Server up at port: %d", http_port));
-        new WebsocketHandler(websocket_port, db).start();
+        wsHandler.start();
         System.out.println(String.format("Websocket Server Started at port: %d", websocket_port));
     }
 

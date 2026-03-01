@@ -1,6 +1,8 @@
 package client;
 
 import java.awt.EventQueue;
+import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -22,6 +24,7 @@ public class ChatController {
     private final ChatView view;
     /** Websocket client */
     private ClientWebSocketHandler webSocket;
+    private Semaphore chatListSemaphore = new Semaphore(1);
 
     /**
      * Constructor for ChatController. Initializes the model, view, and WebSocket connection.
@@ -39,7 +42,7 @@ public class ChatController {
      */
     public void initializeWebSocket() {
         try {
-            URI uri = new URI("ws://fjenhh.me:2346");
+            URI uri = new URI("ws://localhost:2346");
             webSocket = new ClientWebSocketHandler(uri);
             webSocket.addListener(new WebSocketEventListener() {
                 @Override
@@ -61,6 +64,13 @@ public class ChatController {
                 @Override
                 public void onError(String error) {
                     System.out.println("WebSocket error: " + error);
+                }
+
+                @Override
+                public void updateUserList(String chatName, String[] activeUsers, ArrayList<String> inChatUsers) {
+                    chatListSemaphore.acquireUninterruptibly();
+                    view.updateUserList(chatName, activeUsers, inChatUsers);
+                    chatListSemaphore.release();
                 }
             });
             webSocket.connectBlocking();
@@ -100,12 +110,14 @@ public class ChatController {
      * Handles the action of adding a new chat room. Retrieves the chat name from the view, updates the model, and clears the input field.
      */
     private void handleAddChat() {
-    String chatName = view.getAddChatText();
+        String chatName = view.getAddChatText();
+        chatListSemaphore.acquireUninterruptibly();
 
         if (chatName != null && !chatName.trim().isEmpty()) {
             model.addChat(chatName);
             view.clearAddChatField();
         }
+        chatListSemaphore.release();
     }
 
 
@@ -114,7 +126,9 @@ public class ChatController {
      * @param message The Message object representing the incoming message from the server.
      */
     private void handleIncomingMessage(Message message) {
+        chatListSemaphore.acquireUninterruptibly();
         view.onMessageReceived(message);
+        chatListSemaphore.release();
     }
 
     /**
@@ -122,9 +136,11 @@ public class ChatController {
      * @param chat The Chat object representing the selected chat room.
      */
     private void handleChatSelection(Chat chat) {
+        chatListSemaphore.acquireUninterruptibly();
         Chat currentChat = ConnectionHandler.Get_Chat(chat.getChatName());
         webSocket.enterChat(chat.getChatName());
         model.setCurrentChat(currentChat);
+        chatListSemaphore.release();
     }
 
     /**
@@ -146,9 +162,11 @@ public class ChatController {
      * Handles the disconnect action. Notifies the server of the disconnection and reloads the chat list.
      */
     private void handleDisconnect() {
+        chatListSemaphore.acquireUninterruptibly();
         ConnectionHandler.Disconnect(model.getUser(), model.getCurrentChat().getChatName());
         model.setChats(ConnectionHandler.Get_Chats(model.getUser()));
         model.setCurrentChat(null);
+        chatListSemaphore.release();
     }
 
     /**

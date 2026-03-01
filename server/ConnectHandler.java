@@ -18,15 +18,19 @@ import java.time.Instant;
 public class ConnectHandler implements HttpHandler {
     /** The handler used for database persistence. */
     private final DatabaseHandler db;
+    //** websockethandler for updating userlists */
+    private WebsocketHandler wsHandler;
     /** Gson object used for deserialization of json. */
     private static Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
 
     /**
      * Constructor 
      * @param databaseHandler handles the database connection, writing/reading.
+     * @param websocketHandler handles the websocket connections.
      */
-    public ConnectHandler(DatabaseHandler databaseHandler) {
+    public ConnectHandler(DatabaseHandler databaseHandler, WebsocketHandler websocketHandler) {
         this.db = databaseHandler;
+        this.wsHandler = websocketHandler;
     }
 
     /**
@@ -54,6 +58,7 @@ public class ConnectHandler implements HttpHandler {
 
                 System.out.println(String.format("User %s added to chat %s", user.getName(), chat));
                 httpexchange.sendResponseHeaders(200, -1);
+                wsHandler.send_chatlist(chat, gson);
             } catch (Exception e) {
                 e.printStackTrace();
                 httpexchange.sendResponseHeaders(400, -1);

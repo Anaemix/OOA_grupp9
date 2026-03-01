@@ -20,4 +20,6 @@ public interface ChatModelListener {
     void onMessageReceived(Message message);
 
     //void notifyMessageAdded(Chat chat);
+
+    void updateUserList(String chatName, String[] activeUsers, ArrayList<String> inChatUsers);
 }
