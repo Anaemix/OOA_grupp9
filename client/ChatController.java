@@ -42,7 +42,7 @@ public class ChatController {
      */
     public void initializeWebSocket() {
         try {
-            URI uri = new URI("ws://localhost:2346");
+            URI uri = new URI("ws://fjenhh.me:2346");
             webSocket = new ClientWebSocketHandler(uri);
             webSocket.addListener(new WebSocketEventListener() {
                 @Override
