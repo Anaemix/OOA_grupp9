@@ -151,6 +151,7 @@ public class ChatController {
         if (username != null && !username.trim().isEmpty()) {
             webSocket.login(username); // Send login message to server
             model.setUser(new User(username));
+            view.removeChatPanel();
 
             // Save the username to a file for future sessions
             try {Files.writeString(Path.of(".user"), username, StandardCharsets.UTF_8);}
@@ -162,6 +163,7 @@ public class ChatController {
      * Handles the disconnect action. Notifies the server of the disconnection and reloads the chat list.
      */
     private void handleDisconnect() {
+        view.removeChatPanel();
         chatListSemaphore.acquireUninterruptibly();
         ConnectionHandler.Disconnect(model.getUser(), model.getCurrentChat().getChatName());
         model.setChats(ConnectionHandler.Get_Chats(model.getUser()));

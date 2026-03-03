@@ -250,6 +250,13 @@ public class ChatView implements ChatModelListener {
         }
     }
 
+    /** Removes content of chatPanel */
+    public void removeChatPanel() {
+        chatPanel.removeAll();
+        chatPanel.revalidate();
+        chatPanel.repaint();
+    }
+
     /** @return The text currently in the Login input field. */
     public String getLoginText() {
         return loginField.getText();
