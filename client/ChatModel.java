@@ -11,7 +11,10 @@ import java.util.List;
  * As an Observable, it notifies registered ChatModelListeners
  * whenever the state changes (e.g., new messages or loaded chats).
  */
+
 public class ChatModel {
+    private final List<String> messages;
+    private ArrayList<String> chats;
     /** List of all listeners */
     private final List<ChatModelListener> listeners;
     /** The current chat the client is viewing */
@@ -20,16 +23,30 @@ public class ChatModel {
     private User user;
     /** ConnectionHandler */
     private ConnectionHandler connectionHandler;
+    /** ActiveChat */
+    private String activeChat;
 
     /**
      * Constructs a new ChatModel.
      * Initializes message and listener lists and sets up the server connection parameters.
      */
     public ChatModel() {
+        this.chats = new ArrayList<>();
+        this.messages = new ArrayList<>();
         this.listeners = new ArrayList<>();
-        this.connectionHandler = new ConnectionHandler("FJENHH.me", "2345");
+        this.activeChat = null;
+        this.connectionHandler = new ConnectionHandler("FJENHH.me", "2345"); //new ConnectionHandler("localhost", "2345"); 
+        //setUser(new User("DefaultUser")); // Initialize with a default user or provide a method to set the user
     }
 
+
+    /**
+     * Leaves the currently active chat room by setting activeChat to null.
+     */
+    public void leaveChat() {
+        this.activeChat = null;
+    }
+    
     /**
      * Sets the current user and fetches the available chat rooms for that user.
      * @param user The User to log in.
@@ -44,7 +61,8 @@ public class ChatModel {
      * @param chats An ArrayList of chat room names.
      */
     public void setChats(ArrayList<String> chats) {
-        notifyChatsLoaded(chats);
+        this.chats = chats;
+        notifyChatsLoaded(chats, activeChat);
     }
 
     /**
@@ -52,7 +70,7 @@ public class ChatModel {
      * @return The updated list of chat room names.
      */
     public ArrayList<String> getChats() {
-        ArrayList<String> chats = ConnectionHandler.Get_Chats(user);
+        chats = ConnectionHandler.Get_Chats(user);
         return chats;
     }
 
@@ -62,6 +80,7 @@ public class ChatModel {
      */
     public void setCurrentChat(Chat currentChat) {
         this.currentChat = currentChat;
+        this.activeChat = currentChat.getChatName();
         notifyChatSelected(currentChat);
     }
 
@@ -83,11 +102,10 @@ public class ChatModel {
      */
     public void addChat(String chat) {
         if (chat != null && user != null && user.getName() != null) {
+            chats.add(chat);
             ConnectionHandler.Connect(user, chat);
             getChats();
-            ArrayList<String> chats = new ArrayList<>();
-            chats.add(chat);
-            notifyChatsLoaded(chats);
+            notifyChatsLoaded(chats, activeChat);
         }
     }
 
@@ -119,6 +137,8 @@ public class ChatModel {
     public void addMessage(Message message, Chat chat) {
         if (message != null && !message.toString().trim().isEmpty()) {
             System.out.println("sending message" + message);
+            String trimmed = message.toString().trim();
+            messages.add(trimmed);
             ConnectionHandler.Send_Message(message, chat.getChatName());
             Chat updatedChat = ConnectionHandler.Get_Chat(chat.getChatName());
             notifyMessageAdded(updatedChat);
@@ -150,9 +170,9 @@ public class ChatModel {
     // --- Observer notification methods ---
 
     /** Notifies listeners that the list of available chats has been updated. */
-    private void notifyChatsLoaded(ArrayList<String> chats) {
+    private void notifyChatsLoaded(ArrayList<String> chats, String ActiveChat) {
         for (ChatModelListener listener : listeners) {
-            listener.onChatsLoaded(chats);
+            listener.onChatsLoaded(chats, ActiveChat);
         }
     }
 

@@ -164,14 +164,14 @@ public class ChatView implements ChatModelListener {
      * @param chats An ArrayList of strings representing chat room names.
      */
     @Override
-    public void onChatsLoaded(ArrayList<String> chats) {
+    public void onChatsLoaded(ArrayList<String> chats, String ActiveChat) {
         // Ta bort gammal chattlista om den finns
         if (chatListScrollPane != null) {
             leftPanel.remove(chatListScrollPane);
         }
         
         // Skapa ny chattlista
-        chatListGUI = new ChatListGUI(chats);
+        chatListGUI = new ChatListGUI(chats, ActiveChat);
         chatListPanel = chatListGUI.getChatListPanel();
         chatListScrollPane = new JScrollPane(chatListPanel);
         chatListScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -197,6 +197,7 @@ public class ChatView implements ChatModelListener {
         ArrayList<String> users = new ArrayList<>();
         for (User user : chat.getUsers()) {users.add(user.getName());}
         chatGUI.buildUserListPanel(this.activeUsers, users);
+        this.chatListGUI.setActiveChat(chat.getChatName());
         chatPanel.revalidate();
         chatPanel.repaint();
     }

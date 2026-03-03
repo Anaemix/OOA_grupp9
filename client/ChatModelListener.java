@@ -18,8 +18,9 @@ public interface ChatModelListener {
      * Triggered when the list of available chat rooms has been fetched from the server.
      * Use this to rebuild the sidebar or chat navigation list.
      * @param chats An ArrayList of strings representing the names of available chat rooms.
+     * @param ActiveChat The name of the currently selected chat room.
      */
-    void onChatsLoaded(ArrayList<String> chats);
+    void onChatsLoaded(ArrayList<String> chats, String ActiveChat);
 
     /**
      * Triggered when a specific chat room has been selected by the user.
