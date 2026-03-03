@@ -8,8 +8,6 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
@@ -19,10 +17,15 @@ import javax.swing.*;
  * and the list of users in a split-pane view.
  */
 public class ChatGUI {
+    /** The outermost panel encapsuling all of the UI elements that make-up the chat */
     private final JPanel mainPanel;
+    /** The panel in which messages are displayed */
     private JPanel messagePanel;
+    /** The panel in which the users are displayed */
     private JPanel userPanel;
+    /** Scrollable panel for the messages */
     private JScrollPane chatScroll;
+    /** Scrollable panel for the users */
     private JScrollPane userScroll;
 
     /**

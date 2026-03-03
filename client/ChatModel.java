@@ -12,11 +12,13 @@ import java.util.List;
  * whenever the state changes (e.g., new messages or loaded chats).
  */
 public class ChatModel {
-    private final List<String> messages;
+    /** List of all listeners */
     private final List<ChatModelListener> listeners;
-    private ArrayList<String> chats = new ArrayList<>();
+    /** The current chat the client is viewing */
     private Chat currentChat;
+    /** The currently logged in user */
     private User user;
+    /** ConnectionHandler */
     private ConnectionHandler connectionHandler;
 
     /**
@@ -24,10 +26,8 @@ public class ChatModel {
      * Initializes message and listener lists and sets up the server connection parameters.
      */
     public ChatModel() {
-        this.messages = new ArrayList<>();
         this.listeners = new ArrayList<>();
-        this.connectionHandler = new ConnectionHandler("FJENHH.me", "2345"); //new ConnectionHandler("localhost", "2345"); 
-        //setUser(new User("DefaultUser")); // Initialize with a default user or provide a method to set the user
+        this.connectionHandler = new ConnectionHandler("FJENHH.me", "2345");
     }
 
     /**
@@ -44,7 +44,6 @@ public class ChatModel {
      * @param chats An ArrayList of chat room names.
      */
     public void setChats(ArrayList<String> chats) {
-        this.chats = chats;
         notifyChatsLoaded(chats);
     }
 
@@ -53,7 +52,7 @@ public class ChatModel {
      * @return The updated list of chat room names.
      */
     public ArrayList<String> getChats() {
-        chats = ConnectionHandler.Get_Chats(user);
+        ArrayList<String> chats = ConnectionHandler.Get_Chats(user);
         return chats;
     }
 
@@ -84,9 +83,10 @@ public class ChatModel {
      */
     public void addChat(String chat) {
         if (chat != null && user != null && user.getName() != null) {
-            chats.add(chat);
             ConnectionHandler.Connect(user, chat);
             getChats();
+            ArrayList<String> chats = new ArrayList<>();
+            chats.add(chat);
             notifyChatsLoaded(chats);
         }
     }
@@ -119,8 +119,6 @@ public class ChatModel {
     public void addMessage(Message message, Chat chat) {
         if (message != null && !message.toString().trim().isEmpty()) {
             System.out.println("sending message" + message);
-            String trimmed = message.toString().trim();
-            messages.add(trimmed);
             ConnectionHandler.Send_Message(message, chat.getChatName());
             Chat updatedChat = ConnectionHandler.Get_Chat(chat.getChatName());
             notifyMessageAdded(updatedChat);

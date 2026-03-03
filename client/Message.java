@@ -8,9 +8,15 @@ import java.time.Instant;
  * plain text or a reference to an image file, along with associated metadata.
  */
 public class Message {
+    /** * The content of the message. If isImage is true, this string
+     * holds the filename or path to the image resource.
+     */
     private final String text;
+    /** The exact moment in time when the message was sent. */
     private final Instant time;
+    /** The user who sent the message. */
     private final User user;
+    /** Flag indicating whether the content should be rendered as an image or text. */
     private final Boolean isImage;
 
     /**

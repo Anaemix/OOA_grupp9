@@ -10,6 +10,7 @@ import javax.swing.*;
  * vertically at the top of the panel.
  */
 public class ChatListGUI {
+    /** The panel that contains all chats a user is a part of */
     private final JPanel chatListPanel;
     
     /**
@@ -40,7 +41,7 @@ public class ChatListGUI {
             gridBag.setConstraints(chatButton, c);
             chatListPanel.add(chatButton);
         }
-        
+
         JPanel spacer = new JPanel();
         GridBagConstraints spacerGbc = new GridBagConstraints();
         spacerGbc.gridx = 0;

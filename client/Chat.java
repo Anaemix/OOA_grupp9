@@ -7,8 +7,11 @@ import java.util.ArrayList;
  * the history of messages sent, and the list of participating users.
  */
 public class Chat {
+    /** ArrayList of messages that have been sent in the chat */
     private final ArrayList<Message> messages;
+    /** ArrayList of users that have joined the chat */
     private final ArrayList<User> users;
+    /** Name of the chat */
     private final String chatName;
 
     /**
