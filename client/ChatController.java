@@ -111,13 +111,16 @@ public class ChatController {
      */
     private void handleAddChat() {
         String chatName = view.getAddChatText();
-        chatListSemaphore.acquireUninterruptibly();
+        try {
+            chatListSemaphore.acquireUninterruptibly();
 
-        if (chatName != null && !chatName.trim().isEmpty()) {
-            model.addChat(chatName);
-            view.clearAddChatField();
+            if (chatName != null && !chatName.trim().isEmpty()) {
+                model.addChat(chatName);
+                view.clearAddChatField();
+            }
+        } finally {
+            chatListSemaphore.release();
         }
-        chatListSemaphore.release();
     }
 
 
@@ -126,9 +129,12 @@ public class ChatController {
      * @param message The Message object representing the incoming message from the server.
      */
     private void handleIncomingMessage(Message message) {
-        chatListSemaphore.acquireUninterruptibly();
-        view.onMessageReceived(message);
-        chatListSemaphore.release();
+        try {
+            chatListSemaphore.acquireUninterruptibly();
+            view.onMessageReceived(message);
+        } finally {
+            chatListSemaphore.release();
+        }
     }
 
     /**
@@ -136,11 +142,14 @@ public class ChatController {
      * @param chat The Chat object representing the selected chat room.
      */
     private void handleChatSelection(Chat chat) {
-        chatListSemaphore.acquireUninterruptibly();
-        Chat currentChat = ConnectionHandler.Get_Chat(chat.getChatName());
-        webSocket.enterChat(chat.getChatName());
-        model.setCurrentChat(currentChat);
-        chatListSemaphore.release();
+        try {
+            chatListSemaphore.acquireUninterruptibly();
+            Chat currentChat = ConnectionHandler.Get_Chat(chat.getChatName());
+            webSocket.enterChat(chat.getChatName());
+            model.setCurrentChat(currentChat);
+        } finally {
+            chatListSemaphore.release();
+        }
     }
 
     /**
@@ -164,11 +173,15 @@ public class ChatController {
      */
     private void handleDisconnect() {
         view.removeChatPanel();
-        chatListSemaphore.acquireUninterruptibly();
-        ConnectionHandler.Disconnect(model.getUser(), model.getCurrentChat().getChatName());
-        model.setChats(ConnectionHandler.Get_Chats(model.getUser()));
-        model.setCurrentChat(null);
-        chatListSemaphore.release();
+        try {
+            chatListSemaphore.acquireUninterruptibly();
+            model.leaveChat();
+            ConnectionHandler.Disconnect(model.getUser(), model.getCurrentChat().getChatName());
+            model.setChats(ConnectionHandler.Get_Chats(model.getUser()));
+            model.setCurrentChat(null);
+        } finally {
+            chatListSemaphore.release();
+        }
     }
 
     /**
