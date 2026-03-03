@@ -68,7 +68,7 @@ public class WebsocketHandler extends WebSocketServer {
         else if (UserConnected && messageType.equals("enterchat"))
             enterChat(connToUsers.get(conn.getRemoteSocketAddress()), j.get("chat").getAsString(), gson);
         else if (UserConnected && messageType.equals("updatechatlist"))
-            send_chatlist(j.get("chat").getAsString(), gson);
+            send_chatlist(j.get("chat").getAsString());
         else if (messageType.equals("connect"))
             connect(conn.getRemoteSocketAddress(), j.get("name").getAsString());
     } 
@@ -88,7 +88,8 @@ public class WebsocketHandler extends WebSocketServer {
      * @param chat chatname
      * @param gson Gson object for serialization and deserialization
      */
-    public void send_chatlist(String chat, Gson gson) {
+    public void send_chatlist(String chat) {
+        Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
         ArrayList<User> users = db.getChat(chat).getUsers();
         JsonObject update = new JsonObject();
         update.add("inChat", gson.toJsonTree(users));
@@ -112,8 +113,8 @@ public class WebsocketHandler extends WebSocketServer {
             return;
         } else { // If the user is switching chat, update the userChatMap and send updated user lists to both the old and new chat
             userChatMap.put(user , chatname);
-            send_chatlist(chatname, gson);
-            send_chatlist(usersPreviousChat, gson);
+            send_chatlist(chatname);
+            send_chatlist(usersPreviousChat);
         }
 
         System.out.println(String.format("User \"%s\" entered chat \"%s\"", user, chatname));
@@ -157,6 +158,10 @@ public class WebsocketHandler extends WebSocketServer {
         
         if (connToUsers.containsKey(conn.getRemoteSocketAddress())) {
             System.out.println(connToUsers.get(conn.getRemoteSocketAddress()) + " disconnected!");
+            String user = connToUsers.get(conn.getRemoteSocketAddress());
+            String chatname = userChatMap.getChat(user);
+            userChatMap.remove(user);
+            send_chatlist(chatname);
             connToUsers.remove(conn.getRemoteSocketAddress());
         } else {
             System.out.println(conn.getRemoteSocketAddress() + " disconnected!");
