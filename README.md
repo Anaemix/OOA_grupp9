@@ -40,35 +40,35 @@ Server                          Client
 
 | Class | Responsibility | Collaborator |
 |-|-|-|
-| User | Lagra användarnamn, jämföra användare (equals/hashCode) | - |
-| Message | Lagra meddelandetext/bildhash, tidsstämpel, avsändare, bildflagga | User |
-| Chat | Lagra chattnamn, meddelandehistorik, deltagarlista | Message, User |
-| ChatModelListener | Definiera observer-interface för modelländringar (onMessageAdded, onChatsLoaded, onChatSelected, onMessageReceived) | Chat, Message |
-| ChatModel | Lagra applikationstillstånd (aktuell chatt, chattlista, användare), notifiera lyssnare vid ändringar, skapa meddelanden, kommunicera med server via HTTP | ChatModelListener, ConnectionHandler, User, Chat, Message |
-| ChatView | Skapa och visa Swing-UI, ta emot modellupdateringar via observer-callbacks, exponera lyssnare för användarinteraktion | ChatModelListener, ChatGUI, ChatListGUI, Chat, Message |
-| ChatGUI | Rendera meddelandehistorik (text + bilder) och användarlista för en enskild chatt | Chat, Message, User |
-| ChatListGUI | Rendera sidopanel med knappar för tillgängliga chattrum | - |
-| ChatController | Hantera användarinteraktion (skicka meddelande, byta chatt, login, disconnect, skicka bild), brygga mellan View och Model, initiera WebSocket-anslutning, applikationens main() | ChatModel, ChatView, ClientWebSocketHandler, ConnectionHandler, WebSocketEventListener, Chat, User, Message |
-| ConnectionHandler | HTTP-klient mot serverns REST API (Get_Chats, Get_Chat, Connect, Disconnect, Send_Message, Send_Image, Get_Image) | User, Chat, Message, Gson_InstantTypeAdapter |
-| ClientWebSocketHandler | WebSocket-klient för realtidskommunikation, vidarebefordra inkommande meddelanden till lyssnare | WebSocketEventListener, Message, Gson_InstantTypeAdapter |
-| WebSocketEventListener | Definiera observer-interface för WebSocket-events (onMessageReceived, onConnected, onDisconnected, onError) | Message |
+| User | Store username, compare users (equals/hashCode) | - |
+| Message | Store message text/image hash, timestamp, sender, image flag | User |
+| Chat | Store chat name, message history, participant list | Message, User |
+| ChatModelListener | Define observer interface for model changes (onMessageAdded, onChatsLoaded, onChatSelected, onMessageReceived, updateUserList) | Chat, Message |
+| ChatModel | Store application state (current chat, chat list, user), notify listeners on state changes, create messages, communicate with server via HTTP | ChatModelListener, ConnectionHandler, User, Chat, Message |
+| ChatView | Create and display Swing UI, receive model updates via observer callbacks, expose listeners for user interaction | ChatModelListener, ChatGUI, ChatListGUI, Chat, Message, User |
+| ChatGUI | Render message history (text + images) and user list for a single chat | Chat, Message, User |
+| ChatListGUI | Render sidebar panel with buttons for available chat rooms | - |
+| ChatController | Handle user interaction (send message, switch chat, login, disconnect, send image), bridge View and Model, initialize WebSocket connection, application entry point main() | ChatModel, ChatView, ClientWebSocketHandler, ConnectionHandler, WebSocketEventListener, Chat, User, Message |
+| ConnectionHandler | HTTP client for server REST API (Get_Chats, Get_Chat, Connect, Disconnect, Send_Message, Send_Image, Get_Image) | User, Chat, Message, Gson_InstantTypeAdapter |
+| ClientWebSocketHandler | WebSocket client for real-time communication, forward incoming messages to listeners | WebSocketEventListener, Message, User, ConnectionHandler, Gson_InstantTypeAdapter |
+| WebSocketEventListener | Define observer interface for WebSocket events (onMessageReceived, onConnected, onDisconnected, onError, updateUserList) | Message |
 
 ### Server
 
 | Class | Responsibility | Collaborator |
 |-|-|-|
-| Server | Entry point, skapa HTTP-server (port 2345) och WebSocket-server (port 2346), registrera alla routes/handlers | DatabaseHandler, alla Handlers, WebsocketHandler |
-| DatabaseHandler | SQLite-persistens: skapa tabeller, CRUD för users/chats/messages/chat_users | User, Message, Chat |
-| ConnectHandler | HTTP POST — lägg till användare i en chatt (skapa user/chat om de inte finns) | DatabaseHandler, User |
-| DisconnectHandler | HTTP POST — ta bort användare från en chatt | DatabaseHandler, User |
-| GetChatHandler | HTTP GET — returnera ett komplett Chat-objekt (meddelanden + användare) som JSON | DatabaseHandler, Chat |
-| GetChatsHandler | HTTP GET — returnera lista av chattnamn som en användare tillhör | DatabaseHandler, User |
-| SendMessageHandler | HTTP POST — spara meddelande i databas (deprecated, ersatt av WebSocket) | DatabaseHandler, Message |
-| PostImageHandler | HTTP POST — ta emot base64-bild och spara till resources/ | DatabaseHandler |
-| GetImageHandler | HTTP GET — returnera base64-kodad bild från resources/ | DatabaseHandler |
-| WebsocketHandler | WebSocket-server: hantera connect/enterchat/send-meddelanden, broadcasta till aktiva användare i chatten | DatabaseHandler, UserChatMap, Message |
-| UserChatMap | Dubbelriktad map (user ↔ chat) för att spåra vilka användare som är aktiva i vilken chatt via WebSocket | - |
-| Gson_InstantTypeAdapter | Gson TypeAdapter för serialisering/deserialisering av java.time.Instant (ISO 8601) | - |
+| Server | Entry point, create HTTP server (port 2345) and WebSocket server (port 2346), register all routes/handlers | DatabaseHandler, all Handlers, WebsocketHandler |
+| DatabaseHandler | SQLite persistence: create tables, CRUD for users/chats/messages/chat_users | User, Message, Chat |
+| ConnectHandler | HTTP POST — add user to a chat (create user/chat if they don't exist), trigger user list broadcast | DatabaseHandler, WebsocketHandler, User |
+| DisconnectHandler | HTTP POST — remove user from a chat, trigger user list broadcast | DatabaseHandler, WebsocketHandler, User |
+| GetChatHandler | HTTP GET — return a complete Chat object (messages + users) as JSON | DatabaseHandler, Chat |
+| GetChatsHandler | HTTP GET — return list of chat names a user belongs to | DatabaseHandler, User |
+| SendMessageHandler | HTTP POST — persist message to database (deprecated, replaced by WebSocket) | DatabaseHandler, Message |
+| PostImageHandler | HTTP POST — receive base64 image and save to resources/ | - |
+| GetImageHandler | HTTP GET — return base64-encoded image from resources/ | - |
+| WebsocketHandler | WebSocket server: handle connect/enterchat/send messages, broadcast to active users in the chat | DatabaseHandler, UserChatMap, Message, User |
+| UserChatMap | Bidirectional map (user ↔ chat) for tracking which users are active in which chat via WebSocket | - |
+| Gson_InstantTypeAdapter | Gson TypeAdapter for serialization/deserialization of java.time.Instant (ISO 8601) | - |
 
 
 
@@ -78,7 +78,7 @@ LATEX CRC NEDAN:
 ```latex
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage[swedish]{babel}
+\usepackage[english]{babel}
 \usepackage{longtable}
 \usepackage{array}
 \usepackage{booktabs}
@@ -86,7 +86,7 @@ LATEX CRC NEDAN:
 \geometry{a4paper, margin=2cm}
 
 \title{CRC -- Chat Application}
-\author{Grupp 9}
+\author{Group 9}
 \date{}
 
 \begin{document}
@@ -105,62 +105,62 @@ LATEX CRC NEDAN:
 \endhead
 
 User &
-Lagra användarnamn, jämföra användare (equals/hashCode) &
+Store username, compare users (equals/hashCode) &
 -- \\
 \hline
 
 Message &
-Lagra meddelandetext/bildhash, tidsstämpel, avsändare, bildflagga &
+Store message text/image hash, timestamp, sender, image flag &
 User \\
 \hline
 
 Chat &
-Lagra chattnamn, meddelandehistorik, deltagarlista &
+Store chat name, message history, participant list &
 Message, User \\
 \hline
 
 ChatModelListener &
-Definiera observer-interface för modelländringar (onMessageAdded, onChatsLoaded, onChatSelected, onMessageReceived) &
+Define observer interface for model changes (onMessageAdded, onChatsLoaded, onChatSelected, onMessageReceived, updateUserList) &
 Chat, Message \\
 \hline
 
 ChatModel &
-Lagra applikationstillstånd (aktuell chatt, chattlista, användare), notifiera lyssnare vid ändringar, skapa meddelanden, kommunicera med server via HTTP &
+Store application state (current chat, chat list, user), notify listeners on state changes, create messages, communicate with server via HTTP &
 ChatModelListener, ConnectionHandler, User, Chat, Message \\
 \hline
 
 ChatView &
-Skapa och visa Swing-UI, ta emot modellupdateringar via observer-callbacks, exponera lyssnare för användarinteraktion &
-ChatModelListener, ChatGUI, ChatListGUI, Chat, Message \\
+Create and display Swing UI, receive model updates via observer callbacks, expose listeners for user interaction &
+ChatModelListener, ChatGUI, ChatListGUI, Chat, Message, User \\
 \hline
 
 ChatGUI &
-Rendera meddelandehistorik (text + bilder) och användarlista för en enskild chatt &
+Render message history (text + images) and user list for a single chat &
 Chat, Message, User \\
 \hline
 
 ChatListGUI &
-Rendera sidopanel med knappar för tillgängliga chattrum &
+Render sidebar panel with buttons for available chat rooms &
 -- \\
 \hline
 
 ChatController &
-Hantera användarinteraktion (skicka meddelande, byta chatt, login, disconnect, skicka bild), brygga mellan View och Model, initiera WebSocket-anslutning, applikationens main() &
+Handle user interaction (send message, switch chat, login, disconnect, send image), bridge View and Model, initialize WebSocket connection, application entry point main() &
 ChatModel, ChatView, ClientWebSocketHandler, ConnectionHandler, WebSocketEventListener, Chat, User, Message \\
 \hline
 
 ConnectionHandler &
-HTTP-klient mot serverns REST API (Get\_Chats, Get\_Chat, Connect, Disconnect, Send\_Message, Send\_Image, Get\_Image) &
+HTTP client for server REST API (Get\_Chats, Get\_Chat, Connect, Disconnect, Send\_Message, Send\_Image, Get\_Image) &
 User, Chat, Message, Gson\_InstantTypeAdapter \\
 \hline
 
 ClientWebSocketHandler &
-WebSocket-klient för realtidskommunikation, vidarebefordra inkommande meddelanden till lyssnare &
-WebSocketEventListener, Message, Gson\_InstantTypeAdapter \\
+WebSocket client for real-time communication, forward incoming messages to listeners &
+WebSocketEventListener, Message, User, ConnectionHandler, Gson\_InstantTypeAdapter \\
 \hline
 
 WebSocketEventListener &
-Definiera observer-interface för WebSocket-events (onMessageReceived, onConnected, onDisconnected, onError) &
+Define observer interface for WebSocket events (onMessageReceived, onConnected, onDisconnected, onError, updateUserList) &
 Message \\
 \hline
 
@@ -179,62 +179,62 @@ Message \\
 \endhead
 
 Server &
-Entry point, skapa HTTP-server (port 2345) och WebSocket-server (port 2346), registrera alla routes/handlers &
-DatabaseHandler, alla Handlers, WebsocketHandler \\
+Entry point, create HTTP server (port 2345) and WebSocket server (port 2346), register all routes/handlers &
+DatabaseHandler, all Handlers, WebsocketHandler \\
 \hline
 
 DatabaseHandler &
-SQLite-persistens: skapa tabeller, CRUD för users/chats/messages/chat\_users &
+SQLite persistence: create tables, CRUD for users/chats/messages/chat\_users &
 User, Message, Chat \\
 \hline
 
 ConnectHandler &
-HTTP POST --- lägg till användare i en chatt (skapa user/chat om de inte finns) &
-DatabaseHandler, User \\
+HTTP POST --- add user to a chat (create user/chat if they don't exist), trigger user list broadcast &
+DatabaseHandler, WebsocketHandler, User \\
 \hline
 
 DisconnectHandler &
-HTTP POST --- ta bort användare från en chatt &
-DatabaseHandler, User \\
+HTTP POST --- remove user from a chat, trigger user list broadcast &
+DatabaseHandler, WebsocketHandler, User \\
 \hline
 
 GetChatHandler &
-HTTP GET --- returnera ett komplett Chat-objekt (meddelanden + användare) som JSON &
+HTTP GET --- return a complete Chat object (messages + users) as JSON &
 DatabaseHandler, Chat \\
 \hline
 
 GetChatsHandler &
-HTTP GET --- returnera lista av chattnamn som en användare tillhör &
+HTTP GET --- return list of chat names a user belongs to &
 DatabaseHandler, User \\
 \hline
 
 SendMessageHandler &
-HTTP POST --- spara meddelande i databas (deprecated, ersatt av WebSocket) &
+HTTP POST --- persist message to database (deprecated, replaced by WebSocket) &
 DatabaseHandler, Message \\
 \hline
 
 PostImageHandler &
-HTTP POST --- ta emot base64-bild och spara till resources/ &
-DatabaseHandler \\
+HTTP POST --- receive base64 image and save to resources/ &
+-- \\
 \hline
 
 GetImageHandler &
-HTTP GET --- returnera base64-kodad bild från resources/ &
-DatabaseHandler \\
+HTTP GET --- return base64-encoded image from resources/ &
+-- \\
 \hline
 
 WebsocketHandler &
-WebSocket-server: hantera connect/enterchat/send-meddelanden, broadcasta till aktiva användare i chatten &
-DatabaseHandler, UserChatMap, Message \\
+WebSocket server: handle connect/enterchat/send messages, broadcast to active users in the chat &
+DatabaseHandler, UserChatMap, Message, User \\
 \hline
 
 UserChatMap &
-Dubbelriktad map (user $\leftrightarrow$ chat) för att spåra vilka användare som är aktiva i vilken chatt via WebSocket &
+Bidirectional map (user $\leftrightarrow$ chat) for tracking which users are active in which chat via WebSocket &
 -- \\
 \hline
 
 Gson\_InstantTypeAdapter &
-Gson TypeAdapter för serialisering/deserialisering av java.time.Instant (ISO 8601) &
+Gson TypeAdapter for serialization/deserialization of java.time.Instant (ISO 8601) &
 -- \\
 \hline
 
