@@ -58,7 +58,7 @@ public class ConnectHandler implements HttpHandler {
 
                 System.out.println(String.format("User %s added to chat %s", user.getName(), chat));
                 httpexchange.sendResponseHeaders(200, -1);
-                wsHandler.send_chatlist(chat, gson);
+                wsHandler.send_chatlist(chat);
             } catch (Exception e) {
                 e.printStackTrace();
                 httpexchange.sendResponseHeaders(400, -1);

@@ -56,7 +56,7 @@ public class DisconnectHandler implements HttpHandler {
                 
                 System.out.println(String.format("User %s removed from chat %s", user.getName(), chat));
                 db.removeUserFromChat(user, chat);
-                wsHandler.send_chatlist(chat, gson);
+                wsHandler.send_chatlist(chat);
                 httpexchange.sendResponseHeaders(200, -1);
             } catch (Exception e) {
                 e.printStackTrace();
