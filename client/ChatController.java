@@ -189,10 +189,8 @@ public class ChatController {
      */
     private void handleSendMessage() {
         String text = view.getInputText();
-        Message message = model.createMessage(text);
-        Chat chat = model.getCurrentChat();
         if (text != null && !text.trim().isEmpty()) {
-            webSocket.sendMessageToServer(message, chat.getChatName());
+            model.sendMessage(text, webSocket);
             view.clearInputField();
         }
     }
@@ -215,10 +213,7 @@ public class ChatController {
            }
 
            try {
-                String hash = ConnectionHandler.Send_Image(selectedFile.getAbsolutePath());
-                Message message = model.createImageMessage(hash);
-                Chat chat = model.getCurrentChat();
-                webSocket.sendMessageToServer(message, chat.getChatName());
+                model.sendImageMessage(selectedFile.getAbsolutePath(), webSocket);
            } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Failed to read image file.", "Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();

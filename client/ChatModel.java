@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import server.WebsocketHandler;
+
 /**
  * ChatModel - The Model component of the MVC pattern.
  * This class is responsible for the application's business logic and state management.
@@ -148,6 +150,29 @@ public class ChatModel {
             Chat updatedChat = ConnectionHandler.Get_Chat(chat.getChatName());
             notifyMessageAdded(updatedChat);
         }
+    }
+
+    /**
+     * Sends a message to the server for the currently active chat room.
+     * @param text The text content of the message to send.
+     * @param ws The ClientWebSocketHandler used to send the message to the server.
+     */
+    public void sendMessage(String text, ClientWebSocketHandler ws) {
+        Message message = createMessage(text);
+        Chat chat = getCurrentChat();
+        ws.sendMessageToServer(message, chat.getChatName());
+    }
+
+    /**
+     * Sends an image message to the server for the currently active chat room.
+     * @param filepath The file path of the image to send.
+     * @param ws The ClientWebSocketHandler used to send the message to the server.
+     */
+    public void sendImageMessage(String filepath, ClientWebSocketHandler ws) {
+        String hash = ConnectionHandler.Send_Image(filepath);
+        Message message = createImageMessage(hash);
+        Chat chat = getCurrentChat();
+        ws.sendMessageToServer(message, chat.getChatName());
     }
 
     /**
