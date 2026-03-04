@@ -139,7 +139,7 @@ public class ChatModel {
      * Updates the local message list and triggers a listener notification with
      * the updated chat history from the server.
      * @param message The Message object to send.
-     * @param chat The Chat destination for the message.
+     * @param chat The Chat destination for the m: essage.
      */
     public void addMessage(Message message, Chat chat) {
         if (message != null && !message.toString().trim().isEmpty()) {

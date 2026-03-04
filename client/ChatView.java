@@ -221,7 +221,7 @@ public class ChatView implements ChatModelListener {
     }
 
     /** Registers a listener for the "Add Chat" button. */
-    public void addAddChatButtonListener(ActionListener l) { addChatButton.addActionListener(l); }
+    public void addChatButtonListener(ActionListener l) { addChatButton.addActionListener(l); }
     
     /** Registers a listener for the "Send" message button. */
     public void addSendButtonListener(ActionListener l) { sendButton.addActionListener(l); }

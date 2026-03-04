@@ -100,7 +100,7 @@ public class ChatController {
     private void attachEventListeners() {
         view.addSendButtonListener(evt -> handleSendMessage());
         view.addSendImageButtonListener(evt -> handleSendImageMessage());
-        view.addAddChatButtonListener(evt -> handleAddChat());
+        view.addChatButtonListener(evt -> handleAddChat());
         view.addLoginButtonListener(evt -> handleLogin());
         view.addChatSelectionListener(evt -> handleChatSelection(new Chat(evt.getActionCommand())));
         view.addDisconnectButtonListener(evt -> handleDisconnect());
