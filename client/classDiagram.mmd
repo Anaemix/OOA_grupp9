@@ -209,6 +209,23 @@ classDiagram
     }
 
 
+    %% Interfaces
+
+    class ChatModelListener {
+        <<Interface>>
+        +onMessageAdded(chat: Chat): void
+        +onChatsLoaded(chats: ArrayList<String>, ActiveChat: String): void
+        +onChatSelected(chat: Chat): void
+        +onMessageReceived(message: Message): void
+        +updateUserList(chatName: String, activeUsers: String[], inChatUsers: ArrayList<String>): void
+    }
+
+    class WebSocketEventListener {
+        <<Interface>>
+        
+    }
+
+
 
 
 
