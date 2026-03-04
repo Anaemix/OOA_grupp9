@@ -38,7 +38,6 @@ public class ChatListGUI {
         c.anchor = GridBagConstraints.NORTH;
         c.gridwidth = GridBagConstraints.REMAINDER;
         this.chatListPanel = new JPanel(gridBag);
-        System.out.println(chats + "   ◀─▶ ActiveChat: " + ActiveChat);
         for (String chat : chats) {
             JButton chatButton = new JButton(chat);
             if (chat.equals(ActiveChat)) {

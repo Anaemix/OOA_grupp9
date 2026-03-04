@@ -80,8 +80,13 @@ public class ChatModel {
      */
     public void setCurrentChat(Chat currentChat) {
         this.currentChat = currentChat;
-        this.activeChat = currentChat.getChatName();
-        notifyChatSelected(currentChat);
+        if (currentChat == null){
+            this.activeChat = null;
+        }
+        else {
+            this.activeChat = currentChat.getChatName();
+            notifyChatSelected(currentChat);
+        }
     }
 
     /** @return The currently selected Chat room. */
