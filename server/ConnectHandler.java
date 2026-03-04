@@ -52,8 +52,6 @@ public class ConnectHandler implements HttpHandler {
                 User user = gson.fromJson(jsonobject.getAsJsonObject("user"), User.class);
                 String chat = jsonobject.get("chat").getAsString();
                 
-                db.addUser(user);
-                db.addChat(chat);
                 db.addUserToChat(user, chat);
 
                 System.out.println(String.format("User %s added to chat %s", user.getName(), chat));

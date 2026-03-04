@@ -171,7 +171,7 @@ public class DatabaseHandler {
     *
     * @param user the user to add
     */
-    public void addUser(User user) {
+    private void addUser(User user) {
         
         String adduser = "INSERT OR IGNORE INTO users (name) VALUES (?)";
         try(PreparedStatement pstmt = connection.prepareStatement(adduser)) {
@@ -191,7 +191,7 @@ public class DatabaseHandler {
     *
     * @param chatname the name of the chat
     */
-    public void addChat(String chatname) {
+    private void addChat(String chatname) {
         String addchat = "INSERT OR IGNORE INTO chats (name) VALUES (?)";
         try (PreparedStatement pstmt = connection.prepareStatement(addchat)) {
             pstmt.setString(1, chatname);
@@ -213,7 +213,8 @@ public class DatabaseHandler {
     */
     public void addUserToChat(User user, String chatname) {
         String adduser = "INSERT OR IGNORE INTO chat_users (username,chatname) VALUES (?,?)"; 
-
+        addUser(user);
+        addChat(chatname);
         try(PreparedStatement stmt = connection.prepareStatement(adduser)){
             stmt.setString(1, user.getName());
             stmt.setString(2, chatname);
