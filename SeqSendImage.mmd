@@ -1,0 +1,41 @@
+sequenceDiagram
+    autonumber
+    Actor U as User
+    box client
+        Participant C as ChatController
+        Participant M as ChatModel
+        Participant V as ChatView
+        Participant Com as CommunicationHandler
+        Participant web as WebSocketClient
+    end
+    box server
+        Participant S as Server
+        Participant DB as DatabaseHandler
+    end
+    U->>+C: SendImage(path)
+        C->>+M: sendImage(path)
+            M->>+Com: sendImagetToServer(path)
+                Com->>+S: Post request /post_image/hash
+                S->>-Com: statuscode
+            Com->>-M: hash
+            M->>web: sendMessage(Message, chatname)
+                activate web
+                web->>+S: ws message
+                deactivate web
+                web->>M: 
+            M->>-C:
+                    S->>DB: Store
+                    DB->>S:
+                    S->>S: send_message(Message, chat)<br>Send ws message to all users in chat
+                S->>-web: ws message
+                activate web
+                alt image is not cached
+                    web->>+Com: 
+                        Com->>+S: get_image/hash
+                        S->>-Com: image
+                    Com->>-web: image
+                end
+        web->>C:
+        deactivate web
+        C->>+V: onMessageReceived(Message)
+    C->>-U: done 

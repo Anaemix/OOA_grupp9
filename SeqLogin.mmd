@@ -1,0 +1,30 @@
+sequenceDiagram
+    Actor U as User
+    box client
+        Participant C as ChatController
+        Participant M as ChatModel
+        Participant V as ChatView
+        Participant Com as CommunicationHandler
+        Participant web as WebSocketClient
+    end
+    box server
+        Participant S as Server
+        Participant DB as DatabaseHandler
+    end
+    web->>S: WS Connection
+    S->>web: 
+    autonumber
+    U->>+C: Login(username)
+        C->>web: login(username)
+        web->>S: login(username)
+        C->>+M: setUser(username)
+            M->>+Com: getChatList(username)
+                Com->>+S: HttpRequest(GET /get_chats/username)
+                    S->>+DB: getAllChats(username)
+                    DB->>-S: chatList
+                S->>-Com: HttpResponse(chatList)
+            Com->>-M: chatList
+            M->>V: notifyChatsLoaded(chatList)
+        M->>-C: updateChatList(chatList)
+        C->>V: removeChatPanel()
+    C->>-U: done

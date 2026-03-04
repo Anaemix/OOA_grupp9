@@ -1,0 +1,26 @@
+sequenceDiagram
+    autonumber
+    Actor U as User
+    box client
+        Participant C as ChatController
+        Participant M as ChatModel
+        Participant V as ChatView
+        Participant Com as CommunicationHandler
+        Participant web as WebSocketClient
+    end
+    box server
+        Participant S as Server
+        Participant DB as DatabaseHandler
+    end
+    U->>+C: AddChat(chatname)
+        C->>+M: addChat(chatname)
+            M->>+Com: Connect(user, chatname)
+                Com->>+S: HttpRequest /connect
+                    S->>DB: addUserToChat(u, c)
+                    S->>S: send_chatlist(chat)<br>Send ws message to all users in chat
+                S->>-Com: statuscode
+            Com->>-M: return
+            M->>M: getChats()<br>Request list of chats, shown in SeqLogin
+            M->>V: notifyChatsLoaded(c, a)
+        M->>-C: return
+    C->>-U: done
