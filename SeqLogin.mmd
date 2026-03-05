@@ -11,12 +11,16 @@ sequenceDiagram
         Participant S as Server
         Participant DB as DatabaseHandler
     end
-    web->>S: WS Connection
-    S->>web: 
+    #web->>S: WS Connection
+    #S->>web: 
     autonumber
     U->>+C: Login(username)
-        C->>web: login(username)
-        web->>S: login(username)
+        C->>+web: login(username)
+            web->>S: login(username)
+            activate S
+        web->>-C: 
+                S->>S: Map username with connection
+                deactivate S
         C->>+M: setUser(username)
             M->>+Com: getChatList(username)
                 Com->>+S: HttpRequest(GET /get_chats/username)

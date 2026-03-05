@@ -5,14 +5,15 @@ sequenceDiagram
         Participant C as ChatController
         Participant M as ChatModel
         Participant V as ChatView
-        Participant Com as CommunicationHandler
+        Participant Com as ConnectionHandler
         Participant web as WebSocketClient
     end
     box server
         Participant S as Server
         Participant DB as DatabaseHandler
     end
-    U->>+C: SendImage(path)
+    U->>C: SendImage(path)
+    activate C
         C->>+M: sendImage(path)
             M->>+Com: sendImagetToServer(path)
                 Com->>+S: Post request /post_image/hash
@@ -24,6 +25,7 @@ sequenceDiagram
                 deactivate web
                 web->>M: 
             M->>-C:
+            deactivate C
                     S->>DB: Store
                     DB->>S:
                     S->>S: send_message(Message, chat)<br>Send ws message to all users in chat
@@ -36,6 +38,9 @@ sequenceDiagram
                     Com->>-web: image
                 end
         web->>C:
+        activate C
         deactivate web
         C->>+V: onMessageReceived(Message)
-    C->>-U: done 
+        V->>-C:
+    C->>U: done
+    deactivate C 

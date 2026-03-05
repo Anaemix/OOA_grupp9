@@ -16,11 +16,13 @@ sequenceDiagram
         C->>+M: addChat(chatname)
             M->>+Com: Connect(user, chatname)
                 Com->>+S: HttpRequest /connect
-                    S->>DB: addUserToChat(u, c)
+                    S->>+DB: addUserToChat(u, c)
+                    DB->>-S:
                     S->>S: send_chatlist(chat)<br>Send ws message to all users in chat
                 S->>-Com: statuscode
             Com->>-M: return
             M->>M: getChats()<br>Request list of chats, shown in SeqLogin
-            M->>V: notifyChatsLoaded(c, a)
+            M->>+V: notifyChatsLoaded(c, a)
+            V->>-M: 
         M->>-C: return
     C->>-U: done
