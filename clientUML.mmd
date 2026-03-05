@@ -109,7 +109,7 @@ classDiagram
         -JPanel chatPanel
         -ChatGUI chatGUI
         -ActionListener chatSelectionListener
-        -ArrayLisy<String> activeUsers
+        -ArrayList<String> activeUsers
 
         +createAndShowUi(initUser: String): void
         +onMessageAdded(chat: Chat): void
@@ -222,8 +222,50 @@ classDiagram
 
     class WebSocketEventListener {
         <<Interface>>
-        
+        +onMessageReceived(message: Message): void
+        +onConnected(): void
+        +onDisconnected(): void
+        +onError(error: String): void
+        +updateUserList(chatName: String, activeUsers: String[], inChatUsers: ArrayList<String>): void
     }
+
+    class WebSocketClient {
+        <<Abstract>>
+    }
+
+
+    %% Inheritance
+    ChatView ..|> ChatModelListener : implements
+    ClientWebSocketHandler --|> WebSocketClient: extends
+
+    %% Composition
+    Chat *-- Message
+    Chat *-- User
+
+    ChatController *-- ChatModel
+    ChatController *-- ChatView
+    ChatController *-- ClientWebSocketHandler
+
+    ChatModel *-- ConnectionHandler
+
+    ChatView *-- ChatListGUI
+    ChatView *-- ChatGUI
+
+
+    Message *-- User
+
+    %% Association
+    ChatModel --> Chat
+    ChatModel --> User
+
+    %% Aggregation
+    ChatModel o-- ChatModelListener
+    ClientWebSocketHandler o-- WebSocketEventListener
+
+
+
+
+
 
 
 
