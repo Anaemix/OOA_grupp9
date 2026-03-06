@@ -44,7 +44,7 @@ Server                          Client
 | Message | Store message text/image hash, timestamp, sender, image flag | User |
 | Chat | Store chat name, message history, participant list | Message, User |
 | ChatModelListener | Define observer interface for model changes (onMessageAdded, onChatsLoaded, onChatSelected, onMessageReceived, updateUserList) | Chat, Message |
-| ChatModel | Store application state (current chat, chat list, user), notify listeners on state changes, create messages, communicate with server via HTTP | ChatModelListener, ConnectionHandler, User, Chat, Message |
+| ChatModel | Store application state (current chat, chat list, user), notify listeners on state changes, create messages, communicate with server via HTTP and WebSocket | ChatModelListener, ConnectionHandler, ClientWebSocketHandler, User, Chat, Message |
 | ChatView | Create and display Swing UI, receive model updates via observer callbacks, expose listeners for user interaction | ChatModelListener, ChatGUI, ChatListGUI, Chat, Message, User |
 | ChatGUI | Render message history (text + images) and user list for a single chat | Chat, Message, User |
 | ChatListGUI | Render sidebar panel with buttons for available chat rooms | - |
@@ -125,8 +125,8 @@ Chat, Message \\
 \hline
 
 ChatModel &
-Store application state (current chat, chat list, user), notify listeners on state changes, create messages, communicate with server via HTTP &
-ChatModelListener, ConnectionHandler, User, Chat, Message \\
+Store application state (current chat, chat list, user), notify listeners on state changes, create messages, communicate with server via HTTP and WebSocket &
+ChatModelListener, ConnectionHandler, ClientWebSocketHandler, User, Chat, Message \\
 \hline
 
 ChatView &
