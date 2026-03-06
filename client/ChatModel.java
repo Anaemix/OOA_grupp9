@@ -55,6 +55,7 @@ public class ChatModel {
      */
     public void setUser(User user) {
         this.user = user;
+        this.activeChat = null;
         setChats(ConnectionHandler.Get_Chats(user));
     }
 
