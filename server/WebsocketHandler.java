@@ -79,6 +79,11 @@ public class WebsocketHandler extends WebSocketServer {
      * @param username user
      */
     private void connect(InetSocketAddress address, String username) {
+        if(connToUsers.containsKey(address)){
+            String chatToUpdate = userChatMap.getChat(connToUsers.get(address));
+            userChatMap.remove(connToUsers.get(address));
+            send_chatlist(chatToUpdate);
+        }
         connToUsers.put(address, username);
         System.out.println(String.format("%s connected as %s", address, username));
     }
