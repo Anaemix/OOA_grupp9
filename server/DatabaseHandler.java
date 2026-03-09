@@ -31,7 +31,7 @@ import client.Chat;
  * @version 1.0
  */
 
-public class DatabaseHandler {
+public class DatabaseHandler implements ChatDatabase{
 
     private Connection connection;
     
@@ -144,46 +144,28 @@ public class DatabaseHandler {
         }
     }
 
+    
     /**
-    * Removes a user from a specific chat.
-    *
-    * @param user     the user to remove
-    * @param chatName the name of the chat
-    */
-    public void removeUserFromChat(User user, String chatName) {
-        String remove = "DELETE FROM chat_users WHERE username = ? AND chatname = (?)";
-        try(PreparedStatement pstmt = connection.prepareStatement(remove)) {
-            pstmt.setString(1, user.getName());
-            pstmt.setString(2, chatName);
-            pstmt.executeUpdate();
-            System.out.println("user removed from chat");
-
-        }
-        catch(SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-    * Adds a user to the database.
-    * <p>
-    * If the user already exists, the operation is ignored.
-    * </p>
+     * Adds a user to the database.
+     * <p>
+     * If the user already exists, the operation is ignored.
+     * </p>
     *
     * @param user the user to add
     */
-    public void addUser(User user) {
-        
-        String adduser = "INSERT OR IGNORE INTO users (name) VALUES (?)";
-        try(PreparedStatement pstmt = connection.prepareStatement(adduser)) {
-            pstmt.setString(1, user.getName());
-            pstmt.executeUpdate();
+   
+   public void addUser(User user) {
+       
+       String adduser = "INSERT OR IGNORE INTO users (name) VALUES (?)";
+       try(PreparedStatement pstmt = connection.prepareStatement(adduser)) {
+           pstmt.setString(1, user.getName());
+           pstmt.executeUpdate();
             
         }catch(SQLException e) {
             e.printStackTrace();
         }
     }
-
+    
     /**
     * Adds a new chat to the database.
     * <p>
@@ -203,32 +185,51 @@ public class DatabaseHandler {
             e.printStackTrace();
         }
     }
-
+    
     /**
-    * Adds a user to a specific chat.
-    * <p>
-    * If the user is already a member of the chat, the operation is ignored.
-    * </p>
+     * Adds a user to a specific chat.
+     * <p>
+     * If the user is already a member of the chat, the operation is ignored.
+     * </p>
     *
     * @param user     the user to add
     * @param chatname the name of the chat
     */
-    public void addUserToChat(User user, String chatname) {
-        String adduser = "INSERT OR IGNORE INTO chat_users (username,chatname) VALUES (?,?)"; 
+   public void addUserToChat(User user, String chatname) {
+       String adduser = "INSERT OR IGNORE INTO chat_users (username,chatname) VALUES (?,?)"; 
 
         try(PreparedStatement stmt = connection.prepareStatement(adduser)){
             stmt.setString(1, user.getName());
             stmt.setString(2, chatname);
             stmt.executeUpdate();
-
-        }
             
+        }
+        
         catch (SQLException e) {
             e.printStackTrace();
         }
     }
     /**
-    * Inserts a message into the database.
+    * Removes a user from a specific chat.
+    *
+    * @param user     the user to remove
+    * @param chatName the name of the chat
+    */
+    public void removeUserFromChat(User user, String chatName) {
+        String remove = "DELETE FROM chat_users WHERE username = ? AND chatname = (?)";
+        try(PreparedStatement pstmt = connection.prepareStatement(remove)) {
+            pstmt.setString(1, user.getName());
+            pstmt.setString(2, chatName);
+            pstmt.executeUpdate();
+            System.out.println("user removed from chat");
+ 
+        }
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Inserts a message into the database.
     *
     * @param chatName the name of the chat where the message was sent
     * @param message  the message object containing content, sender, timestamp,
