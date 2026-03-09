@@ -14,10 +14,6 @@ public interface ChatDatabase {
 
     void closeConnection();
 
-    void addUser(User user);
-
-    void addChat(String chatname);
-
     void addUserToChat(User user, String chatname);
 
     void removeUserFromChat(User user, String chatName);

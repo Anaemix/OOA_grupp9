@@ -2,11 +2,14 @@
 package server;
 
 import client.Message;
+import client.User;
 import org.java_websocket.server.WebSocketServer;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -15,9 +18,6 @@ import java.time.Instant;
 
 /**
  * This class handles the websocket connections to the server.
- * 
- * @author Henning
- * @version 0.1
  */
 public class WebsocketHandler extends WebSocketServer {
     /** Hashmap that maps each connection address to a user to allow for simpler communication in the future */
@@ -62,15 +62,16 @@ public class WebsocketHandler extends WebSocketServer {
         Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
         JsonObject j = gson.fromJson(incoming, JsonObject.class);
         String messageType = j.get("t").getAsString();
-        if (
-        connToUsers.containsKey(conn.getRemoteSocketAddress()) && messageType.equals("send"))
+        Boolean UserConnected = connToUsers.containsKey(conn.getRemoteSocketAddress());
+        if (UserConnected && messageType.equals("send"))
             send_message(gson, j);
-        else if (
-        connToUsers.containsKey(conn.getRemoteSocketAddress()) && messageType.equals("enterchat"))
-            enterChat(connToUsers.get(conn.getRemoteSocketAddress()), j.get("chat").getAsString());
+        else if (UserConnected && messageType.equals("enterchat"))
+            enterChat(connToUsers.get(conn.getRemoteSocketAddress()), j.get("chat").getAsString(), gson);
+        else if (UserConnected && messageType.equals("updatechatlist"))
+            send_chatlist(j.get("chat").getAsString());
         else if (messageType.equals("connect"))
-            connect(conn.getRemoteSocketAddress(), j.get("user").getAsString());
-    }
+            connect(conn.getRemoteSocketAddress(), j.get("name").getAsString());
+    } 
 
     /**
      * Maps address with a user
@@ -78,8 +79,32 @@ public class WebsocketHandler extends WebSocketServer {
      * @param username user
      */
     private void connect(InetSocketAddress address, String username) {
+        if(connToUsers.containsKey(address)){
+            String chatToUpdate = userChatMap.getChat(connToUsers.get(address));
+            userChatMap.remove(connToUsers.get(address));
+            send_chatlist(chatToUpdate);
+        }
         connToUsers.put(address, username);
         System.out.println(String.format("%s connected as %s", address, username));
+    }
+
+    /**
+     * Sends the list of users, active and inactive in a chat to all active users in the chat.
+     * @param chat chatname
+     * @param gson Gson object for serialization and deserialization
+     */
+    public void send_chatlist(String chat) {
+        Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
+        ArrayList<User> users = db.getChat(chat).getUsers();
+        JsonObject update = new JsonObject();
+        update.add("inChat", gson.toJsonTree(users));
+        update.addProperty("t", "chatlist");
+        update.addProperty("chat", chat);
+        update.add("active", gson.toJsonTree(userChatMap.getUsers(chat)));
+        for (WebSocket client : getConnections()) {
+            if (userChatMap.getUsers(chat).contains(connToUsers.get(client.getRemoteSocketAddress())))
+                client.send(gson.toJson(update));
+        }
     }
 
     /**
@@ -87,8 +112,16 @@ public class WebsocketHandler extends WebSocketServer {
      * @param user user
      * @param chatname chat that the user has entered
      */
-    private void enterChat(String user, String chatname) {
-        userChatMap.put(user , chatname);
+    private void enterChat(String user, String chatname, Gson gson) {
+        String usersPreviousChat = userChatMap.getChat(user);
+        if (usersPreviousChat.equals(chatname)) { // If the user is already in the chat, do nothing
+            return;
+        } else { // If the user is switching chat, update the userChatMap and send updated user lists to both the old and new chat
+            userChatMap.put(user , chatname);
+            send_chatlist(chatname);
+            send_chatlist(usersPreviousChat);
+        }
+
         System.out.println(String.format("User \"%s\" entered chat \"%s\"", user, chatname));
     }
 
@@ -110,6 +143,7 @@ public class WebsocketHandler extends WebSocketServer {
 
         Set<String> updateUsers = userChatMap.getUsers(chat);
         //For each connected client, if its corresponding user is in the updateUsers Set, send the message.
+        System.out.println(String.format("Message received in chat %s, forwarding to to %d clients", chat, updateUsers.size()));
         for (WebSocket client : getConnections()) {
             if (updateUsers.contains(connToUsers.get(client.getRemoteSocketAddress())))
                 client.send(SerializedUpdate);
@@ -129,6 +163,10 @@ public class WebsocketHandler extends WebSocketServer {
         
         if (connToUsers.containsKey(conn.getRemoteSocketAddress())) {
             System.out.println(connToUsers.get(conn.getRemoteSocketAddress()) + " disconnected!");
+            String user = connToUsers.get(conn.getRemoteSocketAddress());
+            String chatname = userChatMap.getChat(user);
+            userChatMap.remove(user);
+            send_chatlist(chatname);
             connToUsers.remove(conn.getRemoteSocketAddress());
         } else {
             System.out.println(conn.getRemoteSocketAddress() + " disconnected!");

@@ -1,26 +1,22 @@
 package server;
 
 import client.Message;
-
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-
 import java.time.Instant;
 import java.util.Set;
+
 
 /**
  * This http handler class handles sending messages to a chat.
  * This class and its functions are considered deprecated. Instead use {@link server.WebsocketHandler WebsocketHandler} connection for sending messages. 
- * @author Henning
- * @version 0.1
  */
 @Deprecated
 public class SendMessageHandler implements HttpHandler {

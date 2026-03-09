@@ -38,6 +38,7 @@ public class ChatView implements ChatModelListener {
     private JPanel chatPanel;
     private ChatGUI chatGUI;
     private ActionListener chatSelectionListener;
+    private ArrayList<String> activeUsers = new ArrayList<>();
 
     /**
      * Initializes the GUI components, sets up layouts, and displays the main frame.
@@ -121,6 +122,9 @@ public class ChatView implements ChatModelListener {
         chatGUI = new ChatGUI(chat);
         chatPanel.removeAll();
         chatPanel.add(chatGUI.getMainPanel(), BorderLayout.CENTER);
+        ArrayList<String> users = new ArrayList<>();
+        for (User user : chat.getUsers()) {users.add(user.getName());}
+        chatGUI.buildUserListPanel(this.activeUsers, users);
         chatPanel.revalidate();
         chatPanel.repaint();
     }
@@ -135,19 +139,39 @@ public class ChatView implements ChatModelListener {
     }
 
     /**
+     * Updates the user list in the sidebar when a chat update is received.
+     * @param chatName The name of the chat room being updated.
+     * @param activeUsers An array of usernames currently active in the chat.
+     * @param inChatUsers An ArrayList of usernames currently in the chat.
+     */
+    @Override
+    public void updateUserList(String chatName, String[] activeUsers, ArrayList<String> inChatUsers) {
+        this.activeUsers = new ArrayList<>();
+        if (activeUsers != null) {
+            for (String user : activeUsers) {
+                this.activeUsers.add(user);
+            }
+        }
+
+        chatGUI.buildUserListPanel(this.activeUsers, inChatUsers);
+        chatPanel.revalidate();
+        chatPanel.repaint();
+    }
+
+    /**
      * Populates the sidebar with the list of available chat rooms.
      * Ensures listeners are reapplied to new buttons.
      * @param chats An ArrayList of strings representing chat room names.
      */
     @Override
-    public void onChatsLoaded(ArrayList<String> chats) {
+    public void onChatsLoaded(ArrayList<String> chats, String ActiveChat) {
         // Ta bort gammal chattlista om den finns
         if (chatListScrollPane != null) {
             leftPanel.remove(chatListScrollPane);
         }
         
         // Skapa ny chattlista
-        chatListGUI = new ChatListGUI(chats);
+        chatListGUI = new ChatListGUI(chats, ActiveChat);
         chatListPanel = chatListGUI.getChatListPanel();
         chatListScrollPane = new JScrollPane(chatListPanel);
         chatListScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -170,6 +194,10 @@ public class ChatView implements ChatModelListener {
         chatGUI = new ChatGUI(chat);
         chatPanel.removeAll();
         chatPanel.add(chatGUI.getMainPanel(), BorderLayout.CENTER);
+        ArrayList<String> users = new ArrayList<>();
+        for (User user : chat.getUsers()) {users.add(user.getName());}
+        chatGUI.buildUserListPanel(this.activeUsers, users);
+        this.chatListGUI.setActiveChat(chat.getChatName());
         chatPanel.revalidate();
         chatPanel.repaint();
     }
@@ -193,7 +221,7 @@ public class ChatView implements ChatModelListener {
     }
 
     /** Registers a listener for the "Add Chat" button. */
-    public void addAddChatButtonListener(ActionListener l) { addChatButton.addActionListener(l); }
+    public void addChatButtonListener(ActionListener l) { addChatButton.addActionListener(l); }
     
     /** Registers a listener for the "Send" message button. */
     public void addSendButtonListener(ActionListener l) { sendButton.addActionListener(l); }
@@ -221,6 +249,13 @@ public class ChatView implements ChatModelListener {
                 button.addActionListener(chatSelectionListener);
             }
         }
+    }
+
+    /** Removes content of chatPanel */
+    public void removeChatPanel() {
+        chatPanel.removeAll();
+        chatPanel.revalidate();
+        chatPanel.repaint();
     }
 
     /** @return The text currently in the Login input field. */

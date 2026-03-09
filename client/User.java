@@ -7,6 +7,7 @@ import java.util.Objects;
  * Stores user information for identifying message senders.
  */
 public class User {
+    /** Name of the user */
     private String name;
 
     /**

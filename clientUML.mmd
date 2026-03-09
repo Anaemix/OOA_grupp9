@@ -1,0 +1,289 @@
+classDiagram
+    class ChatController {
+        -ChatModel model
+        -ChatView view
+        -ClientWebSocketHandler websocket
+        -Semaphore chatListSemaphore
+
+        +ChatController(model: ChatModel, view: ChatView)
+        +initializeWebSocket(): void
+        +initialize(inituser: String): void
+        -attachEventListeners(): void
+        -handleAddChat(): void
+        -handleIncomingMessage(message: Message): void
+        -handleChatSelection(chat: Chat): void
+        -handleLogin(): void
+        -handleDisconnect(): void
+        -handleSendMessage(): void
+        -handleSendImageMessage(): void
+        +main(args: String[]): void$
+        
+    }
+
+    class Chat {
+        -ArrayList<Message> message
+        -ArrayList<User> users
+        -String chatName
+
+        +Chat(chatName: String)
+
+        +getChatName(): String
+        +getMessages(): ArrayList<Message>
+        +getUsers(): ArrayList<User>
+        +addMessage(message: Message): void
+        +addUser(user: User): void
+        +toString(): String 
+    }
+
+    class ChatGUI {
+        -JPanel mainPanel
+        -JPanel messagePanel
+        -JPanel userPanel
+        -JScrollPane chatScroll
+        -JScrollPane userScroll
+
+        +ChatGUI()
+        +ChatGUI(chat: Chat)
+
+        +getMainPanel(): JPanel
+        +buildUserListPanel(activeUsers: ArrayList<String>, inChatUsers: ArrayList<String>): void
+        +createMessagePanel(message: Message): ArrayList<JLabel>
+        +addMessage(message: Message): void
+    }
+
+    class ChatListGUI {
+        -JPanel chatListPanel
+
+        +ChatListGUI()
+        +ChatListGUI(chats: ArrayList<String>, ActiveChat: String)
+
+        +setActiveChat(activeChat: String): void
+        +getChatListPanel(): JPanel
+    }
+
+    class ChatModel {
+        -List<String> messages
+        -ArrayList<String> chats
+        -List<ChatModelListener> listeners
+        -Chat currentChat
+        -User user
+        -ConnectionHandler connectionHandler
+        -String activeChat
+
+        +ChatModel()
+
+        +leaveChat(): void
+        +setUser(user: User): void
+        +setChats(chats: ArrayList<String>): void
+        +getChats(): ArrayList<String>
+        +setCurrentChat(currentChat: Chat): void
+        +getCurrentChat(): Chat
+        +getUser(): User
+        +addChat(chat: String): void
+        +addListener(listener: ChatModelListener): void
+        +removeListener(listener: ChatModelListener): void
+        +addMessage(message: Message, chat: Chat): void
+        +sendMessage(text: String, ws: ClientWebSocketHandler): void
+        +sendImageMessage(filepath: String, ws: ClientWebSocketHandler): void
+        +createMessage(m: String): Message
+        +createImageMessage(hash: String): Message
+        -notifyChatsLoaded(chats: ArrayList<String>, ActiveChat: String): void
+        -notifyChatSelected(chat: Chat): void
+        -notifyMessageAdded(chat: Chat): void
+    }
+
+    class ChatView {
+        -JFrame frame
+        -JTextfield inputField
+        -JButton sendButton
+        -JButton sendImageButton
+        -JButton addChatButton
+        -JTextField addChatField
+        -ChatListGUI chatListGUI
+        -JPanel chatListPanel
+        -JScrollPane chatListScrollPane
+        -JPanel leftPanel
+        -JButton loginButton
+        -JButton disconnectButton
+        -JTextField loginField
+        -JPanel chatPanel
+        -ChatGUI chatGUI
+        -ActionListener chatSelectionListener
+        -ArrayList<String> activeUsers
+
+        +createAndShowUi(initUser: String): void
+        +onMessageAdded(chat: Chat): void
+        +onMessageReceived(message: Message): void
+        +updateUserList(chatName: String, activeUsers: String[], inChatUsers: ArrayList<String>): void
+        +onChatsLoaded(chats: ArrayList<String>, ActiveChat: String): void
+        +onChatSelected(chat: Chat): void
+        +clearAddChatField(): void
+        +getAddChatText(): String
+        +addChatSelectionListener(listener: ActionListener): void
+        +addChatButtonListener(l: ActionListener): void
+        +addSendButtonListener(l: ActionListener): void
+        +addSendImageButtonListener(l: ActionListener): void
+        +addLoginButtonListener(l: ActionListener): void
+        +addDisconnectButtonListener(l: ActionListener): void
+        +addInputFieldButtonListener(l: ActionListener): void
+        -applyChatSelectionListener(): void
+        +removeChatPanel(): void
+        +getLoginText(): String
+        +getInputText(): String
+        +clearInputText(): void
+        +getFrame(): JFrame
+    }
+
+    class ClientWebSocketHandler {
+        -List<WebSocketEventListener> listeners
+
+        +ClientWebSocketHandler(serverUri: URI)
+
+        +onOpen(handshakedata: ServerHandshake): void
+        +onMessage(message: String): void
+        +enterChat(chatName: String): void
+        +login(username: String): void
+        +sendMessageToServer(message: Message, chatName: String): void
+        +onClose(code: int, reason: String, remote: boolean):void
+        +onError(ex: Exception): void
+        +addListener(listener: WebSocketEventListener): void
+        +removeListener(listener: WebSocketEventListener): void
+    }
+
+    class ConnectionHandler {
+        -String ip_address$
+        -String port$
+        -Gson gson$
+
+        +ConnectionHandler(ip_address: String, port: String)
+        +Get_Chats(user: User): ArrayList<String>$
+        +Get_Chat(chat: String): Chat$
+        +Connect(user: User, chat: String): void$
+        +Disconnect(user: User, chat: String): void$
+        +Send_Message(message: Message, chat: String): void$
+        +Get_Image(hash: String): void$
+        +Send_Image(image_path: String): String$
+        -Create_url(path: String): String$
+        -MakeGetRequest(url: String): ServerResponse$
+        -MakePostRequest(url: String, body: String): ServerResponse$
+    }
+
+    class ServerResponse {
+        -String body
+        -int statuscode
+
+        +ServerResponse(body: String, statusCode: int)
+
+        +getBody(): String
+        +getStatusCode(): int
+        +setBody(body: String): void
+        +setStatusCode(statuscode: int): void
+    }
+
+    ConnectionHandler *-- ServerResponse : inner_class
+
+    class Message {
+        -String text
+        -Instant time
+        -User user
+        -Boolean isImage
+
+        +Message(text: String, time: Instant, user: User, isImage:Boolean)
+        +getText(): String
+        +getTime(): Instant
+        +isImage(): Boolean
+        +getUser(): User
+        +toString(): String
+    }
+
+    class User {
+        -String name
+
+        +User(name: String)
+
+        +getName(): String
+        +setName(name: String): void
+        +toString(): String
+        +equals(obj: Object): Boolean
+        +hashCode(): int
+    }
+
+
+    %% Interfaces
+
+    class ChatModelListener {
+        <<Interface>>
+        +onMessageAdded(chat: Chat): void
+        +onChatsLoaded(chats: ArrayList<String>, ActiveChat: String): void
+        +onChatSelected(chat: Chat): void
+        +onMessageReceived(message: Message): void
+        +updateUserList(chatName: String, activeUsers: String[], inChatUsers: ArrayList<String>): void
+    }
+
+    class WebSocketEventListener {
+        <<Interface>>
+        +onMessageReceived(message: Message): void
+        +onConnected(): void
+        +onDisconnected(): void
+        +onError(error: String): void
+        +updateUserList(chatName: String, activeUsers: String[], inChatUsers: ArrayList<String>): void
+    }
+
+    class WebSocketClient {
+        <<Abstract>>
+    }
+
+
+    %% Inheritance
+    ChatView ..|> ChatModelListener : implements
+    ClientWebSocketHandler --|> WebSocketClient: extends
+
+    %% Composition
+    Chat *-- Message
+    Chat *-- User
+
+    ChatController *-- ChatModel
+    ChatController *-- ChatView
+    ChatController *-- ClientWebSocketHandler
+
+    ChatModel *-- ConnectionHandler
+
+    ChatView *-- ChatListGUI
+    ChatView *-- ChatGUI
+
+
+    Message *-- User
+
+    %% Association
+    ChatModel --> Chat
+    ChatModel --> User
+
+    %% Aggregation
+    ChatModel o-- ChatModelListener
+    ClientWebSocketHandler o-- WebSocketEventListener
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

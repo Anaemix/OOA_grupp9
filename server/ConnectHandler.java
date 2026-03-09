@@ -11,60 +11,34 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.time.Instant;
 
+
 /**
  * This http handler class handles the joining/connecting to a chat room.
- * 
- * @author Henning
- * @version 0.1
  */
 public class ConnectHandler implements HttpHandler {
     /** The handler used for database persistence. */
     private final DatabaseHandler db;
+    //** websockethandler for updating userlists */
+    private WebsocketHandler wsHandler;
     /** Gson object used for deserialization of json. */
     private static Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
 
     /**
      * Constructor 
      * @param databaseHandler handles the database connection, writing/reading.
+     * @param websocketHandler handles the websocket connections.
      */
-    public ConnectHandler(DatabaseHandler databaseHandler) {
+    public ConnectHandler(DatabaseHandler databaseHandler, WebsocketHandler websocketHandler) {
         this.db = databaseHandler;
+        this.wsHandler = websocketHandler;
     }
 
     /**
-     * This handles the http request depending on the Request type. 
+     * This handles the http connect request depending on the Request type. 
      * Will never return any data to the requestee and will respond with statuscodes <br>
      * -200 OK <br>
      * -400 Bad Request, if an exception was raised in the json parsing or addition of the user in the database <br>
      * -405 Method Not Allowed, if POST request method was not used <br>
-     * Http request requires a POST request containing a json of the following format <br>
-     * {
-     *   "$schema": "https://json-schema.org/draft-07/schema",
-     *   "type": "object",
-     *   "properties": {
-     *   "chat": {
-     *       "type": "string",
-     *       "description": "Name of chat to leave"
-     *   },
-     *   "User": {
-     *       "type": "object",
-     *       "description": "User to leave the chat",
-     *       "properties": {
-     *       "name": {
-     *           "type": "string",
-     *           "description": "Name of the user"
-     *       }
-     *       },
-     *       "required": [
-     *       "name"
-     *       ]
-     *   }
-     *   },
-     *   "required": [
-     *   "chat",
-     *   "User"
-     *   ]
-     * }
      * @param httpexchange http exchange to be handled by the function
      */
     public void handle(HttpExchange httpexchange) throws IOException {
@@ -78,11 +52,11 @@ public class ConnectHandler implements HttpHandler {
                 User user = gson.fromJson(jsonobject.getAsJsonObject("user"), User.class);
                 String chat = jsonobject.get("chat").getAsString();
                 
-                db.addUser(user);
-                db.addChat(chat);
                 db.addUserToChat(user, chat);
 
+                System.out.println(String.format("User %s added to chat %s", user.getName(), chat));
                 httpexchange.sendResponseHeaders(200, -1);
+                wsHandler.send_chatlist(chat);
             } catch (Exception e) {
                 e.printStackTrace();
                 httpexchange.sendResponseHeaders(400, -1);

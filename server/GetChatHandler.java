@@ -11,9 +11,6 @@ import java.time.Instant;
 
 /**
  * This http handler class handles the joining/connecting to a chat room.
- * 
- * @author Henning
- * @version 0.1
  */
 public class GetChatHandler implements HttpHandler {
     /** The handler used for database persistence. */
@@ -28,8 +25,9 @@ public class GetChatHandler implements HttpHandler {
     public GetChatHandler(DatabaseHandler databaseHandler) {
         this.db = databaseHandler;
     }
+    
     /**
-     * This handles the http request. 
+     * This handles the get_chat http request. 
      * Responds with a serialized json string of a Chat object
      * Will respond with statuscodes <br>
      * -200 OK <br>

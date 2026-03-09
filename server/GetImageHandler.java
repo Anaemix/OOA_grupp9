@@ -1,50 +1,28 @@
 package server;
 
-import client.Chat;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import java.time.Instant;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 
 
 /**
  * This http handler class handles the joining/connecting to a chat room.
- * 
- * @author Henning
- * @version 0.1
  */
 public class GetImageHandler implements HttpHandler {
-    /** The handler used for database persistence. */
-    private final DatabaseHandler db;
-    /** Gson object used for deserialization of json. */
-    private static Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new Gson_InstantTypeAdapter()).create();
+
+    /** Constructor */
+    public GetImageHandler(DatabaseHandler databaseHandler) {}
 
     /**
-     * Constructor 
-     * @param databaseHandler handles the database connection, writing/reading.
-     */
-    public GetImageHandler(DatabaseHandler databaseHandler) {
-        this.db = databaseHandler;
-    }
-    /**
-     * This handles the http request. 
-     * Responds with a serialized json string of a Chat object
+     * This handles the http get_image request. 
      * Will respond with statuscodes <br>
      * -200 OK <br>
-     * -400 Bad Request, if an exception was raised in the json parsing or addition of the user in the database <br>
+     * -400 Bad Request, if an exception was raised while accessing the file<br>
      * -405 Method Not Allowed, if POST request method was not used <br>
      * Test with "curl http://fjenhh.me:2345/get_image/{imagename}"
      * @param httpexchange http exchange to be handled by the function
@@ -52,7 +30,7 @@ public class GetImageHandler implements HttpHandler {
     public void handle(HttpExchange httpexchange) throws IOException {
         if (httpexchange.getRequestMethod().equalsIgnoreCase("GET")) {
             try {
-                String image_name = httpexchange.getRequestURI().getPath().replace("/get_image/", "") + ".png";
+                String image_name = httpexchange.getRequestURI().getPath().replace("/get_image/", "");
                 Path image_path = Paths.get("resources", image_name);
                 if (!Files.exists(image_path)) {
                     httpexchange.sendResponseHeaders(404, -1);

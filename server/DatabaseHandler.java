@@ -146,20 +146,38 @@ public class DatabaseHandler implements ChatDatabase{
 
     
     /**
-     * Adds a user to the database.
-     * <p>
-     * If the user already exists, the operation is ignored.
-     * </p>
+    * Removes a user from a specific chat.
+    *
+    * @param user     the user to remove
+    * @param chatName the name of the chat
+    */
+    public void removeUserFromChat(User user, String chatName) {
+        String remove = "DELETE FROM chat_users WHERE username = ? AND chatname = (?)";
+        try(PreparedStatement pstmt = connection.prepareStatement(remove)) {
+            pstmt.setString(1, user.getName());
+            pstmt.setString(2, chatName);
+            pstmt.executeUpdate();
+
+        }
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+    * Adds a user to the database.
+    * <p>
+    * If the user already exists, the operation is ignored.
+    * </p>
     *
     * @param user the user to add
     */
-   
-   public void addUser(User user) {
-       
-       String adduser = "INSERT OR IGNORE INTO users (name) VALUES (?)";
-       try(PreparedStatement pstmt = connection.prepareStatement(adduser)) {
-           pstmt.setString(1, user.getName());
-           pstmt.executeUpdate();
+    private void addUser(User user) {
+        
+        String adduser = "INSERT OR IGNORE INTO users (name) VALUES (?)";
+        try(PreparedStatement pstmt = connection.prepareStatement(adduser)) {
+            pstmt.setString(1, user.getName());
+            pstmt.executeUpdate();
             
         }catch(SQLException e) {
             e.printStackTrace();
@@ -174,12 +192,11 @@ public class DatabaseHandler implements ChatDatabase{
     *
     * @param chatname the name of the chat
     */
-    public void addChat(String chatname) {
+    private void addChat(String chatname) {
         String addchat = "INSERT OR IGNORE INTO chats (name) VALUES (?)";
         try (PreparedStatement pstmt = connection.prepareStatement(addchat)) {
             pstmt.setString(1, chatname);
             pstmt.executeUpdate();
-            System.out.println("chat added to chats table");
         }
         catch (SQLException e) {
             e.printStackTrace();
@@ -195,9 +212,10 @@ public class DatabaseHandler implements ChatDatabase{
     * @param user     the user to add
     * @param chatname the name of the chat
     */
-   public void addUserToChat(User user, String chatname) {
-       String adduser = "INSERT OR IGNORE INTO chat_users (username,chatname) VALUES (?,?)"; 
-
+    public void addUserToChat(User user, String chatname) {
+        String adduser = "INSERT OR IGNORE INTO chat_users (username,chatname) VALUES (?,?)"; 
+        addUser(user);
+        addChat(chatname);
         try(PreparedStatement stmt = connection.prepareStatement(adduser)){
             stmt.setString(1, user.getName());
             stmt.setString(2, chatname);
@@ -206,25 +224,6 @@ public class DatabaseHandler implements ChatDatabase{
         }
         
         catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    /**
-    * Removes a user from a specific chat.
-    *
-    * @param user     the user to remove
-    * @param chatName the name of the chat
-    */
-    public void removeUserFromChat(User user, String chatName) {
-        String remove = "DELETE FROM chat_users WHERE username = ? AND chatname = (?)";
-        try(PreparedStatement pstmt = connection.prepareStatement(remove)) {
-            pstmt.setString(1, user.getName());
-            pstmt.setString(2, chatName);
-            pstmt.executeUpdate();
-            System.out.println("user removed from chat");
- 
-        }
-        catch(SQLException e) {
             e.printStackTrace();
         }
     }
@@ -247,7 +246,6 @@ public class DatabaseHandler implements ChatDatabase{
             insertmessage.setString(4, chatName);
             insertmessage.setBoolean(5, message.isImage());
             insertmessage.executeUpdate();
-            System.out.println("Message added!");        
 
         }catch(SQLException e){
             e.printStackTrace();

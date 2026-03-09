@@ -9,9 +9,6 @@ import java.util.Set;
 /**
  * Supporting bi directional data structure for storing (user, chat) tuples.
  * Users are unique while chats are not.
- * 
- * @author Henning
- * @version 0.1
  */
 public class UserChatMap {
     /** Main hashmap storing the tuples */
@@ -62,5 +59,18 @@ public class UserChatMap {
      */
     public Set<String> getUsers(String chat) {
         return chatToUser.getOrDefault(chat, Collections.emptySet());
+    }
+    
+    /**
+     * Removes a user from the map. Should be used when a user disconnects.
+     * 
+     * @param user username
+     */
+    public void remove(String user) {
+        if (userToChat.containsKey(user)) {
+            String chat = userToChat.get(user);
+            chatToUser.get(chat).remove(user);
+            userToChat.remove(user);
+        }
     }
 }

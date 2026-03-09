@@ -1,0 +1,161 @@
+classDiagram
+
+class Server {
+    +Server()
+    +main(args: String[]): void$
+}
+
+class DatabaseHandler {
+    -Connection connection
+    +DatabaseHandler()
+    -connectToDatabase(): void
+    -enableForeignKeys(): void
+    -createTablesIfNotExist(): void
+    +closeConnection(): void
+    +removeUserFromChat(user: User, chatName: String): void
+    +addUser(user: User): void
+    +addChat(chatname: String): void
+    +addUserToChat(user: User, chatname: String): void
+    +addMessage(chatName: String, message: Message): void
+    +getMessages(chatname: String, time: Instant): ArrayList<message>
+    -getMessagesInChat(chat: Chat, chatname: String): void
+    +getChat(chatname: String): Chat
+    +getAllChats(user: User): ArrayList<String>
+    +main(args: String[]): void$
+}
+
+class ConnectHandler {
+    -DatabaseHandler db
+    -WebsocketHandler wsHandler
+    -Gson gson$
+    +ConnectHandler(databaseHandler: DatabaseHandler, websocketHandler: WebsocketHandler)
+    +handle(httpexchange: HttpExchange): void
+}
+
+class DisconnectHandler {
+    -DatabaseHandler db
+    -WebsocketHandler wsHandler
+    -Gson gson$
+    +DisconnectHandler(databaseHandler: DatabaseHandler, websocketHandler: WebsocketHandler)
+    +handle(httpexchange: HttpExchange): void
+}
+
+class GetChatHandler {
+    -DatabaseHandler db
+    -Gson gson$
+    +GetChatHandler(databaseHandler: DatabaseHandler)
+    +handle(httpexchange: HttpExchange): void
+}
+
+class GetChatsHandler {
+    -DatabaseHandler db
+    -Gson gson$
+    +GetChatsHandler(databaseHandler: DatabaseHandler)
+    +handle(httpexchange: HttpExchange): void
+}
+
+class GetImageHandler {
+    +GetImageHandler(databaseHandler: DatabaseHandler)
+    +handle(httpexchange: HttpExchange): void
+}
+
+class PostImageHandler {
+    -Gson gson$
+    +PostImageHandler()
+    +handle(httpexchange: HttpExchange): void
+}
+
+class SendMessageHandler {
+    <<deprecated>>
+    -DatabaseHandler db
+    -Gson gson$
+    +SendMessageHandler(databaseHandler: DatabaseHandler)
+    +handle(httpexchange: HttpExchange): void
+}
+
+class WebsocketHandler {
+    -HashMap<InetSocketAddress, String> connToUsers
+    -DatabaseHandler db
+    -UserChatMap userChatMap
+    +WebsocketHandler(port: int, databaseHandler: DatabaseHandler)
+    +onOpen(conn: WebSocket, handshake: ClientHandshake): void
+    +onMessage(conn: WebSocket, incoming: String): void
+    -connect(address: InetSocketAddress, username: String): void
+    +send_chatlist(chat: String): void
+    -enterChat(user: String, chatname: String, gson: Gson): void
+    -send_message(gson: Gson, jsonobject: JsonObject): void
+    +onClose(conn: WebSocket, code: int, reason: String, remote: boolean): void
+    +onError(conn: WebSocket, ex: Exception): void
+    +onStart(): void
+}
+
+class Gson_InstantTypeAdapter {
+    +Gson_InstantTypeAdapter()
+    +write(jsonwriter: JsonWriter, instant: Instant): void
+    +read(jsonReader: JsonReader): Instant
+}
+
+class UserChatMap {
+    -Map<String, String> userToChat
+    -Map<String, Set<String>> chatToUser
+    +UserChatMap()
+    +put(user: String, chat: String): void
+    +getChat(user: String): String
+    +getUsers(chat: String): Set<String>
+    +remove(user: String): void
+}
+
+%% Interfaces
+
+class HttpHandler {
+    <<interface>>
+    +handle(exchange: HttpExchange): void
+}
+
+class WebSocketServer {
+    <<abstract>>
+}
+
+
+%% Inheritance
+ConnectHandler ..|> HttpHandler
+DisconnectHandler ..|> HttpHandler
+GetChatHandler ..|> HttpHandler
+GetChatsHandler ..|> HttpHandler
+GetImageHandler ..|> HttpHandler
+PostImageHandler ..|> HttpHandler
+SendMessageHandler ..|> HttpHandler
+WebsocketHandler --|> WebSocketServer
+Gson_InstantTypeAdapter --|> TypeAdapter
+
+
+%% Composition
+ConnectHandler *-- DatabaseHandler
+ConnectHandler *-- WebsocketHandler
+DisconnectHandler *-- DatabaseHandler
+DisconnectHandler *-- WebsocketHandler
+GetChatHandler *-- DatabaseHandler
+GetChatsHandler *-- DatabaseHandler
+SendMessageHandler *-- DatabaseHandler
+WebsocketHandler *-- DatabaseHandler
+WebsocketHandler *-- UserChatMap
+
+%% Server creates all handlers
+Server ..> DatabaseHandler : creates
+Server ..> GetChatHandler : creates
+Server ..> GetChatsHandler : creates
+Server ..> ConnectHandler : creates
+Server ..> DisconnectHandler : creates
+Server ..> SendMessageHandler : creates
+Server ..> PostImageHandler : creates
+Server ..> GetImageHandler : creates
+Server ..> WebsocketHandler : creates
+
+%% Gson adapter dependency
+ConnectHandler ..> Gson_InstantTypeAdapter : uses
+DisconnectHandler ..> Gson_InstantTypeAdapter : uses
+GetChatHandler ..> Gson_InstantTypeAdapter : uses
+GetChatsHandler ..> Gson_InstantTypeAdapter : uses
+PostImageHandler ..> Gson_InstantTypeAdapter : uses
+SendMessageHandler ..> Gson_InstantTypeAdapter : uses
+WebsocketHandler ..> Gson_InstantTypeAdapter : uses 
