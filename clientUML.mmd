@@ -39,8 +39,6 @@ classDiagram
         -JPanel mainPanel
         -JPanel messagePanel
         -JPanel userPanel
-        -JScrollPane chatScroll
-        -JScrollPane userScroll
 
         +ChatGUI()
         +ChatGUI(chat: Chat)
@@ -93,20 +91,7 @@ classDiagram
     }
 
     class ChatView {
-        -JFrame frame
-        -JTextfield inputField
-        -JButton sendButton
-        -JButton sendImageButton
-        -JButton addChatButton
-        -JTextField addChatField
         -ChatListGUI chatListGUI
-        -JPanel chatListPanel
-        -JScrollPane chatListScrollPane
-        -JPanel leftPanel
-        -JButton loginButton
-        -JButton disconnectButton
-        -JTextField loginField
-        -JPanel chatPanel
         -ChatGUI chatGUI
         -ActionListener chatSelectionListener
         -ArrayList<String> activeUsers
@@ -128,10 +113,6 @@ classDiagram
         +addInputFieldButtonListener(l: ActionListener): void
         -applyChatSelectionListener(): void
         +removeChatPanel(): void
-        +getLoginText(): String
-        +getInputText(): String
-        +clearInputText(): void
-        +getFrame(): JFrame
     }
 
     class ClientWebSocketHandler {
@@ -189,10 +170,7 @@ classDiagram
         -Boolean isImage
 
         +Message(text: String, time: Instant, user: User, isImage:Boolean)
-        +getText(): String
-        +getTime(): Instant
         +isImage(): Boolean
-        +getUser(): User
         +toString(): String
     }
 
@@ -201,8 +179,6 @@ classDiagram
 
         +User(name: String)
 
-        +getName(): String
-        +setName(name: String): void
         +toString(): String
         +equals(obj: Object): Boolean
         +hashCode(): int
