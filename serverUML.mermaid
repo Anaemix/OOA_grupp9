@@ -24,54 +24,7 @@ class DatabaseHandler {
     +main(args: String[]): void$
 }
 
-class ConnectHandler {
-    -DatabaseHandler db
-    -WebsocketHandler wsHandler
-    -Gson gson$
-    +ConnectHandler(databaseHandler: DatabaseHandler, websocketHandler: WebsocketHandler)
-    +handle(httpexchange: HttpExchange): void
-}
 
-class DisconnectHandler {
-    -DatabaseHandler db
-    -WebsocketHandler wsHandler
-    -Gson gson$
-    +DisconnectHandler(databaseHandler: DatabaseHandler, websocketHandler: WebsocketHandler)
-    +handle(httpexchange: HttpExchange): void
-}
-
-class GetChatHandler {
-    -DatabaseHandler db
-    -Gson gson$
-    +GetChatHandler(databaseHandler: DatabaseHandler)
-    +handle(httpexchange: HttpExchange): void
-}
-
-class GetChatsHandler {
-    -DatabaseHandler db
-    -Gson gson$
-    +GetChatsHandler(databaseHandler: DatabaseHandler)
-    +handle(httpexchange: HttpExchange): void
-}
-
-class GetImageHandler {
-    +GetImageHandler(databaseHandler: DatabaseHandler)
-    +handle(httpexchange: HttpExchange): void
-}
-
-class PostImageHandler {
-    -Gson gson$
-    +PostImageHandler()
-    +handle(httpexchange: HttpExchange): void
-}
-
-class SendMessageHandler {
-    <<deprecated>>
-    -DatabaseHandler db
-    -Gson gson$
-    +SendMessageHandler(databaseHandler: DatabaseHandler)
-    +handle(httpexchange: HttpExchange): void
-}
 
 class WebsocketHandler {
     -HashMap<InetSocketAddress, String> connToUsers
@@ -89,11 +42,6 @@ class WebsocketHandler {
     +onStart(): void
 }
 
-class Gson_InstantTypeAdapter {
-    +Gson_InstantTypeAdapter()
-    +write(jsonwriter: JsonWriter, instant: Instant): void
-    +read(jsonReader: JsonReader): Instant
-}
 
 class UserChatMap {
     -Map<String, String> userToChat
@@ -107,55 +55,20 @@ class UserChatMap {
 
 %% Interfaces
 
-class HttpHandler {
-    <<interface>>
-    +handle(exchange: HttpExchange): void
-}
-
 class WebSocketServer {
     <<abstract>>
 }
 
 
 %% Inheritance
-ConnectHandler ..|> HttpHandler
-DisconnectHandler ..|> HttpHandler
-GetChatHandler ..|> HttpHandler
-GetChatsHandler ..|> HttpHandler
-GetImageHandler ..|> HttpHandler
-PostImageHandler ..|> HttpHandler
-SendMessageHandler ..|> HttpHandler
 WebsocketHandler --|> WebSocketServer
-Gson_InstantTypeAdapter --|> TypeAdapter
+
 
 
 %% Composition
-ConnectHandler *-- DatabaseHandler
-ConnectHandler *-- WebsocketHandler
-DisconnectHandler *-- DatabaseHandler
-DisconnectHandler *-- WebsocketHandler
-GetChatHandler *-- DatabaseHandler
-GetChatsHandler *-- DatabaseHandler
-SendMessageHandler *-- DatabaseHandler
 WebsocketHandler *-- DatabaseHandler
 WebsocketHandler *-- UserChatMap
 
 %% Server creates all handlers
-Server ..> DatabaseHandler : creates
-Server ..> GetChatHandler : creates
-Server ..> GetChatsHandler : creates
-Server ..> ConnectHandler : creates
-Server ..> DisconnectHandler : creates
-Server ..> SendMessageHandler : creates
-Server ..> PostImageHandler : creates
-Server ..> GetImageHandler : creates
 Server ..> WebsocketHandler : creates
 
-%% Gson adapter dependency
-ConnectHandler ..> Gson_InstantTypeAdapter : uses
-DisconnectHandler ..> Gson_InstantTypeAdapter : uses
-GetChatHandler ..> Gson_InstantTypeAdapter : uses
-GetChatsHandler ..> Gson_InstantTypeAdapter : uses
-PostImageHandler ..> Gson_InstantTypeAdapter : uses
-SendMessageHandler ..> Gson_InstantTypeAdapter : uses
-WebsocketHandler ..> Gson_InstantTypeAdapter : uses 
