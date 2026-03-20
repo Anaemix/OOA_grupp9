@@ -149,20 +149,6 @@ classDiagram
         -MakePostRequest(url: String, body: String): ServerResponse$
     }
 
-    class ServerResponse {
-        -String body
-        -int statuscode
-
-        +ServerResponse(body: String, statusCode: int)
-
-        +getBody(): String
-        +getStatusCode(): int
-        +setBody(body: String): void
-        +setStatusCode(statuscode: int): void
-    }
-
-    ConnectionHandler *-- ServerResponse : inner_class
-
     class Message {
         -String text
         -Instant time
@@ -205,9 +191,6 @@ classDiagram
         +updateUserList(chatName: String, activeUsers: String[], inChatUsers: ArrayList<String>): void
     }
 
-    class WebSocketClient {
-        <<Abstract>>
-    }
 
 
     %% Inheritance
